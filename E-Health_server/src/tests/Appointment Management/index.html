@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗓️ Đặt lịch — Hub</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;padding:0}
+        .header{background:linear-gradient(135deg,#0f3460,#16213e);color:#fff;padding:20px 24px;text-align:center}
+        .header h1{font-size:1.4rem;margin-bottom:4px}.header p{color:rgba(255,255,255,.7);font-size:.85rem}
+        .grid{max-width:900px;margin:28px auto;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+        .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);transition:all .15s;cursor:pointer;text-decoration:none;color:inherit}
+        .card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:#0f3460}
+        .card h3{font-size:1rem;margin-bottom:6px;color:#0f3460}.card p{font-size:.82rem;color:#64748b;line-height:1.45}
+        .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-bottom:8px}
+        .badge-p{background:#dbeafe;color:#1e40af}.badge-s{background:#d1fae5;color:#065f46}.badge-w{background:#fef3c7;color:#92400e}
+    </style>
+</head>
+<body>
+<div class="header"><h1>🗓️ Quản lý Đặt lịch Khám</h1><p>Appointment Management Module — Dashboard API Test</p></div>
+<div class="grid">
+    <a class="card" href="appointment.html">
+        <span class="badge badge-p">15 endpoints</span>
+        <h3>📋 Lịch Khám (CRUD)</h3>
+        <p>Đặt lịch, sửa, huỷ, gán bác sĩ / phòng / dịch vụ, kiểm tra slot trống, xung đột, đổi lịch, đặt hộ.</p>
+    </a>
+    <a class="card" href="appointment-status.html">
+        <span class="badge badge-s">11 endpoints</span>
+        <h3>✅ Check-in & Trạng thái</h3>
+        <p>Check-in quầy / QR, bắt đầu khám, hoàn tất, No-Show, dashboard hàng đợi, trạng thái phòng, cấu hình.</p>
+    </a>
+    <a class="card" href="appointment-config.html">
+        <span class="badge badge-w">22 endpoints</span>
+        <h3>🔧 Xác nhận & Thay đổi</h3>
+        <p>Xác nhận / từ chối lịch, nhắc nhở, yêu cầu thay đổi, thống kê hủy/dời, policy, điều phối lịch.</p>
+    </a>
+    <a class="card" href="doctor-schedule.html">
+        <span class="badge badge-p">19 endpoints</span>
+        <h3>👨‍⚕️ Bác sĩ & Lịch trình</h3>
+        <p>Khả dụng bác sĩ, vắng mặt, ca dịch vụ, khoá slot, thời lượng khám.</p>
+    </a>
+</div>
+</body>
+</html>

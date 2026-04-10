@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Liên Kết Bệnh Nhân</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2,
+        h3 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group.full-width {
+            flex: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #a5c3f7;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-purple {
+            background: #6f42c1;
+            color: white;
+            width: 100%;
+            font-weight: bold;
+            padding: 12px;
+        }
+
+        .btn-purple:hover {
+            background: #59339d;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .section-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        pre {
+            background: #2b2b2b;
+            color: #a9b7c6;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="messageBox" class="alert"></div>
+
+        <div id="loginSection">
+            <h2>Đăng nhập (Tài khoản App)</h2>
+            <p style="font-size: 13px; color: #666;">
+                Vui lòng đăng nhập bằng tài khoản <b>CUSTOMER</b> để lấy Token xác thực trước khi liên kết.
+            </p>
+            <div class="form-group">
+                <label>Email / SĐT</label>
+                <input type="email" id="loginEmail" placeholder="customer@example.com">
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="loginPassword" placeholder="******">
+            </div>
+            <button onclick="handleLogin()" style="width: 100%;">Đăng nhập để lấy Token</button>
+        </div>
+
+        <div id="dashboardSection" class="hidden">
+            <div class="header-actions">
+                <h2>Liên Kết Hồ Sơ Bệnh Nhân</h2>
+                <button class="btn-danger" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+
+            <div class="section-box">
+                <p style="color: #6f42c1; font-size: 13px; margin-top: 0;">Mô phỏng chức năng liên kết tài khoản trên
+                    Mobile App.</p>
+                <p
+                    style="font-size: 12px; color: #d9534f; background: #fff3cd; padding: 8px; border-radius: 4px; margin: 10px 0;">
+                    ⚠️ Thông tin nhập phải khớp 100% với dữ liệu bệnh nhân trong database (mã bệnh nhân, số CCCD, ngày
+                    sinh)
+                </p>
+
+                <form id="formLink" onsubmit="handleLinkPatient(event)">
+                    <div class="form-group full-width">
+                        <label>Mã bệnh nhân (Patient Code)</label>
+                        <input type="text" id="l_patient_code" required placeholder="PAT-2026-TEST01">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Số CCCD/Passport</label>
+                            <input type="text" id="l_id_number" required placeholder="079004123456">
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày sinh (YYYY-MM-DD)</label>
+                            <input type="date" id="l_dob" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <button type="submit" class="btn-purple" id="btnLinkSubmit">GỌI API LIÊN KẾT</button>
+                    </div>
+                </form>
+
+                <pre id="linkResultOutput" class="hidden"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Tự động check token khi mở file
+        window.onload = () => {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        };
+
+        function showMessage(msg, isSuccess = true) {
+            const box = document.getElementById('messageBox');
+            box.textContent = msg;
+            box.className = `alert ${isSuccess ? 'success' : 'error'}`;
+            box.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                showMessage('Vui lòng đăng nhập lại!', false);
+                handleLogout();
+                return null;
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        // --- XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT ---
+        async function handleLogin() {
+            const identifier = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Tự động nhận diện sđt hay email dựa theo regex đơn giản
+            const isPhone = /^\d+$/.test(identifier.replace('+', '').replace(/\s/g, ''));
+            const endpoint = isPhone ? '/auth/login/phone' : '/auth/login/email';
+            const payload = isPhone ? { phone: identifier, password } : { email: identifier, password };
+            payload.clientInfo = { deviceId: "test-html-link", deviceName: "Browser", userAgent: navigator.userAgent };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (response.ok || result.success) {
+                    const token = result.data?.accessToken;
+                    const refreshToken = result.data?.refreshToken;
+
+                    if (token) {
+                        localStorage.setItem('accessToken', token);
+                        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+                        showMessage(`Đăng nhập thành công! Vai trò: ${result.data.user?.role}`);
+                        showDashboard();
+                    }
+                } else {
+                    showMessage(result.message || 'Đăng nhập thất bại', false);
+                }
+            } catch (error) {
+                showMessage('Lỗi kết nối đến Server', false);
+            }
+        }
+
+        async function handleLogout() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                try {
+                    await fetch(`${API_BASE_URL}/auth/logout`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refreshToken: refreshToken })
+                    });
+                } catch (e) { } // Bỏ qua lỗi logout nếu có
+            }
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            showMessage('Đã đăng xuất thành công!');
+            showLogin();
+        }
+
+        // --- XỬ LÝ GỌI API LIÊN KẾT ---
+        async function handleLinkPatient(event) {
+            event.preventDefault();
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            const btnSubmit = document.getElementById('btnLinkSubmit');
+            const output = document.getElementById('linkResultOutput');
+
+            btnSubmit.innerText = "Đang xử lý...";
+            btnSubmit.disabled = true;
+            output.classList.remove('hidden');
+            output.innerHTML = "Đang gọi API...";
+
+            // Convert YYYY-MM-DD to DD-MM-YYYY format
+            const dobValue = document.getElementById('l_dob').value.trim();
+            let formattedDob = dobValue;
+            if (dobValue && dobValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Convert YYYY-MM-DD to DD-MM-YYYY
+                const parts = dobValue.split('-');
+                formattedDob = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+
+            const payload = {
+                patient_code: document.getElementById('l_patient_code').value.trim(),
+                verification_data: {
+                    identity_number: document.getElementById('l_id_number').value.trim(),
+                    date_of_birth: formattedDob  // Format: DD-MM-YYYY
+                }
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/patients/link`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                // Xử lý mất session / hết hạn token
+                if (response.status === 401) {
+                    handleLogout();
+                    return;
+                }
+
+                // In kết quả ra màn hình cho dễ theo dõi
+                output.innerHTML = `<span style="color: #ffc66d;">HTTP Status:</span> ${response.status}\n<span style="color: #ffc66d;">URL:</span> ${API_BASE_URL}/patients/link\n\n`;
+                output.innerHTML += `<span style="color: #a9b7c6;">Request Payload:</span>\n${JSON.stringify(payload, null, 2)}\n\n`;
+                output.innerHTML += `<span style="color: #a9b7c6;">Response:</span>\n${JSON.stringify(result, null, 4)}`;
+
+                if (response.ok && result.success) {
+                    output.style.borderLeft = "5px solid #28a745";
+                    showMessage("✅ Liên kết thành công!");
+                } else {
+                    output.style.borderLeft = "5px solid #dc3545";
+                    const errorMsg = result.message || result.error_code || 'Lỗi không xác định';
+                    showMessage(`❌ Lỗi: ${errorMsg}`, false);
+                }
+            } catch (error) {
+                output.innerHTML = `<span style="color: #ff6b6b;">Lỗi kết nối hoặc CORS:</span>\n${error.message}\n\n<span style="color: #888; font-size: 12px;">💡 Nếu là lỗi CORS, hãy mở bằng Live Server (VS Code) thay vì file:// protocol</span>`;
+                output.style.borderLeft = "5px solid #dc3545";
+                showMessage('Lỗi kết nối đến server!', false);
+            } finally {
+                btnSubmit.innerText = "GỌI API LIÊN KẾT";
+                btnSubmit.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

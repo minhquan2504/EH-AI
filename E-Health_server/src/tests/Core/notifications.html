@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔔 Thông báo — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-sys {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+
+        .notif-card {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            border-radius: 0 8px 8px 0;
+            padding: 12px;
+            margin-bottom: 8px
+        }
+
+        .notif-card.unread {
+            background: #eff6ff;
+            border-left-color: #f59e0b
+        }
+
+        .matrix-cell {
+            text-align: center;
+            cursor: pointer;
+            font-size: 1rem
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🔔 Thông báo</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📁 Loại TBáo</div>
+        <div class="tab" onclick="switchTab(1)">📝 Mẫu TBáo</div>
+        <div class="tab" onclick="switchTab(2)">🏷️ Role Config</div>
+        <div class="tab" onclick="switchTab(3)">📢 Broadcast</div>
+        <div class="tab" onclick="switchTab(4)">📬 Inbox</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: NOTIFICATION CATEGORIES -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📁 Danh sách Loại Thông báo</h3>
+                <div class="toolbar">
+                    <input id="ncSearch" placeholder="🔍 Tìm tên/code..." style="flex:1">
+                    <input id="ncLimit" type="number" value="10" min="1" max="50" style="width:60px">
+                    <button class="btn btn-primary" onclick="loadNC(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ncTable"></tbody>
+                </table>
+                <div class="pagination" id="ncPag"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Tạo / ✏️ Sửa Loại Thông báo</h3>
+                <div class="toolbar">
+                    <select id="ncIdSelect" style="flex:1" title="Chọn loại thông báo">
+                        <option value="">-- Chọn loại --</option>
+                    </select>
+                    <button class="btn btn-info" onclick="getNC()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteNC()">🗑️ Xóa</button>
+                </div>
+                <div id="ncDetailDisplay" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Code *</label><input id="ncCode" placeholder="APPOINTMENT"></div>
+                    <div class="form-group"><label>Tên *</label><input id="ncName" placeholder="Thông báo lịch hẹn">
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="ncDesc"
+                        placeholder="Dùng cho toàn bộ kịch bản..."></div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="createNC()">💾 Tạo mới</button>
+                    <button class="btn btn-warning" onclick="updateNC()">💾 Cập nhật</button>
+                </div>
+                <div id="ncResultDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: NOTIFICATION TEMPLATES -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>📝 Danh sách Mẫu Thông báo</h3>
+                <div class="toolbar">
+                    <input id="tplSearch" placeholder="🔍 Tìm tên/code..." style="flex:1">
+                    <select id="tplCatFilter" title="Lọc theo loại">
+                        <option value="">Tất cả loại</option>
+                    </select>
+                    <input id="tplLimit" type="number" value="10" min="1" max="50" style="width:60px">
+                    <button class="btn btn-primary" onclick="loadTPL(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Title Template</th>
+                            <th>System</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tplTable"></tbody>
+                </table>
+                <div class="pagination" id="tplPag"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Tạo / ✏️ Sửa Mẫu Thông báo</h3>
+                <div class="toolbar">
+                    <input id="tplId" placeholder="Template ID" style="flex:1">
+                    <button class="btn btn-info" onclick="getTPL()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteTPL()">🗑️ Xóa</button>
+                </div>
+                <div id="tplDetailDisplay" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Code *</label><input id="tCode" placeholder="APPOINTMENT_REMINDER">
+                    </div>
+                    <div class="form-group"><label>Tên *</label><input id="tName" placeholder="Nhắc lịch hẹn"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Loại thông báo</label>
+                        <select id="tCatId" title="Chọn loại">
+                            <option value="">-- Chọn loại --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Title Template *</label><input id="tTitle"
+                            placeholder="Nhắc lịch hẹn {{appointment_date}}"></div>
+                </div>
+                <div class="form-group"><label>Body InApp *</label><textarea id="tBodyInapp" rows="2"
+                        placeholder="Xin chào {{patient_name}}..."></textarea></div>
+                <div class="form-group"><label>Body Email</label><textarea id="tBodyEmail" rows="2"
+                        placeholder="<h1>Hello {{patient_name}}</h1>..."></textarea></div>
+                <div class="form-group"><label>Body Push</label><input id="tBodyPush" placeholder="Short push text...">
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="createTPL()">💾 Tạo mới</button>
+                    <button class="btn btn-warning" onclick="updateTPL()">💾 Cập nhật</button>
+                </div>
+                <div id="tplResultDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ROLE CONFIGS -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>🏷️ Ma trận Cấu hình Thông báo theo Vai trò</h3>
+                <div class="toolbar"><button class="btn btn-primary" onclick="loadRC()">🔄 Tải ma trận</button></div>
+                <div id="rcDisplay" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Cập nhật cấu hình</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Role ID</label><input id="rcRoleId" placeholder="ROL_xxx"></div>
+                    <div class="form-group"><label>Category ID</label><input id="rcCatId" placeholder="NCAT_xxx"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Allow InApp</label>
+                        <select id="rcInapp" title="InApp">
+                            <option value="true">✅ Có</option>
+                            <option value="false">❌ Không</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Allow Email</label>
+                        <select id="rcEmail" title="Email">
+                            <option value="true">✅ Có</option>
+                            <option value="false">❌ Không</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="max-width:50%"><label>Allow Push</label>
+                    <select id="rcPush" title="Push">
+                        <option value="true">✅ Có</option>
+                        <option value="false">❌ Không</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="updateRC()">💾 Lưu</button>
+                <div id="rcResultDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BROADCAST -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>📢 Broadcast Thông báo</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Tiêu đề *</label><input id="bTitle"
+                            placeholder="Thông báo nghỉ lễ 30/4"></div>
+                    <div class="form-group"><label>Role ID (trống = tất cả)</label><input id="bRoleId"
+                            placeholder="ROL_xxx hoặc để trống"></div>
+                </div>
+                <div class="form-group"><label>Nội dung InApp *</label><textarea id="bContent" rows="3"
+                        placeholder="Hệ thống phòng khám sẽ nghỉ lễ từ ngày..."></textarea></div>
+                <div class="form-group"><label>Body Email</label><textarea id="bEmail" rows="2"
+                        placeholder="<h1>Thông báo</h1>..."></textarea></div>
+                <div class="form-group"><label>Body Push</label><input id="bPush"
+                        placeholder="Short push notification text"></div>
+                <button class="btn btn-warning" onclick="sendBroadcast()">📢 Gửi Broadcast</button>
+                <div id="bResultDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: INBOX -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>📬 Hộp thư cá nhân</h3>
+                <div class="toolbar">
+                    <select id="inFilter" title="Lọc">
+                        <option value="">Tất cả</option>
+                        <option value="false">⬜ Chưa đọc</option>
+                        <option value="true">✅ Đã đọc</option>
+                    </select>
+                    <input id="inLimit" type="number" value="10" min="1" max="50" style="width:60px">
+                    <button class="btn btn-primary" onclick="loadInbox(1)">Tải</button>
+                    <button class="btn btn-warning" onclick="markAllRead()">✅ Đọc tất cả</button>
+                </div>
+                <div id="inboxUnread" style="display:none;margin-bottom:10px"></div>
+                <div id="inboxList"></div>
+                <div class="pagination" id="inboxPag"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function v(id) { return document.getElementById(id).value; }
+        function statusBadge(val) { return val ? '<span class="badge b-active">Active</span>' : '<span class="badge b-inactive">Inactive</span>'; }
+        function boolBadge(val) { return val ? '✅' : '❌'; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadCatDropdown(); } };
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: v('loginEmail'), password: v('loginPassword'), clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Notifications', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); loadCatDropdown();
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+        function buildPagination(elId, cur, total, limit, fn) {
+            const el = document.getElementById(elId), tp = Math.ceil(total / limit) || 1;
+            let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (tp <= 7) { for (let i = 1; i <= tp; i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; }
+            else { h += `<button class="${cur === 1 ? 'active' : ''}" onclick="${fn}(1)">1</button>`; if (cur > 3) h += '<span>...</span>'; for (let i = Math.max(2, cur - 1); i <= Math.min(tp - 1, cur + 1); i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; if (cur < tp - 2) h += '<span>...</span>'; h += `<button class="${cur === tp ? 'active' : ''}" onclick="${fn}(${tp})">${tp}</button>`; }
+            h += `<button onclick="${fn}(${cur + 1})" ${cur >= tp ? 'disabled' : ''}>Sau →</button><span style="margin-left:8px">Tổng: ${total}</span>`;
+            el.innerHTML = h;
+        }
+
+        /** Load categories vào combo boxes */
+        async function loadCatDropdown() {
+            try {
+                const r = await apiFetch(`${API}/notifications/categories/dropdown`);
+                const list = r.data || [];
+                ['ncIdSelect', 'tplCatFilter', 'tCatId'].forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const isFilter = selId === 'tplCatFilter';
+                    sel.innerHTML = isFilter ? '<option value="">Tất cả loại</option>' : '<option value="">-- Chọn loại --</option>';
+                    list.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.notification_categories_id || c.id;
+                        opt.textContent = `${c.name || '-'} (${c.code || '-'})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Cat dropdown:', e.message); }
+        }
+
+        // ============ NOTIFICATION CATEGORIES ============
+        async function loadNC(page = 1) {
+            const p = new URLSearchParams();
+            const s = v('ncSearch'); if (s) p.set('search', s);
+            const limit = parseInt(v('ncLimit')) || 10;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/notifications/categories?${p}`);
+                const list = res.data || [];
+                const tb = document.getElementById('ncTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('ncPag').innerHTML = ''; return; }
+                list.forEach((c, i) => {
+                    const cj = JSON.stringify(c).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${c.code || ''}</strong></td>
+                        <td>${c.name || ''}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${c.description || '-'}</td>
+                        <td>${statusBadge(c.is_active)}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewNC(${cj})' title="Xem">👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editNC(${cj})' title="Sửa">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteNCById(${cj})' title="Xóa">🗑️</button>
+                        </div></td></tr>`;
+                });
+                const totalItems = res.total || list.length;
+                buildPagination('ncPag', page, totalItems, limit, 'loadNC');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function viewNC(c) { fillNC(c); getNC(); toast(`👁️ ${c.name || ''}`, 'info'); }
+        function editNC(c) { fillNC(c); toast(`✏️ ${c.name || ''}`, 'info'); }
+        function fillNC(c) {
+            document.getElementById('ncIdSelect').value = c.notification_categories_id || c.id || '';
+            document.getElementById('ncCode').value = c.code || '';
+            document.getElementById('ncName').value = c.name || '';
+            document.getElementById('ncDesc').value = c.description || '';
+        }
+        async function getNC() {
+            const id = v('ncIdSelect');
+            if (!id) return toast('Chọn loại thông báo', 'error');
+            try {
+                const r = await apiFetch(`${API}/notifications/categories`);
+                const list = r.data || [];
+                const d = list.find(c => (c.notification_categories_id || c.id) === id);
+                if (!d) { toast('Không tìm thấy', 'error'); return; }
+                fillNC(d);
+                const el = document.getElementById('ncDetailDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460">📁 ${d.name || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.notification_categories_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Code</div><div class="dg-value">${d.code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mô tả</div><div class="dg-value">${d.description || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Active</div><div class="dg-value">${statusBadge(d.is_active)}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function createNC() {
+            const code = v('ncCode'), name = v('ncName');
+            if (!code || !name) return toast('Nhập Code và Tên', 'error');
+            try {
+                await apiFetch(`${API}/notifications/categories`, { method: 'POST', body: JSON.stringify({ code, name, description: v('ncDesc') }) });
+                showSuccess('ncResultDisplay', 'Tạo loại thông báo thành công!', `<strong>${name}</strong> (${code})`);
+                toast('Tạo thành công!', 'success'); loadCatDropdown();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function updateNC() {
+            const id = v('ncIdSelect');
+            if (!id) return toast('Chọn loại thông báo', 'error');
+            const b = {};
+            if (v('ncName')) b.name = v('ncName');
+            if (v('ncDesc')) b.description = v('ncDesc');
+            try {
+                await apiFetch(`${API}/notifications/categories/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('ncResultDisplay', 'Cập nhật thành công!', `ID: <strong>${id}</strong>`);
+                toast('OK!', 'success'); loadCatDropdown();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteNC() {
+            const id = v('ncIdSelect');
+            if (!id || !confirm('Xóa loại thông báo này?')) return;
+            try { await apiFetch(`${API}/notifications/categories/${id}`, { method: 'DELETE' }); showSuccess('ncResultDisplay', 'Đã xóa!', `${id}`); toast('Đã xóa!', 'success'); loadCatDropdown(); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteNCById(c) {
+            const id = c.notification_categories_id || c.id;
+            if (!id || !confirm(`Xóa "${c.name || id}"?`)) return;
+            try { await apiFetch(`${API}/notifications/categories/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadNC(1); loadCatDropdown(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ NOTIFICATION TEMPLATES ============
+        function fillTPL(t) {
+            document.getElementById('tplId').value = t.notification_templates_id || t.id || '';
+            document.getElementById('tCode').value = t.code || '';
+            document.getElementById('tName').value = t.name || '';
+            document.getElementById('tCatId').value = t.category_id || '';
+            document.getElementById('tTitle').value = t.title_template || '';
+            document.getElementById('tBodyInapp').value = t.body_inapp || '';
+            document.getElementById('tBodyEmail').value = t.body_email || '';
+            document.getElementById('tBodyPush').value = t.body_push || '';
+        }
+        function viewTPLRow(t) { fillTPL(t); getTPL(); toast(`👁️ ${t.name || t.code || ''}`, 'info'); }
+        function editTPLRow(t) { fillTPL(t); toast(`✏️ ${t.name || t.code || ''}`, 'info'); }
+
+        async function loadTPL(page = 1) {
+            const p = new URLSearchParams();
+            const s = v('tplSearch'); if (s) p.set('search', s);
+            const cat = v('tplCatFilter'); if (cat) p.set('category_id', cat);
+            const limit = parseInt(v('tplLimit')) || 10;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/notifications/templates?${p}`);
+                const list = res.data || [];
+                const tb = document.getElementById('tplTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('tplPag').innerHTML = ''; return; }
+                list.forEach((t, i) => {
+                    const tj = JSON.stringify(t).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${t.code || ''}</strong></td>
+                        <td>${t.name || ''}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:.78rem">${t.title_template || '-'}</td>
+                        <td>${t.is_system ? '<span class="badge b-sys">🔒 System</span>' : '<span class="badge b-inactive">Custom</span>'}</td>
+                        <td>${statusBadge(t.is_active)}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewTPLRow(${tj})'>👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editTPLRow(${tj})'>✏️</button>
+                            ${!t.is_system ? `<button class="btn btn-sm btn-danger" onclick='deleteTPLById(${tj})'>🗑️</button>` : ''}
+                        </div></td></tr>`;
+                });
+                const totalItems = res.total || list.length;
+                buildPagination('tplPag', page, totalItems, limit, 'loadTPL');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getTPL() {
+            const id = v('tplId');
+            if (!id) return toast('Nhập Template ID', 'error');
+            // Show detail from filled data
+            const el = document.getElementById('tplDetailDisplay'); el.style.display = 'block';
+            el.innerHTML = `<div class="detail-card"><div style="font-size:1rem;font-weight:700;color:#0f3460">📝 ${v('tName') || v('tCode')}</div>
+                <div class="detail-grid">
+                    <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${id}</div></div>
+                    <div class="dg-item"><div class="dg-label">Code</div><div class="dg-value">${v('tCode')}</div></div>
+                    <div class="dg-item"><div class="dg-label">Title Template</div><div class="dg-value">${v('tTitle')}</div></div>
+                    <div class="dg-item"><div class="dg-label">Category</div><div class="dg-value">${v('tCatId') || '-'}</div></div>
+                </div>
+                <div style="margin-top:8px"><div class="dg-label">Body InApp</div><div style="background:#1e293b;color:#e2e8f0;padding:8px;border-radius:6px;font-size:.78rem;margin-top:4px;white-space:pre-wrap">${v('tBodyInapp') || '-'}</div></div>
+                ${v('tBodyEmail') ? `<div style="margin-top:6px"><div class="dg-label">Body Email</div><div style="background:#1e293b;color:#e2e8f0;padding:8px;border-radius:6px;font-size:.78rem;margin-top:4px;white-space:pre-wrap">${v('tBodyEmail')}</div></div>` : ''}
+            </div>`;
+        }
+
+        async function createTPL() {
+            if (!v('tCode') || !v('tName') || !v('tTitle') || !v('tBodyInapp')) return toast('Nhập Code, Tên, Title Template, Body InApp', 'error');
+            const b = { code: v('tCode'), name: v('tName'), title_template: v('tTitle'), body_inapp: v('tBodyInapp') };
+            if (v('tCatId')) b.category_id = v('tCatId');
+            if (v('tBodyEmail')) b.body_email = v('tBodyEmail');
+            if (v('tBodyPush')) b.body_push = v('tBodyPush');
+            try {
+                await apiFetch(`${API}/notifications/templates`, { method: 'POST', body: JSON.stringify(b) });
+                showSuccess('tplResultDisplay', 'Tạo mẫu thành công!', `<strong>${v('tName')}</strong> (${v('tCode')})`);
+                toast('Tạo thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function updateTPL() {
+            const id = v('tplId');
+            if (!id) return toast('Nhập Template ID', 'error');
+            const b = {};
+            if (v('tName')) b.name = v('tName');
+            if (v('tTitle')) b.title_template = v('tTitle');
+            if (v('tBodyInapp')) b.body_inapp = v('tBodyInapp');
+            if (v('tBodyEmail')) b.body_email = v('tBodyEmail');
+            if (v('tBodyPush')) b.body_push = v('tBodyPush');
+            if (v('tCatId')) b.category_id = v('tCatId');
+            try {
+                await apiFetch(`${API}/notifications/templates/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('tplResultDisplay', 'Cập nhật thành công!', `ID: <strong>${id}</strong>`);
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteTPL() {
+            const id = v('tplId');
+            if (!id || !confirm('Xóa mẫu này?')) return;
+            try { await apiFetch(`${API}/notifications/templates/${id}`, { method: 'DELETE' }); showSuccess('tplResultDisplay', 'Đã xóa!', `${id}`); toast('Đã xóa!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteTPLById(t) {
+            const id = t.notification_templates_id || t.id;
+            if (!id || !confirm(`Xóa "${t.name || t.code || id}"?`)) return;
+            try { await apiFetch(`${API}/notifications/templates/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadTPL(1); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ ROLE CONFIGS (Matrix) ============
+        async function loadRC() {
+            try {
+                const r = await apiFetch(`${API}/notifications/role-configs`);
+                const data = r.data || [];
+                const el = document.getElementById('rcDisplay'); el.style.display = 'block';
+                if (!data.length) { el.innerHTML = '<div class="empty">Không có dữ liệu</div>'; return; }
+                let html = '<div class="detail-card">';
+                data.forEach(role => {
+                    html += `<div style="margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:12px">
+                        <div style="font-weight:700;font-size:.92rem;color:#0f3460;margin-bottom:6px">🏷️ ${role.role_name || role.role_code || 'Unknown'} <span class="badge b-sys">${role.role_code || ''}</span></div>`;
+                    if (role.categories && role.categories.length) {
+                        html += `<table style="margin-top:4px"><thead><tr><th>Category</th><th>InApp</th><th>Email</th><th>Push</th><th>Actions</th></tr></thead><tbody>`;
+                        role.categories.forEach(cat => {
+                            html += `<tr>
+                                <td><strong>${cat.category_code || cat.category_id || '-'}</strong></td>
+                                <td class="matrix-cell">${boolBadge(cat.allow_inapp)}</td>
+                                <td class="matrix-cell">${boolBadge(cat.allow_email)}</td>
+                                <td class="matrix-cell">${boolBadge(cat.allow_push)}</td>
+                                <td><button class="btn btn-sm btn-outline" onclick="selectRC('${role.role_id || ''}','${cat.category_id || ''}',${!!cat.allow_inapp},${!!cat.allow_email},${!!cat.allow_push})">✏️</button></td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table>';
+                    } else { html += '<div class="empty" style="padding:6px">Chưa có cấu hình</div>'; }
+                    html += '</div>';
+                });
+                html += '</div>';
+                el.innerHTML = html;
+                toast('Đã tải ma trận', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function selectRC(roleId, catId, inapp, email, push) {
+            document.getElementById('rcRoleId').value = roleId;
+            document.getElementById('rcCatId').value = catId;
+            document.getElementById('rcInapp').value = String(inapp);
+            document.getElementById('rcEmail').value = String(email);
+            document.getElementById('rcPush').value = String(push);
+            toast(`📋 Role: ${roleId}, Cat: ${catId}`, 'info');
+        }
+
+        async function updateRC() {
+            const roleId = v('rcRoleId'), catId = v('rcCatId');
+            if (!roleId || !catId) return toast('Nhập Role ID và Category ID', 'error');
+            const b = { allow_inapp: v('rcInapp') === 'true', allow_email: v('rcEmail') === 'true', allow_push: v('rcPush') === 'true' };
+            try {
+                await apiFetch(`${API}/notifications/role-configs/${roleId}/${catId}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('rcResultDisplay', 'Cập nhật thành công!', `Role: <strong>${roleId}</strong>, Category: <strong>${catId}</strong>`);
+                toast('OK!', 'success'); loadRC();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ BROADCAST ============
+        async function sendBroadcast() {
+            const title = v('bTitle'), content = v('bContent');
+            if (!title || !content) return toast('Nhập tiêu đề và nội dung', 'error');
+            const b = { title, content };
+            const roleId = v('bRoleId'); if (roleId) b.role_id = roleId;
+            const email = v('bEmail'); if (email) b.body_email = email;
+            const push = v('bPush'); if (push) b.body_push = push;
+            try {
+                const r = await apiFetch(`${API}/notifications/inbox/admin-broadcast`, { method: 'POST', body: JSON.stringify(b) });
+                const d = r.data || {};
+                showSuccess('bResultDisplay', '📢 Broadcast gửi thành công!', `Đã gửi tới <strong>${d.sent_count || d.count || 'N/A'}</strong> người dùng`);
+                toast('Gửi thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ INBOX ============
+        async function loadInbox(page = 1) {
+            const p = new URLSearchParams();
+            p.set('page', page);
+            const limit = parseInt(v('inLimit')) || 10;
+            p.set('limit', limit);
+            const filter = v('inFilter'); if (filter) p.set('is_read', filter);
+            try {
+                const res = await apiFetch(`${API}/notifications/inbox?${p}`);
+                const data = res.data || {};
+                const list = data.notifications || data.rows || (Array.isArray(data) ? data : []);
+                const unread = data.unread_count;
+
+                if (unread !== undefined) {
+                    const el = document.getElementById('inboxUnread'); el.style.display = 'block';
+                    el.innerHTML = `<span class="badge ${unread > 0 ? 'b-warn' : 'b-active'}" style="font-size:.85rem;padding:4px 12px">📬 Chưa đọc: <strong>${unread}</strong></span>`;
+                }
+
+                const container = document.getElementById('inboxList'); container.innerHTML = '';
+                if (!list.length) { container.innerHTML = '<div class="empty">Không có thông báo</div>'; document.getElementById('inboxPag').innerHTML = ''; return; }
+                list.forEach(n => {
+                    const time = n.created_at ? new Date(n.created_at).toLocaleString('vi-VN') : '';
+                    container.innerHTML += `<div class="notif-card ${n.is_read ? '' : 'unread'}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                            <div><strong>${n.title || '-'}</strong> ${n.is_read ? '<span class="badge b-active">Đã đọc</span>' : '<span class="badge b-warn">Chưa đọc</span>'}</div>
+                            <div style="font-size:.75rem;color:#64748b">${time}</div>
+                        </div>
+                        <div style="font-size:.82rem;color:#475569;margin-bottom:6px">${n.content || n.body || '-'}</div>
+                        <div class="action-group">
+                            ${!n.is_read ? `<button class="btn btn-sm btn-success" onclick="markRead('${n.user_notifications_id || n.id || ''}')">✅ Đọc</button>` : ''}
+                        </div>
+                    </div>`;
+                });
+                const pg = data.pagination || {};
+                const totalItems = pg.total || res.total || list.length;
+                buildPagination('inboxPag', page, totalItems, limit, 'loadInbox');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function markRead(id) {
+            if (!id) return;
+            try { await apiFetch(`${API}/notifications/inbox/${id}/read`, { method: 'PUT' }); toast('✅ Đã đánh dấu đọc', 'success'); loadInbox(1); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function markAllRead() {
+            try { await apiFetch(`${API}/notifications/inbox/read-all`, { method: 'PUT' }); toast('✅ Đã đọc tất cả', 'success'); loadInbox(1); } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍⚕️ Bác sĩ & Lịch trình — Test</title>
+    <style>
+        :root {
+            --p: #0f3460;
+            --pl: #3b82f6;
+            --pd: #16213e;
+            --pbg: #eff6ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --warn: #f59e0b;
+            --bg: #f0f2f5;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(15, 52, 96, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .84rem;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            color: var(--muted);
+            transition: all .2s
+        }
+
+        .tab:hover {
+            color: var(--p)
+        }
+
+        .tab.active {
+            color: var(--p);
+            border-bottom-color: var(--p);
+            background: var(--pbg);
+            border-radius: 8px 8px 0 0
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--pd)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        .btn-p {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-ok {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .btn-err {
+            background: var(--err);
+            color: #fff
+        }
+
+        .btn-warn {
+            background: var(--warn);
+            color: #000
+        }
+
+        .btn-out {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem;
+            border-radius: 6px
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 50px
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tbody tr {
+            transition: background .15s
+        }
+
+        tbody tr:hover {
+            background: var(--pbg)
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-err {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .badge-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--muted)
+        }
+
+        .toast-c {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s;
+            min-width: 260px
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669)
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626)
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--pl), var(--p))
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .result {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: .78rem;
+            font-family: 'Cascadia Code', monospace
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>👨‍⚕️ Bác sĩ & Lịch trình</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input id="loginEmail" value="admin@ehealth.com"><input
+                    type="password" id="loginPassword" value="Admin@123"><button class="btn-login"
+                    onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-c" id="toastC"></div>
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" data-t="avail">🗓️ Khả dụng</div>
+            <div class="tab" data-t="absence">🚫 Vắng mặt</div>
+            <div class="tab" data-t="locked">🔒 Khoá Slot</div>
+            <div class="tab" data-t="shift">⚙️ Ca dịch vụ</div>
+        </div>
+
+        <!-- ===== KHẢ DỤNG BS ===== -->
+        <div class="panel active" id="panel_avail">
+            <div class="card">
+                <h3>🗓️ Lịch làm việc BS trong tuần</h3>
+                <div class="toolbar">
+                    <input id="av_doc" placeholder="Doctor ID *">
+                    <input type="date" id="av_from" placeholder="Từ ngày">
+                    <input type="date" id="av_to" placeholder="Đến ngày">
+                    <button class="btn btn-p btn-sm" onclick="loadAvailWeekly()">📅 Xem</button>
+                </div>
+                <div id="availWeeklyResult"></div>
+            </div>
+            <div class="card">
+                <h3>📊 Check khả dụng BS theo ngày</h3>
+                <div class="toolbar">
+                    <input id="av_doc2" placeholder="Doctor ID *">
+                    <input type="date" id="av_date">
+                    <button class="btn btn-p btn-sm" onclick="checkAvailDate()">🔍 Check</button>
+                </div>
+                <div id="availDateResult"></div>
+            </div>
+            <div class="card">
+                <h3>👥 DS Bác sĩ khả dụng theo ngày</h3>
+                <div class="toolbar">
+                    <input type="date" id="av_list_date">
+                    <input id="av_branch" placeholder="Branch ID">
+                    <input id="av_dept" placeholder="Department ID">
+                    <button class="btn btn-p btn-sm" onclick="listAvailDoctors()">👥 Xem</button>
+                </div>
+                <div id="availListResult"></div>
+            </div>
+            <div class="card">
+                <h3>📊 Tổng hợp khả dụng theo khoảng ngày</h3>
+                <div class="toolbar">
+                    <input id="av_sum_doc" placeholder="Doctor ID *">
+                    <input type="date" id="av_sum_from">
+                    <input type="date" id="av_sum_to">
+                    <button class="btn btn-p btn-sm" onclick="loadAvailSummary()">📊 Tổng hợp</button>
+                </div>
+                <div id="availSummaryResult"></div>
+            </div>
+            <div class="card">
+                <h3>📅 Slot khả dụng BS theo ngày</h3>
+                <div class="toolbar">
+                    <input id="av_slot_doc" placeholder="Doctor ID *">
+                    <input type="date" id="av_slot_date">
+                    <button class="btn btn-p btn-sm" onclick="loadAvailSlots()">🕐 Xem Slot</button>
+                </div>
+                <div id="availSlotsResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== VẮNG MẶT ===== -->
+        <div class="panel" id="panel_absence">
+            <div class="card">
+                <h3>📋 Danh sách Đăng ký Vắng</h3>
+                <div class="toolbar">
+                    <input id="ab_doc" placeholder="Doctor ID">
+                    <input type="date" id="ab_from">
+                    <input type="date" id="ab_to">
+                    <select id="ab_status">
+                        <option value="">-- Trạng thái --</option>
+                        <option>PENDING</option>
+                        <option>APPROVED</option>
+                        <option>REJECTED</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadAbsences()">🔄 Tải</button>
+                </div>
+                <div id="absenceListResult"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Đăng ký Vắng mặt</h3>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Doctor ID *</label><input id="ab_new_doc" placeholder="DOC_...">
+                    </div>
+                    <div class="form-group"><label>Từ ngày *</label><input type="date" id="ab_new_from"></div>
+                    <div class="form-group"><label>Đến ngày *</label><input type="date" id="ab_new_to"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Loại *</label><select id="ab_type">
+                            <option>SICK_LEAVE</option>
+                            <option>PERSONAL_LEAVE</option>
+                            <option>CONFERENCE</option>
+                            <option>VACATION</option>
+                            <option>OTHER</option>
+                        </select></div>
+                    <div class="form-group"><label>Lý do</label><input id="ab_reason" placeholder="Lý do vắng..."></div>
+                </div>
+                <button class="btn btn-ok" onclick="createAbsence()">➕ Đăng ký</button>
+                <div id="absenceCreateResult"></div>
+            </div>
+            <div class="card">
+                <h3>📄 Chi tiết / Xoá Vắng mặt</h3>
+                <div class="toolbar">
+                    <input id="ab_detail_id" placeholder="Absence ID *">
+                    <button class="btn btn-p btn-sm" onclick="loadAbsenceDetail()">📄 Chi tiết</button>
+                    <button class="btn btn-err btn-sm" onclick="deleteAbsence()">🗑️ Xoá</button>
+                </div>
+                <div id="absenceDetailResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== KHOÁ SLOT ===== -->
+        <div class="panel" id="panel_locked">
+            <div class="card">
+                <h3>🔒 Danh sách Slot bị khoá</h3>
+                <div class="toolbar">
+                    <input id="lk_doc" placeholder="Doctor ID">
+                    <input type="date" id="lk_date">
+                    <button class="btn btn-p btn-sm" onclick="loadLockedSlots()">🔄 Tải</button>
+                </div>
+                <div id="lockedListResult"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Khoá Slot</h3>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Slot ID *</label><input id="lk_slot" placeholder="SLT_..."></div>
+                    <div class="form-group"><label>Ngày *</label><input type="date" id="lk_lock_date"></div>
+                    <div class="form-group"><label>Lý do</label><input id="lk_reason" placeholder="Họp nội bộ..."></div>
+                </div>
+                <div class="form-group"><label>Doctor ID (tuỳ chọn — khoá riêng BS)</label><input id="lk_lock_doc"
+                        placeholder="DOC_..."></div>
+                <button class="btn btn-ok" onclick="lockSlot()">🔒 Khoá</button>
+                <div id="lockedCreateResult"></div>
+            </div>
+            <div class="card">
+                <h3>🔓 Mở khoá Slot</h3>
+                <div class="toolbar">
+                    <input id="lk_unlock_id" placeholder="Locked Slot ID *">
+                    <button class="btn btn-warn btn-sm" onclick="unlockSlot()">🔓 Mở khoá</button>
+                </div>
+                <div id="unlockResult"></div>
+            </div>
+            <div class="card">
+                <h3>📦 Khoá / Mở khoá Hàng loạt</h3>
+                <div class="form-group"><label>Slot IDs (phẩy cách) *</label><textarea id="lk_batch_ids"
+                        placeholder="SLT_001, SLT_002"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày *</label><input type="date" id="lk_batch_date"></div>
+                    <div class="form-group"><label>Lý do</label><input id="lk_batch_reason" placeholder="Bảo trì...">
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-ok btn-sm" onclick="batchLock()">🔒 Khoá tất cả</button>
+                    <button class="btn btn-warn btn-sm" onclick="batchUnlock()">🔓 Mở khoá tất cả</button>
+                </div>
+                <div id="batchLockResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== CA DỊCH VỤ ===== -->
+        <div class="panel" id="panel_shift">
+            <div class="card">
+                <h3>⚙️ Gán Dịch vụ vào Ca</h3>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Shift ID *</label><input id="ss_shift" placeholder="SH_..."></div>
+                    <div class="form-group"><label>Service ID *</label><input id="ss_service" placeholder="FSRV_...">
+                    </div>
+                    <div class="form-group"><label>Max BN / slot</label><input type="number" id="ss_max"
+                            placeholder="10"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ưu tiên</label><input type="number" id="ss_priority" placeholder="1"
+                            min="1"></div>
+                    <div class="form-group"><label>Thời lượng (phút)</label><input type="number" id="ss_duration"
+                            placeholder="30"></div>
+                </div>
+                <button class="btn btn-ok" onclick="assignShiftService()">➕ Gán</button>
+                <div id="ssCreateResult"></div>
+            </div>
+            <div class="card">
+                <h3>📋 DS Dịch vụ theo Ca</h3>
+                <div class="toolbar">
+                    <input id="ss_list_shift" placeholder="Shift ID *">
+                    <button class="btn btn-p btn-sm" onclick="loadShiftServices()">🔄 Tải</button>
+                </div>
+                <div id="ssListResult"></div>
+            </div>
+            <div class="card">
+                <h3>📋 DS Ca theo Dịch vụ</h3>
+                <div class="toolbar">
+                    <input id="ss_list_svc" placeholder="Service ID *">
+                    <button class="btn btn-p btn-sm" onclick="loadServiceShifts()">🔄 Tải</button>
+                </div>
+                <div id="ssSvcResult"></div>
+            </div>
+            <div class="card">
+                <h3>📋 DS theo Branch</h3>
+                <div class="toolbar">
+                    <input id="ss_branch" placeholder="Branch ID *">
+                    <button class="btn btn-p btn-sm" onclick="loadBranchShiftSvcs()">🔄 Tải</button>
+                </div>
+                <div id="ssBranchResult"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Cập nhật / 🗑️ Xoá</h3>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Shift-Service ID *</label><input id="ss_edit_id" placeholder="ID...">
+                    </div>
+                    <div class="form-group"><label>Max BN mới</label><input type="number" id="ss_edit_max"
+                            placeholder="15"></div>
+                    <div class="form-group"><label>Ưu tiên mới</label><input type="number" id="ss_edit_pri"
+                            placeholder="2"></div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-ok btn-sm" onclick="updateShiftService()">💾 Cập nhật</button>
+                    <button class="btn btn-err btn-sm" onclick="deleteShiftService()">🗑️ Xoá</button>
+                </div>
+                <div id="ssEditResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api'; let token = null;
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastC'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+        function showJson(id, data) { document.getElementById(id).innerHTML = '<div class="result"><pre>' + JSON.stringify(data, null, 2) + '</pre></div>' }
+
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById('panel_' + t.dataset.t).classList.add('active') }));
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user) } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Doctor Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success') } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        // ========== AVAILABILITY ==========
+        async function loadAvailWeekly() { const doc = document.getElementById('av_doc').value; if (!doc) { toast('Nhập Doctor ID', 'error'); return }; const p = new URLSearchParams(); const f = document.getElementById('av_from').value; if (f) p.set('from_date', f); const t = document.getElementById('av_to').value; if (t) p.set('to_date', t); try { const r = await apiFetch(`${API}/doctor-availability/${doc}/weekly?${p}`); showJson('availWeeklyResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function checkAvailDate() { const doc = document.getElementById('av_doc2').value; if (!doc) { toast('Nhập Doctor ID', 'error'); return }; const dt = document.getElementById('av_date').value; if (!dt) { toast('Chọn ngày', 'error'); return }; try { const r = await apiFetch(`${API}/doctor-availability/${doc}/check?date=${dt}`); showJson('availDateResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function listAvailDoctors() { const dt = document.getElementById('av_list_date').value; if (!dt) { toast('Chọn ngày', 'error'); return }; const p = new URLSearchParams({ date: dt }); const b = document.getElementById('av_branch').value; if (b) p.set('branch_id', b); const d = document.getElementById('av_dept').value; if (d) p.set('department_id', d); try { const r = await apiFetch(`${API}/doctor-availability/available?${p}`); showJson('availListResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function loadAvailSummary() { const doc = document.getElementById('av_sum_doc').value; if (!doc) { toast('Nhập Doctor ID', 'error'); return }; const p = new URLSearchParams(); const f = document.getElementById('av_sum_from').value; if (f) p.set('from_date', f); const t = document.getElementById('av_sum_to').value; if (t) p.set('to_date', t); try { const r = await apiFetch(`${API}/doctor-availability/${doc}/summary?${p}`); showJson('availSummaryResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function loadAvailSlots() { const doc = document.getElementById('av_slot_doc').value; if (!doc) { toast('Nhập Doctor ID', 'error'); return }; const dt = document.getElementById('av_slot_date').value; if (!dt) { toast('Chọn ngày', 'error'); return }; try { const r = await apiFetch(`${API}/doctor-availability/${doc}/available-slots?date=${dt}`); showJson('availSlotsResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+
+        // ========== ABSENCE ==========
+        async function loadAbsences() { const p = new URLSearchParams({ limit: '50' }); const d = document.getElementById('ab_doc').value; if (d) p.set('doctor_id', d); const f = document.getElementById('ab_from').value; if (f) p.set('from_date', f); const t = document.getElementById('ab_to').value; if (t) p.set('to_date', t); const s = document.getElementById('ab_status').value; if (s) p.set('status', s); try { const r = await apiFetch(`${API}/doctor-absences?${p}`); showJson('absenceListResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function createAbsence() { const body = { doctor_id: document.getElementById('ab_new_doc').value, start_date: document.getElementById('ab_new_from').value, end_date: document.getElementById('ab_new_to').value, absence_type: document.getElementById('ab_type').value }; if (!body.doctor_id || !body.start_date || !body.end_date) { toast('Điền đủ thông tin', 'error'); return }; const r1 = document.getElementById('ab_reason').value; if (r1) body.reason = r1; try { const r = await apiFetch(`${API}/doctor-absences`, { method: 'POST', body: JSON.stringify(body) }); showJson('absenceCreateResult', r); toast('Đăng ký OK!', 'success') } catch (e) { toast(e.message, 'error'); showJson('absenceCreateResult', { error: e.message }) } }
+        async function loadAbsenceDetail() { const id = document.getElementById('ab_detail_id').value; if (!id) { toast('Nhập ID', 'error'); return }; try { const r = await apiFetch(`${API}/doctor-absences/${id}`); showJson('absenceDetailResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function deleteAbsence() { const id = document.getElementById('ab_detail_id').value; if (!id) { toast('Nhập ID', 'error'); return }; if (!confirm('Xoá đăng ký vắng mặt?')) return; try { const r = await apiFetch(`${API}/doctor-absences/${id}`, { method: 'DELETE' }); showJson('absenceDetailResult', r); toast('Đã xoá!', 'success') } catch (e) { toast(e.message, 'error') } }
+
+        // ========== LOCKED SLOT ==========
+        async function loadLockedSlots() { const p = new URLSearchParams({ limit: '50' }); const d = document.getElementById('lk_doc').value; if (d) p.set('doctor_id', d); const dt = document.getElementById('lk_date').value; if (dt) p.set('date', dt); try { const r = await apiFetch(`${API}/locked-slots?${p}`); showJson('lockedListResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function lockSlot() { const body = { slot_id: document.getElementById('lk_slot').value, lock_date: document.getElementById('lk_lock_date').value }; if (!body.slot_id || !body.lock_date) { toast('Điền slot + ngày', 'error'); return }; const d = document.getElementById('lk_lock_doc').value; if (d) body.doctor_id = d; const r1 = document.getElementById('lk_reason').value; if (r1) body.reason = r1; try { const r = await apiFetch(`${API}/locked-slots`, { method: 'POST', body: JSON.stringify(body) }); showJson('lockedCreateResult', r); toast('Khoá OK!', 'success') } catch (e) { toast(e.message, 'error'); showJson('lockedCreateResult', { error: e.message }) } }
+        async function unlockSlot() { const id = document.getElementById('lk_unlock_id').value; if (!id) { toast('Nhập ID', 'error'); return }; try { const r = await apiFetch(`${API}/locked-slots/${id}`, { method: 'DELETE' }); showJson('unlockResult', r); toast('Mở khoá OK!', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function batchLock() { const ids = document.getElementById('lk_batch_ids').value.split(',').map(s => s.trim()).filter(Boolean); if (!ids.length) { toast('Nhập Slot IDs', 'error'); return }; const body = { slot_ids: ids, lock_date: document.getElementById('lk_batch_date').value }; if (!body.lock_date) { toast('Chọn ngày', 'error'); return }; const r1 = document.getElementById('lk_batch_reason').value; if (r1) body.reason = r1; try { const r = await apiFetch(`${API}/locked-slots/batch`, { method: 'POST', body: JSON.stringify(body) }); showJson('batchLockResult', r); toast('Khoá hàng loạt OK!', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function batchUnlock() { const ids = document.getElementById('lk_batch_ids').value.split(',').map(s => s.trim()).filter(Boolean); if (!ids.length) { toast('Nhập Slot IDs', 'error'); return }; try { const r = await apiFetch(`${API}/locked-slots/batch`, { method: 'DELETE', body: JSON.stringify({ slot_ids: ids, lock_date: document.getElementById('lk_batch_date').value }) }); showJson('batchLockResult', r); toast('Mở khoá hàng loạt OK!', 'success') } catch (e) { toast(e.message, 'error') } }
+
+        // ========== SHIFT-SERVICE ==========
+        async function assignShiftService() { const body = { shift_id: document.getElementById('ss_shift').value, facility_service_id: document.getElementById('ss_service').value }; if (!body.shift_id || !body.facility_service_id) { toast('Điền đủ Shift + Service', 'error'); return }; const m = document.getElementById('ss_max').value; if (m) body.max_patients_per_slot = parseInt(m); const p = document.getElementById('ss_priority').value; if (p) body.priority = parseInt(p); const d = document.getElementById('ss_duration').value; if (d) body.estimated_duration_minutes = parseInt(d); try { const r = await apiFetch(`${API}/shift-services`, { method: 'POST', body: JSON.stringify(body) }); showJson('ssCreateResult', r); toast('Gán OK!', 'success') } catch (e) { toast(e.message, 'error'); showJson('ssCreateResult', { error: e.message }) } }
+        async function loadShiftServices() { const id = document.getElementById('ss_list_shift').value; if (!id) { toast('Nhập Shift ID', 'error'); return }; try { const r = await apiFetch(`${API}/shift-services/shift/${id}`); showJson('ssListResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function loadServiceShifts() { const id = document.getElementById('ss_list_svc').value; if (!id) { toast('Nhập Service ID', 'error'); return }; try { const r = await apiFetch(`${API}/shift-services/service/${id}`); showJson('ssSvcResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function loadBranchShiftSvcs() { const id = document.getElementById('ss_branch').value; if (!id) { toast('Nhập Branch ID', 'error'); return }; try { const r = await apiFetch(`${API}/shift-services/branch/${id}`); showJson('ssBranchResult', r); toast('OK', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function updateShiftService() { const id = document.getElementById('ss_edit_id').value; if (!id) { toast('Nhập ID', 'error'); return }; const body = {}; const m = document.getElementById('ss_edit_max').value; if (m) body.max_patients_per_slot = parseInt(m); const p = document.getElementById('ss_edit_pri').value; if (p) body.priority = parseInt(p); try { const r = await apiFetch(`${API}/shift-services/${id}`, { method: 'PATCH', body: JSON.stringify(body) }); showJson('ssEditResult', r); toast('OK!', 'success') } catch (e) { toast(e.message, 'error') } }
+        async function deleteShiftService() { const id = document.getElementById('ss_edit_id').value; if (!id) { toast('Nhập ID', 'error'); return }; if (!confirm('Xoá liên kết ca-dịch vụ?')) return; try { const r = await apiFetch(`${API}/shift-services/${id}`, { method: 'DELETE' }); showJson('ssEditResult', r); toast('Đã xoá!', 'success') } catch (e) { toast(e.message, 'error') } }
+    </script>
+</body>
+
+</html>

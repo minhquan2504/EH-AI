@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Hồ sơ cá nhân — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-sys {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .b-current {
+            background: #c4b5fd;
+            color: #4c1d95
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+
+        .avatar-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 10px
+        }
+
+        .session-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .session-card.current {
+            border-color: #c4b5fd;
+            background: #f5f3ff
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px
+        }
+
+        .config-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px
+        }
+
+        .config-item .cl {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .config-item .cv {
+            font-weight: 700;
+            font-size: .92rem;
+            color: #1e293b
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>👤 Hồ sơ cá nhân</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">👤 Profile</div>
+        <div class="tab" onclick="switchTab(1)">🔑 Mật khẩu</div>
+        <div class="tab" onclick="switchTab(2)">📱 Sessions</div>
+        <div class="tab" onclick="switchTab(3)">⚙️ Cài đặt</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: PROFILE -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>👤 Thông tin cá nhân</h3>
+                <button class="btn btn-primary" onclick="getProfile()">🔄 Tải Profile</button>
+                <div id="profileDisplay" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Cập nhật Profile</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Họ tên</label><input id="pName" placeholder="Nguyễn Văn A"></div>
+                    <div class="form-group"><label>Giới tính</label>
+                        <select id="pGender" title="Giới tính">
+                            <option value="">-- Chọn --</option>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                            <option value="OTHER">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày sinh</label><input id="pDob" type="date"></div>
+                    <div class="form-group"><label>Địa chỉ</label><input id="pAddr"
+                            placeholder="123 Đường Số 1, Q1, HCM"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>CMND/CCCD</label><input id="pIdCard" placeholder="083485098765">
+                    </div>
+                    <div class="form-group"><label>Avatar URL</label><input id="pAvatar" placeholder="https://...">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateProfile()">💾 Lưu</button>
+                <div id="updateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: PASSWORD -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>🔑 Đổi mật khẩu</h3>
+                <p style="font-size:.82rem;color:#64748b;margin-bottom:10px">⚠️ Đổi mật khẩu thành công sẽ <strong>ép
+                        đăng xuất tất cả thiết bị khác</strong></p>
+                <div class="form-group"><label>Mật khẩu hiện tại *</label><input id="curPw" type="password"
+                        placeholder="Nhập mật khẩu cũ..."></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mật khẩu mới *</label><input id="newPw" type="password"
+                            placeholder="Mật khẩu mới..."></div>
+                    <div class="form-group"><label>Xác nhận mật khẩu *</label><input id="cfmPw" type="password"
+                            placeholder="Nhập lại mật khẩu mới..."></div>
+                </div>
+                <button class="btn btn-warning" onclick="changePw()">🔑 Đổi mật khẩu</button>
+                <div id="pwDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SESSIONS -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>📱 Phiên đăng nhập</h3>
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="getSessions()">🔄 Tải sessions</button>
+                    <button class="btn btn-danger" onclick="revokeAllOther()">🚫 Đăng xuất tất cả thiết bị khác</button>
+                </div>
+                <div id="sessDisplay"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SETTINGS -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>⚙️ Cài đặt cá nhân</h3>
+                <p style="font-size:.82rem;color:#64748b;margin-bottom:10px">Preferences được lưu dạng JSON trong trường
+                    <code>preferences</code></p>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngôn ngữ</label>
+                        <select id="sLang" title="Ngôn ngữ">
+                            <option value="vi">🇻🇳 Tiếng Việt</option>
+                            <option value="en">🇺🇸 English</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Theme</label>
+                        <select id="sTheme" title="Theme">
+                            <option value="light">☀️ Light</option>
+                            <option value="dark">🌙 Dark</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Timezone</label><input id="sTz" placeholder="Asia/Ho_Chi_Minh"
+                            value="Asia/Ho_Chi_Minh"></div>
+                    <div class="form-group"><label>Nhận thông báo</label>
+                        <select id="sNotif" title="Thông báo">
+                            <option value="true">✅ Có</option>
+                            <option value="false">❌ Không</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateMySettings()">💾 Lưu cài đặt</button>
+                <div id="settingsDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3'];
+        let token = null;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function v(id) { return document.getElementById(id).value; }
+        function fmtDate(d) { return d ? new Date(d).toLocaleDateString('vi-VN') : '-'; }
+        function genderLabel(g) { return g === 'MALE' ? '👨 Nam' : g === 'FEMALE' ? '👩 Nữ' : g === 'OTHER' ? '⚧ Khác' : '-'; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); } };
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: v('loginEmail'), password: v('loginPassword'), clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Profile', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+
+        // ============ PROFILE (GET/PUT /api/profile/me) ============
+        async function getProfile() {
+            try {
+                const r = await apiFetch(`${API}/profile/me`);
+                const d = r.data || {};
+                // Fill form
+                document.getElementById('pName').value = d.full_name || '';
+                document.getElementById('pGender').value = d.gender || '';
+                document.getElementById('pDob').value = d.dob ? d.dob.split('T')[0] : '';
+                document.getElementById('pAddr').value = d.address || '';
+                document.getElementById('pIdCard').value = d.identity_card_number || '';
+                document.getElementById('pAvatar').value = d.avatar_url || '';
+                // Fill settings if available
+                if (d.preferences) {
+                    if (d.preferences.language) document.getElementById('sLang').value = d.preferences.language;
+                    if (d.preferences.theme) document.getElementById('sTheme').value = d.preferences.theme;
+                    if (d.preferences.timezone) document.getElementById('sTz').value = d.preferences.timezone;
+                    if (d.preferences.notifications !== undefined) document.getElementById('sNotif').value = String(d.preferences.notifications);
+                }
+                // Show card
+                const el = document.getElementById('profileDisplay'); el.style.display = 'block';
+                const initials = (d.full_name || 'U').charAt(0).toUpperCase();
+                el.innerHTML = `<div class="detail-card">
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+                        ${d.avatar_url ? `<img src="${d.avatar_url}" style="width:60px;height:60px;border-radius:50%;object-fit:cover">` : `<div class="avatar-box">${initials}</div>`}
+                        <div>
+                            <div style="font-size:1.1rem;font-weight:700;color:#0f3460">${d.full_name || '-'}</div>
+                            <div style="font-size:.82rem;color:#64748b">${d.email || '-'} · ${d.phone_number || '-'}</div>
+                            <div style="margin-top:4px">${(d.roles || []).map(r => `<span class="badge b-sys">${r}</span> `).join('')} <span class="badge ${d.status === 'ACTIVE' ? 'b-active' : 'b-inactive'}">${d.status || '-'}</span></div>
+                        </div>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.users_id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Giới tính</div><div class="dg-value">${genderLabel(d.gender)}</div></div>
+                        <div class="dg-item"><div class="dg-label">Ngày sinh</div><div class="dg-value">${fmtDate(d.dob)}</div></div>
+                        <div class="dg-item"><div class="dg-label">Địa chỉ</div><div class="dg-value">${d.address || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">CMND/CCCD</div><div class="dg-value">${d.identity_card_number || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Đăng nhập gần nhất</div><div class="dg-value">${d.last_login_at ? new Date(d.last_login_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div>
+                    ${d.preferences ? `<div style="margin-top:10px"><div class="dg-label">Preferences</div><pre style="background:#1e293b;color:#e2e8f0;padding:8px;border-radius:6px;font-size:.78rem;overflow-x:auto;margin-top:4px">${JSON.stringify(d.preferences, null, 2)}</pre></div>` : ''}
+                </div>`;
+                toast('Đã tải profile', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateProfile() {
+            const b = {};
+            if (v('pName')) b.full_name = v('pName');
+            if (v('pGender')) b.gender = v('pGender');
+            if (v('pDob')) b.dob = v('pDob');
+            if (v('pAddr')) b.address = v('pAddr');
+            if (v('pIdCard')) b.identity_card_number = v('pIdCard');
+            if (v('pAvatar')) b.avatar_url = v('pAvatar');
+            try {
+                await apiFetch(`${API}/profile/me`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('updateDisplay', 'Cập nhật profile thành công!', Object.entries(b).map(([k, v]) => `<strong>${k}</strong>: ${v}`).join(', '));
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ CHANGE PASSWORD (PUT /api/profile/password) ============
+        async function changePw() {
+            const cur = v('curPw'), pw = v('newPw'), cfm = v('cfmPw');
+            if (!cur || !pw) return toast('Nhập mật khẩu cũ và mới', 'error');
+            if (pw !== cfm) return toast('Mật khẩu xác nhận không khớp', 'error');
+            try {
+                await apiFetch(`${API}/profile/password`, { method: 'PUT', body: JSON.stringify({ old_password: cur, new_password: pw }) });
+                showSuccess('pwDisplay', 'Đổi mật khẩu thành công!', 'Tất cả thiết bị khác đã bị đăng xuất.');
+                toast('Đổi MK thành công!', 'success');
+                document.getElementById('curPw').value = '';
+                document.getElementById('newPw').value = '';
+                document.getElementById('cfmPw').value = '';
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ SESSIONS (GET/DELETE /api/profile/sessions) ============
+        async function getSessions() {
+            try {
+                const r = await apiFetch(`${API}/profile/sessions`);
+                const list = r.data || [];
+                const el = document.getElementById('sessDisplay');
+                if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">Không có session nào</div>'; return; }
+                el.innerHTML = list.map(s => `<div class="session-card ${s.is_current ? 'current' : ''}">
+                    <div>
+                        <div style="font-weight:600;font-size:.88rem">${s.device_name || 'Unknown Device'} ${s.is_current ? '<span class="badge b-current">📍 Hiện tại</span>' : ''}</div>
+                        <div style="font-size:.78rem;color:#64748b;margin-top:2px">
+                            IP: <strong>${s.ip_address || '-'}</strong> · 
+                            Last: ${s.last_used_at ? new Date(s.last_used_at).toLocaleString('vi-VN') : '-'} · 
+                            Hết hạn: ${s.expired_at ? new Date(s.expired_at).toLocaleString('vi-VN') : '-'}
+                            ${s.revoked_at ? ` · <span class="badge b-inactive">Đã thu hồi</span>` : ''}
+                        </div>
+                    </div>
+                    <div>${!s.is_current && !s.revoked_at ? `<button class="btn btn-sm btn-danger" onclick="revokeSession('${s.user_sessions_id}')">🚫 Thu hồi</button>` : ''}</div>
+                </div>`).join('');
+                toast('Đã tải sessions', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function revokeSession(id) {
+            if (!confirm('Thu hồi session này?')) return;
+            try { await apiFetch(`${API}/profile/sessions/${id}`, { method: 'DELETE' }); toast('Đã thu hồi!', 'success'); getSessions(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function revokeAllOther() {
+            if (!confirm('Đăng xuất TẤT CẢ thiết bị khác?')) return;
+            try { await apiFetch(`${API}/profile/sessions`, { method: 'DELETE' }); toast('Đã đăng xuất tất cả thiết bị khác!', 'success'); getSessions(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ SETTINGS (PUT /api/profile/settings) ============
+        async function updateMySettings() {
+            const preferences = {
+                language: v('sLang'),
+                theme: v('sTheme'),
+                timezone: v('sTz'),
+                notifications: v('sNotif') === 'true'
+            };
+            try {
+                await apiFetch(`${API}/profile/settings`, { method: 'PUT', body: JSON.stringify({ preferences }) });
+                showSuccess('settingsDisplay', 'Cập nhật cài đặt thành công!', Object.entries(preferences).map(([k, v]) => `<strong>${k}</strong>: ${v}`).join(', '));
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

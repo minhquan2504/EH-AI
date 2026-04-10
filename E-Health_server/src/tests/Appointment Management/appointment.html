@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗓️ E-Health — Test Quản Lý Lịch Khám</title>
+    <style>
+        :root {
+            --p: #0f3460;
+            --pl: #3b82f6;
+            --pd: #16213e;
+            --pbg: #eff6ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --warn: #f59e0b;
+            --bg: #f0f2f5;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(15, 52, 96, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 20px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 4px;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .85rem;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            transition: all .15s;
+            white-space: nowrap
+        }
+
+        .tab:hover {
+            background: #eff6ff
+        }
+
+        .tab.active {
+            background: var(--p);
+            color: #fff;
+            border-color: var(--p)
+        }
+
+        .panel {
+            display: none;
+            background: var(--card);
+            border-radius: 0 8px 8px 8px;
+            padding: 20px;
+            box-shadow: var(--shadow)
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: .85rem;
+            outline: none
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, .1)
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .85rem;
+            transition: all .15s
+        }
+
+        .btn:hover {
+            opacity: .85;
+            transform: translateY(-1px)
+        }
+
+        .btn-primary {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-success {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .btn-warning {
+            background: var(--warn);
+            color: #fff
+        }
+
+        .btn-danger {
+            background: var(--err);
+            color: #fff
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #475569
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: .78rem
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px
+        }
+
+        .result-box {
+            margin-top: 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            max-height: 500px;
+            overflow-y: auto
+        }
+
+        .result-box pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: .8rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem;
+            margin-top: 8px
+        }
+
+        table th {
+            background: #f1f5f9;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            white-space: nowrap
+        }
+
+        table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        table tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .badge-confirmed {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-cancelled {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge-completed {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .badge-checked_in {
+            background: #e0e7ff;
+            color: #3730a3
+        }
+
+        .badge-no_show {
+            background: #f3e8ff;
+            color: #6b21a8
+        }
+
+        .badge-in_progress {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--p);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .slot-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all .15s
+        }
+
+        .slot-card:hover {
+            border-color: var(--pl);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, .1)
+        }
+
+        .slot-card.selected {
+            border-color: var(--p);
+            background: #eff6ff
+        }
+
+        .slot-card.full {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .slot-time {
+            font-weight: 700;
+            font-size: .9rem
+        }
+
+        .slot-info {
+            font-size: .75rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .conflict-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: .82rem
+        }
+
+        .conflict-doctor {
+            background: #fef3c7;
+            border-left: 3px solid var(--warn)
+        }
+
+        .conflict-patient {
+            background: #fee2e2;
+            border-left: 3px solid var(--err)
+        }
+
+        .conflict-room {
+            background: #dbeafe;
+            border-left: 3px solid var(--pl)
+        }
+
+        .dd-count {
+            font-size: .72rem;
+            color: var(--ok);
+            margin-left: 4px
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f8fafc, #eff6ff);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .info-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .info-card .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--p)
+        }
+
+        .info-card .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px
+        }
+
+        .info-card .card-field {
+            font-size: .83rem
+        }
+
+        .info-card .card-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .info-card .card-value {
+            color: var(--text);
+            margin-top: 1px
+        }
+
+        .info-card .card-value.empty {
+            color: #94a3b8;
+            font-style: italic
+        }
+
+        .info-card .card-full {
+            grid-column: 1/-1
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🗓️ E-Health — Test Quản Lý Lịch Khám</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" data-t="tabList">📋 Danh sách</div>
+            <div class="tab" data-t="tabCreate">➕ Tạo lịch</div>
+            <div class="tab" data-t="tabSlots">🕐 Slot trống</div>
+            <div class="tab" data-t="tabConflict">⚠️ Kiểm tra trùng</div>
+            <div class="tab" data-t="tabReschedule">🔄 Đổi lịch</div>
+            <div class="tab" data-t="tabVisit">📝 Mục đích khám</div>
+            <div class="tab" data-t="tabBookStaff">👩‍💼 Đặt hộ</div>
+            <div class="tab" data-t="tabPatient">👤 Lịch BN</div>
+        </div>
+
+        <!-- =============== TAB 1: DANH SÁCH LỊCH KHÁM =============== -->
+        <div class="panel active" id="tabList">
+            <div class="section-title">📋 Danh sách lịch khám (GET /api/appointments)</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Trạng thái</label>
+                    <select id="fStatus">
+                        <option value="">-- Tất cả --</option>
+                        <option>PENDING</option>
+                        <option>CONFIRMED</option>
+                        <option>CHECKED_IN</option>
+                        <option>IN_PROGRESS</option>
+                        <option>CANCELLED</option>
+                        <option>NO_SHOW</option>
+                        <option>COMPLETED</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Bác sĩ</label><select id="fDoctorId" class="dd-doctor">
+                        <option value="">-- Tất cả --</option>
+                    </select></div>
+                <div class="form-group"><label>Bệnh nhân</label><select id="fPatientId" class="dd-patient">
+                        <option value="">-- Tất cả --</option>
+                    </select></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Từ ngày</label><input type="date" id="fFromDate"></div>
+                <div class="form-group"><label>Đến ngày</label><input type="date" id="fToDate"></div>
+                <div class="form-group"><label>Ngày chính xác</label><input type="date" id="fDate"></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Kênh đặt lịch</label>
+                    <select id="fChannel">
+                        <option value="">-- Tất cả --</option>
+                        <option>WEB</option>
+                        <option>APP</option>
+                        <option>HOTLINE</option>
+                        <option>DIRECT_CLINIC</option>
+                        <option>REFERRAL</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Từ khóa (mã/tên BN)</label><input id="fKeyword"
+                        placeholder="APP-2603 hoặc Nguyễn..."></div>
+                <div class="form-group"><label>Dịch vụ</label><select id="fServiceId" class="dd-service">
+                        <option value="">-- Tất cả --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Trang</label><input type="number" id="fPage" value="1" min="1"></div>
+                <div class="form-group"><label>Số bản ghi</label><input type="number" id="fLimit" value="20" min="1"
+                        max="100"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="loadAppointments()">🔍 Tìm kiếm</button>
+                <button class="btn btn-outline" onclick="clearFilters()">🗑️ Xóa bộ lọc</button>
+            </div>
+            <div id="listResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 2: TẠO LỊCH KHÁM =============== -->
+        <div class="panel" id="tabCreate">
+            <div class="section-title">➕ Tạo lịch khám mới (POST /api/appointments)</div>
+            <div class="form-row">
+                <div class="form-group"><label>🏥 Cơ sở y tế * (chọn trước)</label><select id="cFacilityId"
+                        class="dd-facility">
+                        <option value="">-- Chọn cơ sở --</option>
+                    </select></div>
+                <div class="form-group"><label>Bệnh nhân *</label><select id="cPatientId" class="dd-patient">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Ngày khám *</label><input type="date" id="cDate"></div>
+                <div class="form-group"><label>Kênh đặt *</label>
+                    <select id="cChannel">
+                        <option>WEB</option>
+                        <option>APP</option>
+                        <option>HOTLINE</option>
+                        <option>DIRECT_CLINIC</option>
+                        <option>REFERRAL</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Bác sĩ</label><select id="cDoctorId" class="dd-doctor">
+                        <option value="">-- Chọn bác sĩ --</option>
+                    </select></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Slot</label><select id="cSlotId" class="dd-slot">
+                        <option value="">-- Chọn slot --</option>
+                    </select></div>
+                <div class="form-group"><label>Phòng khám</label><select id="cRoomId" class="dd-room">
+                        <option value="">-- Chọn phòng --</option>
+                    </select></div>
+                <div class="form-group"><label>Dịch vụ</label><select id="cServiceId" class="dd-service">
+                        <option value="">-- Chọn dịch vụ --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Lý do khám</label><textarea id="cReason"
+                        placeholder="Đau đầu kéo dài 3 ngày..."></textarea></div>
+                <div class="form-group"><label>Triệu chứng</label><textarea id="cSymptoms"
+                        placeholder="Kèm theo chóng mặt..."></textarea></div>
+            </div>
+            <div class="actions"><button class="btn btn-success" onclick="createAppointment()">✅ Đặt lịch</button></div>
+            <div id="createResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 3: SLOT TRỐNG =============== -->
+        <div class="panel" id="tabSlots">
+            <div class="section-title">🕐 Lấy slot trống (GET /api/appointments/available-slots)</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Ngày *</label><input type="date" id="sDate"></div>
+                <div class="form-group"><label>Bác sĩ</label><select id="sDoctorId" class="dd-doctor">
+                        <option value="">-- Tất cả --</option>
+                    </select></div>
+                <div class="form-group"><label>Cơ sở y tế</label><select id="sFacilityId" class="dd-facility">
+                        <option value="">-- Tất cả --</option>
+                    </select></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary" onclick="loadSlots()">🔍 Tìm slot</button></div>
+            <div id="slotsGrid" class="slot-grid"></div>
+            <div id="slotsResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 4: KIỂM TRA TRÙNG LỊCH =============== -->
+        <div class="panel" id="tabConflict">
+            <div class="section-title">⚠️ Kiểm tra trùng lịch (POST /api/appointments/check-conflict)</div>
+            <div class="form-row">
+                <div class="form-group"><label>Ngày *</label><input type="date" id="cfDate"></div>
+                <div class="form-group"><label>Slot *</label><select id="cfSlotId" class="dd-slot">
+                        <option value="">-- Chọn slot --</option>
+                    </select></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Bác sĩ</label><select id="cfDoctorId" class="dd-doctor">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Bệnh nhân</label><select id="cfPatientId" class="dd-patient">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Phòng khám</label><select id="cfRoomId" class="dd-room">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+            </div>
+            <div class="actions"><button class="btn btn-warning" onclick="checkConflict()">⚡ Kiểm tra</button></div>
+            <div id="conflictVisual" style="margin-top:12px"></div>
+            <div id="conflictResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 5: ĐỔI LỊCH =============== -->
+        <div class="panel" id="tabReschedule">
+            <div class="section-title">🔄 Đổi lịch khám (PATCH /api/appointments/{id}/reschedule)</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Appointment ID *</label><input id="rsId"
+                        placeholder="Bấm mã lịch khám ở tab Danh sách..."></div>
+                <div class="form-group"><label>Ngày mới *</label><input type="date" id="rsDate"></div>
+                <div class="form-group"><label>Slot mới *</label><select id="rsSlotId" class="dd-slot">
+                        <option value="">-- Chọn slot --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Phòng mới</label><select id="rsRoomId" class="dd-room">
+                        <option value="">-- Giữ nguyên --</option>
+                    </select></div>
+                <div class="form-group"><label>Lý do đổi</label><input id="rsReason" placeholder="BN bận công tác...">
+                </div>
+            </div>
+            <div class="actions"><button class="btn btn-warning" onclick="reschedule()">🔄 Đổi lịch</button></div>
+            <div id="rescheduleResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 6: MỤC ĐÍCH KHÁM =============== -->
+        <div class="panel" id="tabVisit">
+            <div class="section-title">📝 Mục đích khám (visit-reason)</div>
+            <div class="form-row">
+                <div class="form-group"><label>Appointment ID *</label><input id="vrId"
+                        placeholder="Bấm mã lịch khám ở tab Danh sách..."></div>
+                <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary btn-sm"
+                        onclick="getVisitReason()" style="margin-top:2px">📖 Xem</button></div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Lý do khám</label><textarea id="vrReason"
+                        placeholder="Đau đầu..."></textarea></div>
+                <div class="form-group"><label>Triệu chứng</label><textarea id="vrSymptoms"
+                        placeholder="Chóng mặt..."></textarea></div>
+            </div>
+            <div class="actions"><button class="btn btn-success" onclick="updateVisitReason()">💾 Cập nhật</button>
+            </div>
+            <div id="visitResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 7: ĐẶT HỘ =============== -->
+        <div class="panel" id="tabBookStaff">
+            <div class="section-title">👩‍💼 Lễ tân đặt lịch hộ (POST /api/appointments/book-by-staff)</div>
+            <div class="form-row">
+                <div class="form-group"><label>Bệnh nhân *</label><select id="bsPatientId" class="dd-patient">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select></div>
+                <div class="form-group"><label>Ngày khám *</label><input type="date" id="bsDate"></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Kênh đặt</label>
+                    <select id="bsChannel">
+                        <option>DIRECT_CLINIC</option>
+                        <option>HOTLINE</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Bác sĩ</label><select id="bsDoctorId" class="dd-doctor">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Slot</label><select id="bsSlotId" class="dd-slot">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Phòng khám</label><select id="bsRoomId" class="dd-room">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Dịch vụ</label><select id="bsServiceId" class="dd-service">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Lý do khám</label><textarea id="bsReason"
+                        placeholder="BN gọi điện yêu cầu tái khám"></textarea></div>
+                <div class="form-group"><label>Ghi chú nhân viên</label><textarea id="bsStaffNotes"
+                        placeholder="BN là VIP, ưu tiên phòng riêng"></textarea></div>
+            </div>
+            <div class="actions"><button class="btn btn-success" onclick="bookByStaff()">👩‍💼 Đặt lịch hộ</button>
+            </div>
+            <div id="bookStaffResult" class="result-box" style="display:none"></div>
+        </div>
+
+        <!-- =============== TAB 8: LỊCH BỆNH NHÂN =============== -->
+        <div class="panel" id="tabPatient">
+            <div class="section-title">👤 Lịch khám theo bệnh nhân</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Bệnh nhân *</label><select id="ptId" class="dd-patient">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Trạng thái</label>
+                    <select id="ptStatus">
+                        <option value="">-- Tất cả --</option>
+                        <option>PENDING</option>
+                        <option>CONFIRMED</option>
+                        <option>CHECKED_IN</option>
+                        <option>IN_PROGRESS</option>
+                        <option>CANCELLED</option>
+                        <option>NO_SHOW</option>
+                        <option>COMPLETED</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary"
+                        onclick="loadPatientAppts()" style="margin-top:2px">🔍 Xem lịch BN</button></div>
+            </div>
+            <div id="patientListResult" class="result-box" style="display:none"></div>
+
+            <div class="divider"></div>
+            <div class="section-title" style="margin-top:8px">➕ Tạo lịch từ hồ sơ BN (POST
+                /api/patients/{id}/appointments)</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Bệnh nhân *</label><select id="ptCreateId" class="dd-patient">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Ngày khám *</label><input type="date" id="ptCreateDate"></div>
+                <div class="form-group"><label>Kênh đặt</label>
+                    <select id="ptCreateChannel">
+                        <option>DIRECT_CLINIC</option>
+                        <option>WEB</option>
+                        <option>APP</option>
+                        <option>HOTLINE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Bác sĩ</label><select id="ptCreateDoctor" class="dd-doctor">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Slot</label><select id="ptCreateSlot" class="dd-slot">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Phòng khám</label><select id="ptCreateRoom" class="dd-room">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Dịch vụ</label><select id="ptCreateService" class="dd-service">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Lý do khám</label><input id="ptCreateReason" placeholder="Tái khám...">
+                </div>
+            </div>
+            <div class="actions"><button class="btn btn-success" onclick="createByPatient()">✅ Tạo lịch</button></div>
+            <div id="patientCreateResult" class="result-box" style="display:none"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+
+        // ---- Utilities ----
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        function showResult(id, data) { const el = document.getElementById(id); el.style.display = 'block'; el.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>' }
+        /** Hiển thị appointment dưới dạng card đẹp */
+        function showAppointmentCard(containerId, apt, title) {
+            const a = apt?.data || apt;
+            const el = document.getElementById(containerId);
+            el.style.display = 'block';
+            const f = (v) => v && v !== 'null' && v !== 'undefined' ? v : null;
+            const fv = (v, fallback) => f(v) ? `<span class="card-value">${v}</span>` : `<span class="card-value empty">${fallback || '—'}</span>`;
+            el.innerHTML = `
+    <div class="info-card">
+        <div class="card-header">
+            <div class="card-title">${title || '🗓️ Thông tin lịch khám'}</div>
+            ${a.status ? statusBadge(a.status) : ''}
+        </div>
+        <div class="card-grid">
+            <div class="card-field"><div class="card-label">Mã lịch khám</div>${fv(a.appointment_code, 'Chưa có')}</div>
+            <div class="card-field"><div class="card-label">ID</div><span class="card-value" style="font-size:.75rem;cursor:pointer;color:var(--pl)" onclick="copyId('${a.appointments_id || a.appointment_id}')">${a.appointments_id || a.appointment_id || '—'}</span></div>
+            <div class="card-field"><div class="card-label">Bệnh nhân</div>${fv(a.patient_name, a.patient_id)}</div>
+            <div class="card-field"><div class="card-label">Ngày khám</div>${fv(a.appointment_date, '—')}</div>
+            <div class="card-field"><div class="card-label">Bác sĩ</div>${fv(a.doctor_name, 'Chưa chỉ định')}</div>
+            <div class="card-field"><div class="card-label">Khung giờ</div>${fv(a.slot_start_time ? a.slot_start_time.substring(0, 5) + ' – ' + (a.slot_end_time || '').substring(0, 5) : null, 'Chưa chọn')}</div>
+            <div class="card-field"><div class="card-label">Phòng khám</div>${fv(a.room_name, 'Chưa chọn')}</div>
+            <div class="card-field"><div class="card-label">Dịch vụ</div>${fv(a.service_name, 'Chưa chọn')}</div>
+            <div class="card-field"><div class="card-label">Kênh đặt lịch</div>${fv(a.booking_channel, '—')}</div>
+            <div class="card-field"><div class="card-label">Ngày tạo</div>${fv(a.created_at ? new Date(a.created_at).toLocaleString('vi-VN') : null, '—')}</div>
+            ${a.reason_for_visit ? `<div class="card-field card-full"><div class="card-label">Lý do khám</div>${fv(a.reason_for_visit)}</div>` : ''}
+            ${a.symptoms_notes ? `<div class="card-field card-full"><div class="card-label">Triệu chứng</div>${fv(a.symptoms_notes)}</div>` : ''}
+            ${a.cancellation_reason ? `<div class="card-field card-full"><div class="card-label">Lý do hủy</div><span class="card-value" style="color:var(--err)">${a.cancellation_reason}</span></div>` : ''}
+        </div>
+    </div>`;
+        }
+        function statusBadge(s) { return `<span class="badge badge-${(s || '').toLowerCase()}">${s}</span>` }
+        function val(id) { return document.getElementById(id).value.trim() }
+
+        // ---- Auth ----
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadAllDropdowns() } }
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: val('loginEmail'), password: val('loginPassword'),
+                        clientInfo: { deviceId: 'HTML_TEST', deviceName: 'AppointmentTest', userAgent: navigator.userAgent }
+                    })
+                })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success');
+                loadAllDropdowns();
+            } catch (e) { toast(e.message, 'error') }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        // ---- Tab Switching ----
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            t.classList.add('active');
+            document.getElementById(t.dataset.t).classList.add('active');
+        }));
+
+        // ---- API Helper ----
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token') }
+            const r = await fetch(url, { headers: headers(), ...opts });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+            return d;
+        }
+
+        // ===================================================================
+        // DROPDOWN LOADING
+        // ===================================================================
+        function fillSelect(cssClass, optHtml, count) {
+            document.querySelectorAll(`.${cssClass}`).forEach(sel => {
+                const first = sel.options[0]?.outerHTML || '';
+                sel.innerHTML = first + optHtml;
+            });
+            console.log(`[DD] .${cssClass} → ${count} items`);
+        }
+
+        async function loadAllDropdowns() {
+            if (!token) return;
+            toast('⏳ Đang tải dữ liệu dropdown...', 'info');
+            // Service dropdown phụ thuộc facility nên không load ở đây
+            const results = await Promise.allSettled([
+                loadFacilityDropdown(),
+                loadPatientDropdown(),
+                loadDoctorDropdown(),
+                loadRoomDropdown(),
+                loadSlotDropdown()
+            ]);
+            const ok = results.filter(r => r.status === 'fulfilled').length;
+            const fail = results.filter(r => r.status === 'rejected');
+            if (fail.length) {
+                fail.forEach(f => console.error('[DD FAIL]', f.reason));
+                toast(`⚠️ Tải dropdown: ${ok}/5 thành công, ${fail.length} lỗi (xem console)`, 'error');
+            } else {
+                toast(`✅ Đã tải đủ ${ok}/5 dropdown (địch vụ cần chọn cơ sở trước)`, 'success');
+            }
+
+            // Gắn event: khi chọn facility → load dịch vụ cơ sở
+            document.querySelectorAll('.dd-facility').forEach(sel => {
+                sel.addEventListener('change', onFacilityChange);
+            });
+        }
+
+        /** Khi chọn Facility → tự động load lại dịch vụ cơ sở */
+        async function onFacilityChange(e) {
+            const facilityId = e?.target?.value || '';
+            if (facilityId) {
+                toast(`⏳ Đang tải dịch vụ cơ sở ${facilityId}...`, 'info');
+                try {
+                    await loadServiceDropdown(facilityId);
+                    toast('✅ Đã tải dịch vụ cơ sở', 'success');
+                } catch (err) {
+                    console.error('[DD] Service load failed:', err);
+                    toast('❌ Lỗi tải dịch vụ: ' + err.message, 'error');
+                }
+            } else {
+                fillSelect('dd-service', '', 0);
+            }
+        }
+
+        /** 🏥 Cơ sở y tế — GET /api/facilities/dropdown */
+        async function loadFacilityDropdown() {
+            const r = await apiFetch(`${API}/facilities/dropdown`);
+            const list = r.data || [];
+            const html = list.map(f => `<option value="${f.facilities_id}">${f.name} (${f.code})</option>`).join('');
+            fillSelect('dd-facility', html, list.length);
+        }
+
+        /** 👤 Bệnh nhân — GET /api/patients?limit=200 */
+        async function loadPatientDropdown() {
+            const r = await apiFetch(`${API}/patients?limit=200`);
+            console.log('[DD DEBUG] patients raw r.data:', r.data);
+            // API có thể trả về: r.data = array, r.data = { items: [...] }, r.data = paginated obj
+            let list = [];
+            if (Array.isArray(r.data)) {
+                list = r.data;
+            } else if (r.data?.items && Array.isArray(r.data.items)) {
+                list = r.data.items;
+            } else if (r.data && typeof r.data === 'object') {
+                // Trường hợp data chứa trực tiếp các fields khác
+                list = Object.values(r.data).find(v => Array.isArray(v)) || [];
+            }
+            const html = list.map(p => {
+                const pid = p.patients_id || p.patient_id || p.id;
+                const name = p.full_name || `${p.last_name || ''} ${p.first_name || ''}`.trim() || pid;
+                return `<option value="${pid}">${name} — ${pid?.substring(0, 12)}...</option>`;
+            }).join('');
+            fillSelect('dd-patient', html, list.length);
+            if (list.length === 0) console.warn('[DD WARN] patients: 0 items — có thể DB chưa có bệnh nhân hoặc cấu trúc response khác');
+        }
+
+        /** 👨‍⚕️ Bác sĩ — GET /api/doctor-services/active-doctors */
+        async function loadDoctorDropdown() {
+            const r = await apiFetch(`${API}/doctor-services/active-doctors`);
+            console.log('[DD DEBUG] doctors raw r.data:', r.data);
+            const list = Array.isArray(r.data) ? r.data : [];
+            const html = list.map(d => {
+                const name = d.full_name || 'Bác sĩ';
+                const spec = d.specialty_name || d.title || '';
+                return `<option value="${d.doctors_id}">${name}${spec ? ' — ' + spec : ''}</option>`;
+            }).join('');
+            fillSelect('dd-doctor', html, list.length);
+        }
+
+        /** 🏠 Phòng khám — GET /api/medical-rooms?limit=200 */
+        async function loadRoomDropdown() {
+            const r = await apiFetch(`${API}/medical-rooms?limit=200`);
+            const list = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+            const html = list.map(rm => {
+                const rid = rm.medical_rooms_id || rm.room_id;
+                const name = rm.room_name || rm.name || rid;
+                const type = rm.room_type || '';
+                return `<option value="${rid}">${name}${type ? ' (' + type + ')' : ''}</option>`;
+            }).join('');
+            fillSelect('dd-room', html, list.length);
+        }
+
+        /** 💊 Dịch vụ cơ sở — phụ thuộc facility đã chọn */
+        async function loadServiceDropdown(facilityId) {
+            if (!facilityId) {
+                console.warn('[DD WARN] Chưa chọn cơ sở — bỏ qua load dịch vụ');
+                fillSelect('dd-service', '', 0);
+                return;
+            }
+            const r = await apiFetch(`${API}/medical-services/facilities/${facilityId}/active-services`);
+            console.log('[DD DEBUG] facility services raw r.data:', r.data);
+            const list = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+            const html = list.map(svc => {
+                const sid = svc.facility_services_id || svc.id;
+                const name = svc.service_name || svc.name || sid;
+                const code = svc.service_code || svc.code || '';
+                return `<option value="${sid}">${name}${code ? ' (' + code + ')' : ''}</option>`;
+            }).join('');
+            fillSelect('dd-service', html, list.length);
+        }
+
+        /** 🕐 Slot ACTIVE — GET /api/slots?is_active=true */
+        async function loadSlotDropdown() {
+            const r = await apiFetch(`${API}/slots?is_active=true`);
+            const list = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+            const html = list.map(s => {
+                const sid = s.appointment_slots_id || s.slot_id;
+                const time = (s.start_time?.substring(0, 5) || '??') + '–' + (s.end_time?.substring(0, 5) || '??');
+                const shift = s.shift_name || s.shift_type || '';
+                return `<option value="${sid}">${time} ${shift ? '(' + shift + ')' : ''} — ${sid?.substring(0, 15)}</option>`;
+            }).join('');
+            fillSelect('dd-slot', html, list.length);
+        }
+
+        // ===== TAB 1: DANH SÁCH =====
+        async function loadAppointments() {
+            try {
+                const p = new URLSearchParams();
+                if (val('fStatus')) p.set('status', val('fStatus'));
+                if (val('fDoctorId')) p.set('doctor_id', val('fDoctorId'));
+                if (val('fPatientId')) p.set('patient_id', val('fPatientId'));
+                if (val('fFromDate')) p.set('fromDate', val('fFromDate'));
+                if (val('fToDate')) p.set('toDate', val('fToDate'));
+                if (val('fDate')) p.set('date', val('fDate'));
+                if (val('fChannel')) p.set('booking_channel', val('fChannel'));
+                if (val('fKeyword')) p.set('keyword', val('fKeyword'));
+                if (val('fServiceId')) p.set('facility_service_id', val('fServiceId'));
+                p.set('page', val('fPage') || '1');
+                p.set('limit', val('fLimit') || '20');
+
+                const r = await apiFetch(`${API}/appointments?${p}`);
+                let html = `<div style="margin-bottom:8px;font-weight:600">📊 Tổng: ${r.pagination?.total || 0} | Trang ${r.pagination?.page}/${r.pagination?.totalPages}</div>`;
+                if (r.data?.length) {
+                    html += `<table><thead><tr><th>Mã</th><th>Bệnh nhân</th><th>Ngày</th><th>Slot</th><th>Bác sĩ</th><th>Phòng</th><th>Dịch vụ</th><th>Kênh</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>`;
+                    r.data.forEach(a => {
+                        const aptId = a.appointments_id || a.appointment_id;
+                        const slot = a.slot_start_time ? `${a.slot_start_time?.substring(0, 5)}-${a.slot_end_time?.substring(0, 5)}` : '—';
+                        html += `<tr>
+                    <td style="font-weight:600;font-size:.78rem;cursor:pointer;color:var(--pl)" onclick="copyId('${aptId}')" title="Bấm để copy ID">${a.appointment_code || aptId?.substring(0, 15)}</td>
+                    <td>${a.patient_name || '—'}</td>
+                    <td>${a.appointment_date || '—'}</td>
+                    <td>${slot}</td>
+                    <td>${a.doctor_name || '—'}</td>
+                    <td>${a.room_name || '—'}</td>
+                    <td>${a.service_name || '—'}</td>
+                    <td>${a.booking_channel || '—'}</td>
+                    <td>${statusBadge(a.status)}</td>
+                    <td><button class="btn btn-outline btn-sm" onclick="viewDetail('${aptId}')">👁 Chi tiết</button></td>
+                </tr>`;
+                    });
+                    html += '</tbody></table>';
+                } else { html += '<div style="color:#94a3b8;padding:20px;text-align:center">Không có dữ liệu</div>' }
+                document.getElementById('listResult').style.display = 'block';
+                document.getElementById('listResult').innerHTML = html;
+                toast(`Tìm thấy ${r.pagination?.total || 0} lịch khám`, 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function viewDetail(id) {
+            if (!id || id === 'undefined' || id === 'null') { toast('Không tìm thấy ID lịch khám', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/appointments/${id}`);
+                const d = r.data?.appointment || r.data || r;
+                showAppointmentCard('listResult', d, '👁 Chi tiết lịch khám');
+                // Nếu có audit logs, hiện bên dưới
+                const logs = r.data?.auditLogs;
+                if (logs?.length) {
+                    let logHtml = '<div style="margin-top:12px"><div style="font-weight:700;font-size:.85rem;margin-bottom:6px">📜 Lịch sử thao tác</div>';
+                    logHtml += '<table><thead><tr><th>Thời gian</th><th>Trạng thái cũ</th><th>Trạng thái mới</th><th>Ghi chú</th></tr></thead><tbody>';
+                    logs.forEach(l => {
+                        logHtml += `<tr><td>${l.created_at ? new Date(l.created_at).toLocaleString('vi-VN') : '—'}</td><td>${statusBadge(l.old_status || '—')}</td><td>${statusBadge(l.new_status || '—')}</td><td>${l.action_note || '—'}</td></tr>`;
+                    });
+                    logHtml += '</tbody></table></div>';
+                    document.getElementById('listResult').innerHTML += logHtml;
+                }
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function copyId(id) {
+            if (!id || id === 'undefined') return;
+            ['rsId', 'vrId'].forEach(el => { const e = document.getElementById(el); if (e) e.value = id });
+            navigator.clipboard?.writeText(id);
+            toast(`Đã copy: ${id}`, 'info');
+        }
+
+        function clearFilters() {
+            ['fStatus', 'fDoctorId', 'fPatientId', 'fFromDate', 'fToDate', 'fDate', 'fKeyword', 'fServiceId', 'fChannel'].forEach(i => document.getElementById(i).value = '');
+            document.getElementById('fPage').value = '1';
+            toast('Đã xóa bộ lọc', 'info');
+        }
+
+        // ===== TAB 2: TẠO LỊCH =====
+        async function createAppointment() {
+            try {
+                if (!val('cFacilityId')) { toast('Chọn cơ sở y tế trước', 'error'); return }
+                if (!val('cPatientId')) { toast('Chọn bệnh nhân', 'error'); return }
+                if (!val('cDate')) { toast('Chọn ngày khám', 'error'); return }
+                const body = { patient_id: val('cPatientId'), appointment_date: val('cDate'), booking_channel: val('cChannel') };
+                if (val('cDoctorId')) body.doctor_id = val('cDoctorId');
+                if (val('cSlotId')) body.slot_id = val('cSlotId');
+                if (val('cRoomId')) body.room_id = val('cRoomId');
+                if (val('cServiceId')) body.facility_service_id = val('cServiceId');
+                if (val('cFacilityId')) body.facility_id = val('cFacilityId');
+                if (val('cReason')) body.reason_for_visit = val('cReason');
+                if (val('cSymptoms')) body.symptoms_notes = val('cSymptoms');
+
+                const r = await apiFetch(`${API}/appointments`, { method: 'POST', body: JSON.stringify(body) });
+                showAppointmentCard('createResult', r, '✅ Đặt lịch thành công!');
+                toast('Đặt lịch thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('createResult', { error: e.message }) }
+        }
+
+        // ===== TAB 3: SLOT TRỐNG =====
+        async function loadSlots() {
+            try {
+                const p = new URLSearchParams();
+                if (val('sDate')) p.set('date', val('sDate'));
+                if (val('sDoctorId')) p.set('doctor_id', val('sDoctorId'));
+                if (val('sFacilityId')) p.set('facility_id', val('sFacilityId'));
+
+                const r = await apiFetch(`${API}/appointments/available-slots?${p}`);
+                const grid = document.getElementById('slotsGrid');
+                if (r.data?.length) {
+                    grid.innerHTML = r.data.map(s => `
+                <div class="slot-card ${s.is_available ? '' : 'full'}" onclick="${s.is_available ? `selectSlot('${s.slot_id || s.appointment_slots_id}')` : ''}">
+                    <div class="slot-time">${s.start_time?.substring(0, 5)} – ${s.end_time?.substring(0, 5)}</div>
+                    <div class="slot-info">${s.shift_name || ''}</div>
+                    <div class="slot-info">📊 ${s.booked_count}/${s.max_capacity} đã đặt</div>
+                    <div class="slot-info">${s.is_available ? '✅ Còn chỗ' : '❌ Hết chỗ'}</div>
+                    <div class="slot-info" style="font-size:.7rem;color:#94a3b8">${s.slot_id || s.appointment_slots_id}</div>
+                </div>
+            `).join('');
+                } else { grid.innerHTML = '<div style="color:#94a3b8;padding:20px">Không tìm thấy slot trống</div>' }
+                showResult('slotsResult', r);
+                toast(`Tìm thấy ${r.data?.length || 0} slot`, 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('slotsResult', { error: e.message }) }
+        }
+
+        function selectSlot(slotId) {
+            document.querySelectorAll('.dd-slot').forEach(sel => { for (let o of sel.options) { if (o.value === slotId) { sel.value = slotId; return } } });
+            toast(`Đã chọn slot: ${slotId}`, 'info');
+        }
+
+        // ===== TAB 4: KIỂM TRA TRÙNG LỊCH =====
+        async function checkConflict() {
+            try {
+                if (!val('cfDate') || !val('cfSlotId')) { toast('Cần nhập ngày + slot', 'error'); return }
+                const body = { date: val('cfDate'), slot_id: val('cfSlotId') };
+                if (val('cfDoctorId')) body.doctor_id = val('cfDoctorId');
+                if (val('cfPatientId')) body.patient_id = val('cfPatientId');
+                if (val('cfRoomId')) body.room_id = val('cfRoomId');
+
+                const r = await apiFetch(`${API}/appointments/check-conflict`, { method: 'POST', body: JSON.stringify(body) });
+                const vis = document.getElementById('conflictVisual');
+                if (r.data?.has_conflict) {
+                    let html = '<div style="font-weight:700;color:#ef4444;margin-bottom:8px">⚠️ Phát hiện xung đột!</div>';
+                    (r.data.conflicts || []).forEach(c => {
+                        const cls = c.type === 'DOCTOR' ? 'conflict-doctor' : c.type === 'PATIENT' ? 'conflict-patient' : 'conflict-room';
+                        html += `<div class="conflict-item ${cls}"><strong>${c.type}</strong>: ${c.message}</div>`;
+                    });
+                    vis.innerHTML = html; toast('Phát hiện xung đột!', 'error');
+                } else {
+                    vis.innerHTML = '<div style="color:#10b981;font-weight:700;padding:12px">✅ Không có xung đột — an toàn để đặt lịch!</div>';
+                    toast('Không có xung đột', 'success');
+                }
+                showResult('conflictResult', r);
+            } catch (e) { toast(e.message, 'error'); showResult('conflictResult', { error: e.message }) }
+        }
+
+        // ===== TAB 5: ĐỔI LỊCH =====
+        async function reschedule() {
+            try {
+                const id = val('rsId');
+                if (!id) { toast('Nhập Appointment ID', 'error'); return }
+                const body = { new_date: val('rsDate'), new_slot_id: val('rsSlotId') };
+                if (val('rsRoomId')) body.new_room_id = val('rsRoomId');
+                if (val('rsReason')) body.reason = val('rsReason');
+
+                const r = await apiFetch(`${API}/appointments/${id}/reschedule`, { method: 'PATCH', body: JSON.stringify(body) });
+                showAppointmentCard('rescheduleResult', r, '🔄 Đổi lịch thành công!');
+                toast('Đổi lịch thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('rescheduleResult', { error: e.message }) }
+        }
+
+        // ===== TAB 6: MỤC ĐÍCH KHÁM =====
+        async function getVisitReason() {
+            try {
+                const id = val('vrId');
+                if (!id) { toast('Nhập Appointment ID', 'error'); return }
+                const r = await apiFetch(`${API}/appointments/${id}/visit-reason`);
+                if (r.data) {
+                    document.getElementById('vrReason').value = r.data.reason_for_visit || '';
+                    document.getElementById('vrSymptoms').value = r.data.symptoms_notes || '';
+                }
+                const el = document.getElementById('visitResult'); el.style.display = 'block';
+                el.innerHTML = `<div class="info-card"><div class="card-grid">
+            <div class="card-field"><div class="card-label">Lý do khám</div><span class="card-value">${r.data?.reason_for_visit || '<em style="color:#94a3b8">Chưa nhập</em>'}</span></div>
+            <div class="card-field"><div class="card-label">Triệu chứng</div><span class="card-value">${r.data?.symptoms_notes || '<em style="color:#94a3b8">Chưa nhập</em>'}</span></div>
+        </div></div>`;
+                toast('Đã tải mục đích khám', 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function updateVisitReason() {
+            try {
+                const id = val('vrId');
+                if (!id) { toast('Nhập Appointment ID', 'error'); return }
+                const body = {};
+                if (val('vrReason')) body.reason_for_visit = val('vrReason');
+                if (val('vrSymptoms')) body.symptoms_notes = val('vrSymptoms');
+
+                const r = await apiFetch(`${API}/appointments/${id}/visit-reason`, { method: 'PATCH', body: JSON.stringify(body) });
+                const el = document.getElementById('visitResult'); el.style.display = 'block';
+                el.innerHTML = `<div class="info-card"><div class="card-header"><div class="card-title">✅ Cập nhật thành công</div></div><div class="card-grid">
+            <div class="card-field"><div class="card-label">Lý do khám</div><span class="card-value">${r.data?.reason_for_visit || '—'}</span></div>
+            <div class="card-field"><div class="card-label">Triệu chứng</div><span class="card-value">${r.data?.symptoms_notes || '—'}</span></div>
+        </div></div>`;
+                toast('Cập nhật thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('visitResult', { error: e.message }) }
+        }
+
+        // ===== TAB 7: ĐẶT HỘ =====
+        async function bookByStaff() {
+            try {
+                if (!val('bsPatientId')) { toast('Chọn bệnh nhân', 'error'); return }
+                if (!val('bsDate')) { toast('Chọn ngày khám', 'error'); return }
+                const body = { patient_id: val('bsPatientId'), appointment_date: val('bsDate'), booking_channel: val('bsChannel') };
+                if (val('bsDoctorId')) body.doctor_id = val('bsDoctorId');
+                if (val('bsSlotId')) body.slot_id = val('bsSlotId');
+                if (val('bsRoomId')) body.room_id = val('bsRoomId');
+                if (val('bsServiceId')) body.facility_service_id = val('bsServiceId');
+                if (val('bsReason')) body.reason_for_visit = val('bsReason');
+                if (val('bsStaffNotes')) body.staff_notes = val('bsStaffNotes');
+
+                const r = await apiFetch(`${API}/appointments/book-by-staff`, { method: 'POST', body: JSON.stringify(body) });
+                showAppointmentCard('bookStaffResult', r, '👩‍💼 Đặt lịch hộ thành công!');
+                toast('Đặt lịch hộ thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('bookStaffResult', { error: e.message }) }
+        }
+
+        // ===== TAB 8: LỊCH BỆNH NHÂN =====
+        async function loadPatientAppts() {
+            try {
+                const pid = val('ptId');
+                if (!pid) { toast('Chọn bệnh nhân', 'error'); return }
+                const p = new URLSearchParams();
+                if (val('ptStatus')) p.set('status', val('ptStatus'));
+
+                const r = await apiFetch(`${API}/patients/${pid}/appointments?${p}`);
+                let html = `<div style="margin-bottom:8px;font-weight:600">📊 Tổng: ${r.pagination?.total || r.data?.length || 0}</div>`;
+                if (r.data?.length) {
+                    html += '<table><thead><tr><th>Mã</th><th>Ngày</th><th>Slot</th><th>Bác sĩ</th><th>Phòng</th><th>Dịch vụ</th><th>Trạng thái</th></tr></thead><tbody>';
+                    r.data.forEach(a => {
+                        const aptId = a.appointments_id || a.appointment_id;
+                        const slot = a.slot_start_time ? `${a.slot_start_time?.substring(0, 5)}-${a.slot_end_time?.substring(0, 5)}` : '—';
+                        html += `<tr><td style="cursor:pointer;color:var(--pl)" onclick="copyId('${aptId}')">${a.appointment_code || aptId?.substring(0, 15)}</td><td>${a.appointment_date}</td><td>${slot}</td><td>${a.doctor_name || '—'}</td><td>${a.room_name || '—'}</td><td>${a.service_name || '—'}</td><td>${statusBadge(a.status)}</td></tr>`;
+                    });
+                    html += '</tbody></table>';
+                } else { html += '<div style="color:#94a3b8;padding:20px;text-align:center">Không có lịch khám</div>' }
+                document.getElementById('patientListResult').style.display = 'block';
+                document.getElementById('patientListResult').innerHTML = html;
+                toast(`Tìm thấy ${r.data?.length || 0} lịch khám`, 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function createByPatient() {
+            try {
+                const pid = val('ptCreateId');
+                if (!pid) { toast('Chọn bệnh nhân', 'error'); return }
+                const body = { appointment_date: val('ptCreateDate'), booking_channel: val('ptCreateChannel') };
+                if (val('ptCreateDoctor')) body.doctor_id = val('ptCreateDoctor');
+                if (val('ptCreateSlot')) body.slot_id = val('ptCreateSlot');
+                if (val('ptCreateRoom')) body.room_id = val('ptCreateRoom');
+                if (val('ptCreateService')) body.facility_service_id = val('ptCreateService');
+                if (val('ptCreateReason')) body.reason_for_visit = val('ptCreateReason');
+
+                const r = await apiFetch(`${API}/patients/${pid}/appointments`, { method: 'POST', body: JSON.stringify(body) });
+                showAppointmentCard('patientCreateResult', r, '✅ Tạo lịch từ hồ sơ BN thành công!');
+                toast('Tạo lịch từ hồ sơ BN thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showResult('patientCreateResult', { error: e.message }) }
+        }
+    </script>
+</body>
+
+</html>

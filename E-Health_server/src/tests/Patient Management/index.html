@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 Patient Management — Test Hub</title>
+    <style>
+        :root{--p:#4f46e5;--pd:#3730a3;--bg:#f1f5f9;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--radius:14px}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        .header{background:linear-gradient(135deg,var(--pd),var(--p));color:#fff;padding:28px 32px;text-align:center;box-shadow:0 4px 20px rgba(79,70,229,.25)}
+        .header h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+        .header p{color:rgba(255,255,255,.7);font-size:.88rem}
+        .grid{max-width:900px;margin:30px auto;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+        .card{background:var(--card);border-radius:var(--radius);padding:28px 24px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);text-decoration:none;color:var(--text);transition:all .2s;position:relative;overflow:hidden}
+        .card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(79,70,229,.15);border-color:rgba(79,70,229,.15)}
+        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--p),var(--pd));opacity:0;transition:opacity .2s}
+        .card:hover::before{opacity:1}
+        .card .icon{font-size:2rem;margin-bottom:12px}
+        .card h3{font-size:1rem;font-weight:700;margin-bottom:6px;color:var(--pd)}
+        .card p{font-size:.82rem;color:var(--muted);line-height:1.45}
+        .card .badge{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:#eef2ff;color:var(--p)}
+        .back{display:inline-block;margin:20px auto;padding:8px 16px;text-decoration:none;color:var(--muted);font-size:.85rem;text-align:center;width:100%}
+        .back:hover{color:var(--p)}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 Module 2 — Patient Management</h1>
+        <p>Quản lý Hồ sơ Bệnh nhân, Bảo hiểm, Lịch sử Khám, Tài liệu, Thẻ phân loại</p>
+    </div>
+    <div class="grid">
+        <a class="card" href="patients.html">
+            <div class="icon">👤</div>
+            <h3>Hồ sơ Bệnh nhân</h3>
+            <p>CRUD hồ sơ, tạo/sửa/xóa, tìm kiếm nâng cao, liên kết tài khoản, người thân, tài liệu, thẻ, lịch khám</p>
+            <span class="badge">27 endpoints</span>
+        </a>
+        <a class="card" href="insurance.html">
+            <div class="icon">🛡️</div>
+            <h3>Bảo hiểm Y tế</h3>
+            <p>Đơn vị bảo hiểm, tỷ lệ chi trả, thẻ bảo hiểm bệnh nhân, hiệu lực, lịch sử</p>
+            <span class="badge">17 endpoints</span>
+        </a>
+        <a class="card" href="medical-history.html">
+            <div class="icon">📋</div>
+            <h3>Lịch sử Khám & Điều trị</h3>
+            <p>Danh sách lượt khám, chi tiết, timeline sức khỏe, tổng hợp, lần khám gần nhất</p>
+            <span class="badge">5 endpoints</span>
+        </a>
+        <a class="card" href="patient-config.html">
+            <div class="icon">⚙️</div>
+            <h3>Danh mục Cấu hình</h3>
+            <p>Thẻ phân loại (tags), loại tài liệu, loại quan hệ, luật phân loại tự động, người thân</p>
+            <span class="badge">23 endpoints</span>
+        </a>
+    </div>
+    <a class="back" href="../index.html">← Quay về trang chủ Test Hub</a>
+</body>
+</html>

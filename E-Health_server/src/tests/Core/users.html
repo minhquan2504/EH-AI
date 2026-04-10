@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 Quản lý Người dùng — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .action-group {
+            display: flex;
+            gap: 3px;
+            flex-wrap: nowrap
+        }
+
+        .action-group .btn-sm {
+            font-size: .7rem;
+            padding: 3px 6px;
+            white-space: nowrap
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-banned {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .b-pending {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: .82rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-card .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0
+        }
+
+        .detail-card .detail-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #0f3460;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700
+        }
+
+        .detail-card .detail-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #0f3460
+        }
+
+        .detail-card .detail-sub {
+            font-size: .78rem;
+            color: #64748b
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px
+        }
+
+        .detail-grid .dg-item {
+            font-size: .83rem
+        }
+
+        .detail-grid .dg-label {
+            color: #64748b;
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        .detail-grid .dg-value {
+            color: #1e293b;
+            font-weight: 500
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>👥 Quản lý Người dùng</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📋 Danh sách</div>
+        <div class="tab" onclick="switchTab(1)">➕ Tạo mới</div>
+        <div class="tab" onclick="switchTab(2)">✏️ Chi tiết / Sửa</div>
+        <div class="tab" onclick="switchTab(3)">🔒 Khóa / Trạng thái</div>
+        <div class="tab" onclick="switchTab(4)">🔑 Mật khẩu</div>
+        <div class="tab" onclick="switchTab(5)">🏷️ Roles & Cơ sở</div>
+        <div class="tab" onclick="switchTab(6)">📥 Import / Export</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+
+        <!-- TAB 0: DANH SÁCH -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📋 Danh sách Người dùng</h3>
+                <div class="toolbar">
+                    <input id="uSearch" placeholder="🔍 Tìm tên, email, SĐT..." style="flex:1">
+                    <select id="uRole">
+                        <option value="">Tất cả roles</option>
+                    </select>
+                    <select id="uStatus">
+                        <option value="">Tất cả status</option>
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                        <option>BANNED</option>
+                        <option>PENDING</option>
+                    </select>
+                    <input id="uLimit" type="number" value="10" style="width:60px" placeholder="Limit">
+                    <button class="btn btn-primary" onclick="loadUsers(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable"></tbody>
+                </table>
+                <div class="pagination" id="userPagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: TẠO MỚI -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>➕ Tạo Người dùng mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Họ tên *</label><input id="cName" placeholder="Nguyễn Văn A"></div>
+                    <div class="form-group"><label>Email *</label><input id="cEmail" placeholder="nguyenvana@gmail.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>SĐT</label><input id="cPhone" placeholder="0901234567"></div>
+                    <div class="form-group"><label>Mật khẩu *</label><input id="cPassword" type="password"
+                            placeholder="Admin@123"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giới tính</label>
+                        <select id="cGender">
+                            <option value="">-</option>
+                            <option>MALE</option>
+                            <option>FEMALE</option>
+                            <option>OTHER</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Ngày sinh</label><input id="cDob" type="date"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>CCCD/CMND</label><input id="cIdCard" placeholder="012345678901">
+                    </div>
+                    <div class="form-group"><label>Role</label>
+                        <select id="cRole" title="Chọn role cho người dùng mới">
+                            <option value="">-- Chọn role --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Địa chỉ</label><input id="cAddr" placeholder="123 Đường ABC, HN"></div>
+                <button class="btn btn-success" onclick="createUser()">💾 Tạo người dùng</button>
+                <div id="createRes" class="result-box" style="display:none"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: CHI TIẾT / SỬA -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>🔍 Chi tiết Người dùng</h3>
+                <div class="toolbar">
+                    <input id="detailId" placeholder="User ID (USR_...)" style="flex:1">
+                    <button class="btn btn-primary" onclick="loadUserDetail()">Xem chi tiết</button>
+                    <button class="btn btn-danger" onclick="deleteUser()">🗑️ Xóa</button>
+                </div>
+                <div id="detailInfo" style="display:none"></div>
+                <div id="detailRes" class="result-box" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Cập nhật Người dùng</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>User ID *</label><input id="uId" placeholder="USR_..."></div>
+                    <div class="form-group"><label>Họ tên</label><input id="uName"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Email</label><input id="uEmail"></div>
+                    <div class="form-group"><label>SĐT</label><input id="uPhone"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giới tính</label>
+                        <select id="uGender">
+                            <option value="">-</option>
+                            <option>MALE</option>
+                            <option>FEMALE</option>
+                            <option>OTHER</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Ngày sinh</label><input id="uDob" type="date"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>CCCD</label><input id="uIdCard"></div>
+                    <div class="form-group"><label>Địa chỉ</label><input id="uAddr"></div>
+                </div>
+                <button class="btn btn-success" onclick="updateUser()">💾 Lưu thay đổi</button>
+                <div id="updateRes" class="result-box" style="display:none"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: KHÓA / TRẠNG THÁI -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>🔒 Khóa / Mở khóa tài khoản</h3>
+                <div class="toolbar">
+                    <input id="lockId" placeholder="User ID" style="flex:1">
+                    <button class="btn btn-warning" onclick="lockUser()">🔒 Khóa</button>
+                    <button class="btn btn-success" onclick="unlockUser()">🔓 Mở khóa</button>
+                </div>
+                <div id="lockRes" class="result-box" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>🔄 Thay đổi trạng thái</h3>
+                <div class="toolbar">
+                    <input id="statusId" placeholder="User ID" style="flex:1">
+                    <select id="newStatus" title="Chọn trạng thái mới">
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                        <option>BANNED</option>
+                        <option>PENDING</option>
+                    </select>
+                    <input id="statusReason" placeholder="Lý do (tuỳ chọn)" style="width:200px">
+                    <button class="btn btn-primary" onclick="changeStatus()">Đổi Status</button>
+                </div>
+                <div id="statusResDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📜 Lịch sử trạng thái</h3>
+                <div class="toolbar">
+                    <input id="historyId" placeholder="User ID" style="flex:1">
+                    <button class="btn btn-outline" onclick="loadStatusHistory()">Xem lịch sử</button>
+                </div>
+                <div id="historyDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MẬT KHẨU -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>🔑 Admin Reset mật khẩu</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>User ID *</label><input id="resetId" placeholder="USR_..."></div>
+                    <div class="form-group"><label>Mật khẩu mới</label><input id="resetPw" type="password"
+                            placeholder="Mới (hoặc để trống = tự tạo)"></div>
+                </div>
+                <button class="btn btn-warning" onclick="resetPassword()">🔑 Reset MK</button>
+                <div id="resetRes" class="result-box" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>🔄 User tự đổi MK</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>User ID *</label><input id="changePwId" placeholder="USR_..."></div>
+                    <div class="form-group"><label>MK hiện tại *</label><input id="oldPw" type="password"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>MK mới *</label><input id="newPw" type="password"></div>
+                    <div class="form-group"><label>Xác nhận MK mới *</label><input id="confirmPw" type="password"></div>
+                </div>
+                <button class="btn btn-primary" onclick="changePassword()">Đổi mật khẩu</button>
+                <div id="changePwRes" class="result-box" style="display:none"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: ROLES & CƠ SỞ -->
+        <div class="panel" id="p5">
+            <div class="card">
+                <h3>🏷️ Quản lý Roles của User</h3>
+                <div class="toolbar">
+                    <input id="roleUserId" placeholder="User ID" style="flex:1">
+                    <button class="btn btn-primary" onclick="getUserRoles()">🔍 Xem roles hiện tại</button>
+                </div>
+                <!-- Roles hiện tại của user -->
+                <div id="userRolesDisplay" style="margin-top:10px;display:none">
+                    <label style="font-weight:600;font-size:.85rem;color:#0f3460">📋 Roles hiện tại:</label>
+                    <div id="userRolesList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+                </div>
+                <div class="form-row" style="margin-top:12px">
+                    <div class="form-group" style="flex:1">
+                        <label>Chọn Role để gán</label>
+                        <select id="assignRole" title="Chọn role để gán"
+                            style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem">
+                            <option value="">-- Chọn role --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="assignRole()">➕ Gán role</button>
+                </div>
+                <div id="roleRes" class="result-box" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>🏢 Gán / Xóa / Chuyển Chi nhánh</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>User ID *</label><input id="facUserId" placeholder="USR_..."></div>
+                    <div class="form-group"><label>Chi nhánh</label>
+                        <select id="facId" title="Chọn chi nhánh">
+                            <option value="">-- Chọn chi nhánh --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-info" onclick="viewUserFacilities()">🔍 Xem chi nhánh hiện tại</button>
+                    <button class="btn btn-success" onclick="assignFacility()">➕ Gán chi nhánh</button>
+                    <button class="btn btn-danger" onclick="removeFacility()">🗑️ Xóa khỏi chi nhánh</button>
+                    <button class="btn btn-warning" onclick="transferFacility()">↔️ Chuyển chi nhánh</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Chi nhánh đích (chuyển)</label>
+                        <select id="facTargetId" title="Chọn chi nhánh đích">
+                            <option value="">-- Chọn chi nhánh đích --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Lý do (khi xóa)</label><input id="facReason"
+                            placeholder="Nghỉ việc, chuyển công tác..."></div>
+                </div>
+                <div id="facDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 6: IMPORT / EXPORT -->
+        <div class="panel" id="p6">
+            <div class="card">
+                <h3>📥 Import Người dùng từ Excel</h3>
+                <div class="form-group"><label>File Excel (.xlsx)</label><input id="importFile" type="file"
+                        accept=".xlsx,.xls"></div>
+                <div class="toolbar">
+                    <button class="btn btn-outline" onclick="validateImport()">✅ Validate dữ liệu</button>
+                    <button class="btn btn-success" onclick="executeImport()">🚀 Thực thi Import</button>
+                    <button class="btn btn-outline" onclick="importHistory()">📜 Lịch sử Import</button>
+                </div>
+                <div id="importRes" class="result-box" style="display:none"></div>
+            </div>
+            <div class="card">
+                <h3>📤 Export Người dùng ra Excel</h3>
+                <div class="toolbar">
+                    <input id="exportSearch" placeholder="Search (tuỳ chọn)" style="width:200px">
+                    <select id="exportRole" title="Lọc theo role">
+                        <option value="">Tất cả roles</option>
+                    </select>
+                    <select id="exportStatus">
+                        <option value="">Tất cả status</option>
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                        <option>BANNED</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="exportUsers()">📤 Export Excel</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+        let token = null, currentPage = 1;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function showResult(id, data) { const el = document.getElementById(id); el.style.display = 'block'; el.textContent = JSON.stringify(data, null, 2); }
+        function statusBadge(s) { const m = { ACTIVE: 'b-active', INACTIVE: 'b-inactive', BANNED: 'b-banned', PENDING: 'b-pending' }; return `<span class="badge ${m[s] || 'b-inactive'}">${s || '-'}</span>`; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadAllRoles(); loadAllFacilities(); } };
+        async function handleLogin() { const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value; try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Users Page', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); loadAllRoles(); loadAllFacilities(); toast('Đăng nhập thành công!', 'success'); } catch (e) { toast(e.message, 'error'); } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+
+        async function tryRefreshToken() {
+            const auth = getAuth();
+            if (!auth?.refreshToken) return false;
+            try {
+                const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: auth.refreshToken }) })).json();
+                if (!r.success) return false;
+                token = r.data.accessToken;
+                auth.accessToken = r.data.accessToken;
+                if (r.data.refreshToken) auth.refreshToken = r.data.refreshToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify(auth));
+                toast('🔄 Token đã tự động refresh!', 'info');
+                return true;
+            } catch { return false; }
+        }
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token'); }
+            let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            if (r.status === 401) {
+                const refreshed = await tryRefreshToken();
+                if (refreshed) {
+                    r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+                } else { handleLogout(); throw new Error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'); }
+            }
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+            return d;
+        }
+
+        /** Điền form người dùng vào tất cả các tab liên quan */
+        function fillAllForms(user) {
+            const uid = user.users_id || user.id || '';
+            document.getElementById('detailId').value = uid;
+            document.getElementById('uId').value = uid;
+            document.getElementById('uName').value = user.full_name || user.name || '';
+            document.getElementById('uEmail').value = user.email || '';
+            document.getElementById('uPhone').value = user.phone_number || user.phone || '';
+            document.getElementById('uGender').value = user.gender || '';
+            document.getElementById('uDob').value = user.dob ? user.dob.split('T')[0] : '';
+            document.getElementById('uIdCard').value = user.identity_card_number || '';
+            document.getElementById('uAddr').value = user.address || '';
+            document.getElementById('lockId').value = uid;
+            document.getElementById('statusId').value = uid;
+            document.getElementById('historyId').value = uid;
+            document.getElementById('resetId').value = uid;
+            document.getElementById('changePwId').value = uid;
+            document.getElementById('roleUserId').value = uid;
+            document.getElementById('facUserId').value = uid;
+        }
+
+        /** Xem chi tiết → tab 2, load API detail */
+        function viewUser(user) {
+            fillAllForms(user);
+            switchTab(2);
+            loadUserDetail();
+            toast(`👁️ Xem chi tiết: ${user.full_name || user.name || ''}`, 'info');
+        }
+
+        /** Sửa → tab 2, fill form sẵn */
+        function editUser(user) {
+            fillAllForms(user);
+            switchTab(2);
+            toast(`✏️ Sửa: ${user.full_name || user.name || ''}`, 'info');
+        }
+
+        /** Xóa trực tiếp từ danh sách */
+        async function deleteUserById(user) {
+            const uid = user.users_id || user.id || '';
+            if (!uid) return toast('Không tìm thấy ID', 'error');
+            if (!confirm(`Xác nhận xóa/vô hiệu hóa: ${user.full_name || user.name || uid}?`)) return;
+            try { await apiFetch(`${API}/users/${uid}`, { method: 'DELETE' }); toast('Đã xóa/vô hiệu hóa!', 'success'); loadUsers(currentPage); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        /** Khóa/Mở khóa → tab 3 */
+        function lockUserAction(user) {
+            fillAllForms(user);
+            switchTab(3);
+            toast(`🔒 Quản lý khóa: ${user.full_name || user.name || ''}`, 'info');
+        }
+
+        // Giữ lại tương thích cũ
+        function fillEditForm(user) { editUser(user); }
+
+        // TAB 0: LIST
+        async function loadUsers(page = 1) {
+            currentPage = page;
+            const p = new URLSearchParams();
+            const s = document.getElementById('uSearch').value; if (s) p.set('search', s);
+            const r = document.getElementById('uRole').value; if (r) p.set('role', r);
+            const st = document.getElementById('uStatus').value; if (st) p.set('status', st);
+            p.set('page', page);
+            p.set('limit', document.getElementById('uLimit').value || 10);
+            try {
+                const res = await apiFetch(`${API}/users?${p}`);
+                const data = res.data;
+                const users = data.users || data.rows || data.items || (Array.isArray(data) ? data : []);
+                const pagination = data.pagination || data.meta || {};
+                const tb = document.getElementById('userTable');
+                tb.innerHTML = '';
+                if (!users.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; }
+                users.forEach((u, i) => {
+                    const id = u.users_id || u.id || '';
+                    const uj = JSON.stringify(u).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * (parseInt(document.getElementById('uLimit').value) || 10) + i + 1}</td>
+                        <td><strong>${u.full_name || u.name || '-'}</strong></td>
+                        <td>${u.email || '-'}</td>
+                        <td>${u.phone_number || u.phone || '-'}</td>
+                        <td>${u.role_name || u.role || '-'}</td>
+                        <td>${statusBadge(u.status)}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewUser(${uj})' title="Xem chi tiết">👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editUser(${uj})' title="Sửa">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteUserById(${uj})' title="Xóa">🗑️</button>
+                            <button class="btn btn-sm btn-warning" onclick='lockUserAction(${uj})' title="Khóa/Mở khóa">🔒</button>
+                        </div></td>
+                    </tr>`;
+                });
+                // Pagination
+                const pg = document.getElementById('userPagination');
+                const totalItems = data.total || data.pagination?.total || data.meta?.total || users.length;
+                const limit = parseInt(document.getElementById('uLimit').value) || 10;
+                const totalPages = data.totalPages || data.total_pages || data.pagination?.totalPages || Math.ceil(totalItems / limit);
+                let pgHtml = '';
+                // Prev button
+                pgHtml += `<button onclick="loadUsers(${page - 1})" ${page <= 1 ? 'disabled style="opacity:.4;cursor:default"' : ''}>← Trước</button>`;
+                // Page numbers with ellipsis
+                if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pgHtml += `<button class="${i === page ? 'active' : ''}" onclick="loadUsers(${i})">${i}</button>`;
+                } else {
+                    pgHtml += `<button class="${page === 1 ? 'active' : ''}" onclick="loadUsers(1)">1</button>`;
+                    if (page > 3) pgHtml += `<span>...</span>`;
+                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+                        pgHtml += `<button class="${i === page ? 'active' : ''}" onclick="loadUsers(${i})">${i}</button>`;
+                    }
+                    if (page < totalPages - 2) pgHtml += `<span>...</span>`;
+                    pgHtml += `<button class="${page === totalPages ? 'active' : ''}" onclick="loadUsers(${totalPages})">${totalPages}</button>`;
+                }
+                // Next button
+                pgHtml += `<button onclick="loadUsers(${page + 1})" ${page >= totalPages ? 'disabled style="opacity:.4;cursor:default"' : ''}>Sau →</button>`;
+                pgHtml += `<span style="margin-left:8px;color:#64748b">Tổng: ${totalItems}</span>`;
+                pg.innerHTML = pgHtml;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 1: CREATE
+        async function createUser() {
+            const body = { full_name: document.getElementById('cName').value, email: document.getElementById('cEmail').value, password: document.getElementById('cPassword').value };
+            const v = (id) => document.getElementById(id).value;
+            if (v('cPhone')) body.phone_number = v('cPhone');
+            if (v('cGender')) body.gender = v('cGender');
+            if (v('cDob')) body.dob = v('cDob');
+            if (v('cIdCard')) body.identity_card_number = v('cIdCard');
+            if (v('cRole')) body.roles = [v('cRole')];
+            if (v('cAddr')) body.address = v('cAddr');
+            try { const r = await apiFetch(`${API}/users`, { method: 'POST', body: JSON.stringify(body) }); showResult('createRes', r); toast('Tạo người dùng thành công!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 2: DETAIL / UPDATE
+        async function loadUserDetail() {
+            const id = document.getElementById('detailId').value; if (!id) return toast('Nhập User ID', 'error');
+            try {
+                const r = await apiFetch(`${API}/users/${id}`);
+                const d = r.data || {};
+                const p = d.profile || {};
+                // Fill forms với data gốc + profile lồng nhau
+                const merged = {
+                    users_id: d.users_id || d.id || id,
+                    full_name: p.full_name || d.full_name || d.name || '',
+                    email: d.email || '',
+                    phone_number: d.phone || d.phone_number || '',
+                    gender: p.gender || d.gender || '',
+                    dob: p.dob || d.dob || '',
+                    identity_card_number: p.identity_card_number || d.identity_card_number || '',
+                    address: p.address || d.address || '',
+                    status: d.status || '',
+                    roles: d.roles || [],
+                    avatar_url: p.avatar_url || '',
+                    last_login_at: d.last_login_at || '',
+                    created_at: d.created_at || '',
+                    updated_at: d.updated_at || ''
+                };
+                fillAllForms(merged);
+                // Render info card
+                const initials = (merged.full_name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                const genderTxt = { MALE: 'Nam', FEMALE: 'Nữ', OTHER: 'Khác' }[merged.gender] || merged.gender || '-';
+                const fmtDate = (s) => s ? new Date(s).toLocaleDateString('vi-VN') : '-';
+                const fmtDateTime = (s) => s ? new Date(s).toLocaleString('vi-VN') : '-';
+                const rolesHtml = (merged.roles || []).map(r => `<span class="badge b-active" style="margin-right:4px">${r}</span>`).join('') || '-';
+                document.getElementById('detailInfo').style.display = 'block';
+                document.getElementById('detailInfo').innerHTML = `
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <div class="detail-avatar">${initials}</div>
+                            <div>
+                                <div class="detail-name">${merged.full_name || '-'}</div>
+                                <div class="detail-sub">${merged.users_id} &nbsp; ${statusBadge(merged.status)}</div>
+                            </div>
+                        </div>
+                        <div class="detail-grid">
+                            <div class="dg-item"><div class="dg-label">📧 Email</div><div class="dg-value">${merged.email || '-'}</div></div>
+                            <div class="dg-item"><div class="dg-label">📱 SĐT</div><div class="dg-value">${merged.phone_number || '-'}</div></div>
+                            <div class="dg-item"><div class="dg-label">👤 Giới tính</div><div class="dg-value">${genderTxt}</div></div>
+                            <div class="dg-item"><div class="dg-label">🎂 Ngày sinh</div><div class="dg-value">${fmtDate(merged.dob)}</div></div>
+                            <div class="dg-item"><div class="dg-label">🪪 CCCD/CMND</div><div class="dg-value">${merged.identity_card_number || '-'}</div></div>
+                            <div class="dg-item"><div class="dg-label">📍 Địa chỉ</div><div class="dg-value">${merged.address || '-'}</div></div>
+                            <div class="dg-item"><div class="dg-label">🏷️ Vai trò</div><div class="dg-value">${rolesHtml}</div></div>
+                            <div class="dg-item"><div class="dg-label">🕐 Đăng nhập cuối</div><div class="dg-value">${fmtDateTime(merged.last_login_at)}</div></div>
+                            <div class="dg-item"><div class="dg-label">📅 Tạo lúc</div><div class="dg-value">${fmtDateTime(merged.created_at)}</div></div>
+                            <div class="dg-item"><div class="dg-label">📅 Cập nhật</div><div class="dg-value">${fmtDateTime(merged.updated_at)}</div></div>
+                        </div>
+                    </div>`;
+                document.getElementById('detailRes').style.display = 'none';
+                toast(`Đã tải chi tiết: ${merged.full_name}`, 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function updateUser() {
+            const id = document.getElementById('uId').value; if (!id) return toast('Nhập User ID', 'error');
+            const body = {}, v = (elId) => document.getElementById(elId).value;
+            if (v('uName')) body.full_name = v('uName');
+            if (v('uEmail')) body.email = v('uEmail');
+            if (v('uPhone')) body.phone_number = v('uPhone');
+            if (v('uGender')) body.gender = v('uGender');
+            if (v('uDob')) body.dob = v('uDob');
+            if (v('uIdCard')) body.identity_card_number = v('uIdCard');
+            if (v('uAddr')) body.address = v('uAddr');
+            try { const r = await apiFetch(`${API}/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }); showResult('updateRes', r); toast('Cập nhật thành công!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteUser() {
+            const id = document.getElementById('detailId').value; if (!id) return toast('Nhập User ID', 'error');
+            if (!confirm('Xác nhận xóa/vô hiệu hóa?')) return;
+            try { await apiFetch(`${API}/users/${id}`, { method: 'DELETE' }); toast('Đã xóa/vô hiệu hóa!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 3: LOCK / STATUS
+        async function lockUser() { const id = document.getElementById('lockId').value; if (!id) return toast('Nhập User ID', 'error'); try { await apiFetch(`${API}/users/${id}/lock`, { method: 'PATCH' }); const el = document.getElementById('lockRes'); el.style.display = 'block'; el.innerHTML = '<div style="padding:10px;background:#d1fae5;border-radius:8px;color:#065f46">✅ Đã <strong>khóa</strong> tài khoản <strong>' + id + '</strong> thành công!</div>'; toast('Đã khóa!', 'success'); } catch (e) { toast(e.message, 'error'); } }
+        async function unlockUser() { const id = document.getElementById('lockId').value; if (!id) return toast('Nhập User ID', 'error'); try { await apiFetch(`${API}/users/${id}/unlock`, { method: 'PATCH' }); const el = document.getElementById('lockRes'); el.style.display = 'block'; el.innerHTML = '<div style="padding:10px;background:#d1fae5;border-radius:8px;color:#065f46">✅ Đã <strong>mở khóa</strong> tài khoản <strong>' + id + '</strong> thành công!</div>'; toast('Đã mở khóa!', 'success'); } catch (e) { toast(e.message, 'error'); } }
+        async function changeStatus() {
+            const id = document.getElementById('statusId').value; if (!id) return toast('Nhập User ID', 'error');
+            const newSt = document.getElementById('newStatus').value;
+            const body = { status: newSt };
+            const reason = document.getElementById('statusReason').value; if (reason) body.reason = reason;
+            try {
+                await apiFetch(`${API}/users/${id}/status`, { method: 'PATCH', body: JSON.stringify(body) });
+                const el = document.getElementById('statusResDisplay');
+                el.style.display = 'block';
+                el.innerHTML = `<div style="padding:12px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px">
+                    <div style="font-weight:700;color:#065f46;margin-bottom:6px">✅ Thay đổi trạng thái thành công!</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.83rem">
+                        <div><span style="color:#64748b">User ID:</span> <strong>${id}</strong></div>
+                        <div><span style="color:#64748b">Trạng thái mới:</span> ${statusBadge(newSt)}</div>
+                        ${reason ? `<div style="grid-column:1/-1"><span style="color:#64748b">Lý do:</span> ${reason}</div>` : ''}
+                        <div style="grid-column:1/-1;color:#64748b;font-size:.78rem">Thời gian: ${new Date().toLocaleString('vi-VN')}</div>
+                    </div>
+                </div>`;
+                toast('Đổi trạng thái thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function loadStatusHistory() {
+            const id = document.getElementById('historyId').value;
+            if (!id) return toast('Nhập User ID', 'error');
+            try {
+                const r = await apiFetch(`${API}/users/${id}/status-history`);
+                const data = r.data || [];
+                const el = document.getElementById('historyDisplay');
+                el.style.display = 'block';
+                if (data.length === 0) {
+                    el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">📭 Chưa có lịch sử thay đổi trạng thái nào</div>';
+                    return;
+                }
+                const fmtDT = (s) => s ? new Date(s).toLocaleString('vi-VN') : '-';
+                el.innerHTML = `<table>
+                    <thead><tr><th>#</th><th>Hành động</th><th>Giá trị cũ</th><th>Giá trị mới</th><th>Người thực hiện</th><th>IP</th><th>Thời gian</th></tr></thead>
+                    <tbody>${data.map((h, i) => {
+                    const oldVal = h.old_value ? (typeof h.old_value === 'string' ? h.old_value : JSON.stringify(h.old_value)) : '-';
+                    const newVal = h.new_value ? (typeof h.new_value === 'string' ? h.new_value : JSON.stringify(h.new_value)) : '-';
+                    return `<tr>
+                            <td>${i + 1}</td>
+                            <td><span class="badge b-pending">${h.action_type || h.action || '-'}</span></td>
+                            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;font-size:.78rem">${oldVal}</td>
+                            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;font-size:.78rem">${newVal}</td>
+                            <td>${h.changed_by_name || h.user_id || '-'}</td>
+                            <td style="font-size:.75rem">${h.ip_address || '-'}</td>
+                            <td style="font-size:.78rem">${fmtDT(h.created_at)}</td>
+                        </tr>`;
+                }).join('')}</tbody>
+                </table>`;
+                toast(`Có ${data.length} bản ghi lịch sử`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 4: PASSWORD
+        async function resetPassword() {
+            const id = document.getElementById('resetId').value; if (!id) return toast('Nhập User ID', 'error');
+            const body = {}; const pw = document.getElementById('resetPw').value; if (pw) body.newPassword = pw;
+            try { showResult('resetRes', await apiFetch(`${API}/users/${id}/reset-password`, { method: 'PATCH', body: JSON.stringify(body) })); toast('Reset MK thành công!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function changePassword() {
+            const id = document.getElementById('changePwId').value; if (!id) return toast('Nhập User ID', 'error');
+            try {
+                showResult('changePwRes', await apiFetch(`${API}/users/${id}/change-password`, {
+                    method: 'PATCH', body: JSON.stringify({ currentPassword: document.getElementById('oldPw').value, newPassword: document.getElementById('newPw').value, confirmPassword: document.getElementById('confirmPw').value })
+                }));
+                toast('Đổi MK thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 5: ROLES & FACILITY
+        /** Load tất cả roles từ hệ thống vào tất cả combo box */
+        async function loadAllRoles() {
+            try {
+                const r = await apiFetch(`${API}/roles`);
+                const roles = r.data?.items || r.data || [];
+                // Danh sách các select cần fill roles
+                const selectors = ['assignRole', 'cRole', 'uRole', 'exportRole'];
+                selectors.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const defaultText = sel === document.getElementById('uRole') || sel === document.getElementById('exportRole') ? 'Tất cả roles' : '-- Chọn role --';
+                    sel.innerHTML = `<option value="">${defaultText}</option>`;
+                    roles.forEach(role => {
+                        const opt = document.createElement('option');
+                        opt.value = role.code || role.roles_id;
+                        opt.textContent = `${role.name} (${role.code})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Không load được roles:', e.message); }
+        }
+        /** Hiển thị roles hiện tại của user dạng badge */
+        async function getUserRoles() {
+            const id = document.getElementById('roleUserId').value;
+            if (!id) return toast('Nhập User ID', 'error');
+            try {
+                const r = await apiFetch(`${API}/users/${id}/roles`);
+                const roles = r.data || [];
+                const container = document.getElementById('userRolesList');
+                const wrapper = document.getElementById('userRolesDisplay');
+                wrapper.style.display = 'block';
+                if (roles.length === 0) {
+                    container.innerHTML = '<span style="color:#999;font-size:.85rem">Chưa có role nào</span>';
+                    return;
+                }
+                container.innerHTML = roles.map(role => `
+                    <div style="display:inline-flex;align-items:center;gap:6px;background:#e8f4f8;border:1px solid #b8d8e8;border-radius:20px;padding:4px 12px 4px 14px;font-size:.82rem">
+                        <span style="font-weight:600;color:#0f3460">${role.name || role.code}</span>
+                        <span style="color:#666">(${role.code})</span>
+                        <button onclick="removeRole('${role.code || role.roles_id}')" style="background:#e94560;color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center" title="Xóa role này">✕</button>
+                    </div>
+                `).join('');
+                toast(`User có ${roles.length} role(s)`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function assignRole() {
+            const id = document.getElementById('roleUserId').value;
+            const role = document.getElementById('assignRole').value;
+            if (!id) return toast('Nhập User ID', 'error');
+            if (!role) return toast('Chọn role cần gán', 'error');
+            try {
+                await apiFetch(`${API}/users/${id}/roles`, { method: 'POST', body: JSON.stringify({ role }) });
+                toast('Gán role thành công!', 'success');
+                getUserRoles();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function removeRole(roleIdOrCode) {
+            const id = document.getElementById('roleUserId').value;
+            if (!id) return toast('Nhập User ID', 'error');
+            if (!confirm(`Xóa role "${roleIdOrCode}" khỏi user?`)) return;
+            try {
+                await apiFetch(`${API}/users/${id}/roles/${roleIdOrCode}`, { method: 'DELETE' });
+                toast('Xóa role thành công!', 'success');
+                getUserRoles();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        /** Load danh sách chi nhánh từ API vào combo box */
+        async function loadAllFacilities() {
+            try {
+                const r = await apiFetch(`${API}/branches/dropdown`);
+                const branches = r.data || [];
+                ['facId', 'facTargetId'].forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const defaultText = selId === 'facTargetId' ? '-- Chọn chi nhánh đích --' : '-- Chọn chi nhánh --';
+                    sel.innerHTML = `<option value="">${defaultText}</option>`;
+                    branches.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.branches_id || b.id;
+                        opt.textContent = `${b.name} (${b.code || b.branches_id || b.id})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Không load được chi nhánh:', e.message); }
+        }
+        async function viewUserFacilities() {
+            const id = document.getElementById('facUserId').value;
+            if (!id) return toast('Nhập User ID', 'error');
+            try {
+                const r = await apiFetch(`${API}/users/${id}/facilities`);
+                const facilities = r.data || [];
+                const el = document.getElementById('facDisplay');
+                el.style.display = 'block';
+                if (!Array.isArray(facilities) || facilities.length === 0) {
+                    el.innerHTML = '<div style="text-align:center;padding:14px;color:#94a3b8">🏢 User chưa được gán chi nhánh nào</div>';
+                    return;
+                }
+                el.innerHTML = `<table>
+                    <thead><tr><th>#</th><th>Chi nhánh</th><th>Cơ sở</th><th>Khoa/Phòng</th><th>Chức danh</th><th>Trạng thái</th></tr></thead>
+                    <tbody>${facilities.map((f, i) => `<tr>
+                        <td>${i + 1}</td>
+                        <td><strong>${f.branch_name || '-'}</strong><br><span style="font-size:.75rem;color:#64748b">${f.branch_id || '-'}</span></td>
+                        <td>${f.facility_name || '-'}</td>
+                        <td>${f.department_name || '-'}</td>
+                        <td>${f.role_title || '-'}</td>
+                        <td>${statusBadge(f.status || 'ACTIVE')}</td>
+                    </tr>`).join('')}</tbody>
+                </table>`;
+                toast(`User có ${facilities.length} chi nhánh`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function showFacResult(action, id, branchId, extra) {
+            const el = document.getElementById('facDisplay');
+            el.style.display = 'block';
+            el.innerHTML = `<div style="padding:12px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px">
+                <div style="font-weight:700;color:#065f46;margin-bottom:6px">✅ ${action}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.83rem">
+                    <div><span style="color:#64748b">User ID:</span> <strong>${id}</strong></div>
+                    <div><span style="color:#64748b">Chi nhánh:</span> <strong>${branchId}</strong></div>
+                    ${extra || ''}
+                    <div style="grid-column:1/-1;color:#64748b;font-size:.78rem">Thời gian: ${new Date().toLocaleString('vi-VN')}</div>
+                </div>
+            </div>`;
+        }
+        async function assignFacility() {
+            const id = document.getElementById('facUserId').value, branchId = document.getElementById('facId').value;
+            if (!id || !branchId) return toast('Nhập User ID và chọn chi nhánh', 'error');
+            try {
+                await apiFetch(`${API}/users/${id}/facilities`, { method: 'POST', body: JSON.stringify({ branchId }) });
+                showFacResult('Gán chi nhánh thành công!', id, branchId);
+                toast('Gán chi nhánh thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function removeFacility() {
+            const id = document.getElementById('facUserId').value, branchId = document.getElementById('facId').value;
+            const reason = document.getElementById('facReason').value;
+            if (!id || !branchId) return toast('Nhập User ID và chọn chi nhánh', 'error');
+            if (!reason) return toast('Vui lòng nhập lý do xóa', 'error');
+            if (!confirm(`Xóa user "${id}" khỏi chi nhánh "${branchId}"?`)) return;
+            try {
+                await apiFetch(`${API}/users/${id}/facilities/${branchId}`, { method: 'DELETE', body: JSON.stringify({ reason }) });
+                showFacResult('Xóa khỏi chi nhánh thành công!', id, branchId);
+                toast('Xóa khỏi chi nhánh thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        async function transferFacility() {
+            const id = document.getElementById('facUserId').value, fromBranch = document.getElementById('facId').value, toBranch = document.getElementById('facTargetId').value;
+            if (!id || !fromBranch || !toBranch) return toast('Nhập User ID, chi nhánh nguồn và đích', 'error');
+            try {
+                await apiFetch(`${API}/users/${id}/facilities/${fromBranch}`, { method: 'PUT', body: JSON.stringify({ branchId: toBranch }) });
+                showFacResult('Chuyển chi nhánh thành công!', id, fromBranch, `<div><span style="color:#64748b">Chi nhánh đích:</span> <strong>${toBranch}</strong></div>`);
+                toast('Chuyển chi nhánh thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // TAB 6: IMPORT / EXPORT
+        async function validateImport() { const f = document.getElementById('importFile').files[0]; if (!f) return toast('Chọn file', 'error'); const fd = new FormData(); fd.append('file', f); try { const r = await fetch(`${API}/users/import/validate`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd }); showResult('importRes', await r.json()); } catch (e) { toast(e.message, 'error'); } }
+        async function executeImport() { const f = document.getElementById('importFile').files[0]; if (!f) return toast('Chọn file', 'error'); const fd = new FormData(); fd.append('file', f); try { const r = await fetch(`${API}/users/import/execute`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd }); showResult('importRes', await r.json()); toast('Import xong!', 'success'); } catch (e) { toast(e.message, 'error'); } }
+        async function importHistory() { try { showResult('importRes', await apiFetch(`${API}/users/import/history`)); } catch (e) { toast(e.message, 'error'); } }
+        async function exportUsers() {
+            const p = new URLSearchParams();
+            const s = document.getElementById('exportSearch').value; if (s) p.set('search', s);
+            const r = document.getElementById('exportRole').value; if (r) p.set('role', r);
+            const st = document.getElementById('exportStatus').value; if (st) p.set('status', st);
+            try {
+                const r = await fetch(`${API}/users/export?${p}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!r.ok) throw new Error('Export failed');
+                const blob = await r.blob(); const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'users.xlsx'; a.click();
+                toast('Export thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

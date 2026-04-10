@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Bảo hiểm Y tế — Test</title>
+    <style>
+        :root {
+            --p: #4f46e5;
+            --pl: #818cf8;
+            --pd: #3730a3;
+            --pbg: #eef2ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --warn: #f59e0b;
+            --bg: #f1f5f9;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1060px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .84rem;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            color: var(--muted);
+            transition: all .2s
+        }
+
+        .tab:hover {
+            color: var(--p)
+        }
+
+        .tab.active {
+            color: var(--p);
+            border-bottom-color: var(--p);
+            background: var(--pbg);
+            border-radius: 8px 8px 0 0
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--pd)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        .btn-p {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-ok {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .btn-err {
+            background: var(--err);
+            color: #fff
+        }
+
+        .btn-warn {
+            background: var(--warn);
+            color: #000
+        }
+
+        .btn-out {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem;
+            border-radius: 6px
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tbody tr {
+            transition: background .15s
+        }
+
+        tbody tr:hover {
+            background: var(--pbg)
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-err {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px
+        }
+
+        .detail-grid dt {
+            background: #f8fafc;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: .82rem;
+            color: var(--muted)
+        }
+
+        .detail-grid dd {
+            background: var(--card);
+            padding: 10px 14px;
+            font-size: .84rem
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted)
+        }
+
+        .toast-c {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s;
+            min-width: 260px
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669)
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626)
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--p), var(--pd))
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🛡️ Bảo hiểm Y tế</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input id="loginEmail" value="admin@ehealth.com"><input
+                    type="password" id="loginPassword" value="Admin@123"><button class="btn-login"
+                    onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-c" id="toastC"></div>
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" data-t="providers">🏢 Đơn vị BH</div>
+            <div class="tab" data-t="coverage">📊 Tỷ lệ Chi trả</div>
+            <div class="tab" data-t="cards">💳 Thẻ BH Bệnh nhân</div>
+        </div>
+
+        <!-- ===== PROVIDERS ===== -->
+        <div class="panel active" id="panel_providers">
+            <div class="card">
+                <h3>🏢 Danh sách Đơn vị Bảo hiểm</h3>
+                <div class="toolbar">
+                    <input id="pv_search" placeholder="Tìm tên/mã..." style="flex:1">
+                    <select id="pv_type">
+                        <option value="">-- Loại --</option>
+                        <option value="STATE">Nhà nước</option>
+                        <option value="PRIVATE">Tư nhân</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadProviders()">🔄 Tải</button>
+                </div>
+                <div id="providerList"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Tạo / ✏️ Cập nhật Đơn vị BH</h3>
+                <div class="form-group"><label>Chọn để sửa (hoặc bỏ trống để tạo mới)</label><select id="pv_sel"
+                        onchange="fillProvider()">
+                        <option value="">-- Tạo mới --</option>
+                    </select></div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Mã đơn vị *</label><input id="pv_code" placeholder="BHYT"></div>
+                    <div class="form-group"><label>Tên *</label><input id="pv_name" placeholder="Bảo hiểm Y tế VN">
+                    </div>
+                    <div class="form-group"><label>Loại *</label><select id="pv_ins_type">
+                            <option value="STATE">Nhà nước</option>
+                            <option value="PRIVATE">Tư nhân</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Điện thoại</label><input id="pv_phone" placeholder="1900545458">
+                    </div>
+                    <div class="form-group"><label>Email</label><input id="pv_email" placeholder="contact@bhyt.vn">
+                    </div>
+                </div>
+                <div class="form-group"><label>Địa chỉ</label><input id="pv_addr"></div>
+                <div class="form-group"><label>Ghi chú thủ tục</label><input id="pv_notes"></div>
+                <div class="toolbar">
+                    <button class="btn btn-ok" onclick="saveProvider()">💾 Lưu</button>
+                    <button class="btn btn-err btn-sm" onclick="deleteProvider()">🗑️ Vô hiệu hóa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COVERAGE ===== -->
+        <div class="panel" id="panel_coverage">
+            <div class="card">
+                <h3>📊 Tỷ lệ Chi trả Bảo hiểm</h3>
+                <div class="toolbar">
+                    <select id="cv_provider" style="flex:1">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadCoverages()">🔄 Tải</button>
+                </div>
+                <div id="coverageList"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Tạo Tỷ lệ Chi trả</h3>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Đơn vị BH *</label><select id="cv_sel_prov">
+                            <option value="">-- Chọn --</option>
+                        </select></div>
+                    <div class="form-group"><label>Tên gói *</label><input id="cv_name" placeholder="BHYT cơ bản"></div>
+                    <div class="form-group"><label>Tỷ lệ % *</label><input type="number" id="cv_percent" min="0"
+                            max="100" placeholder="80"></div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="cv_desc"></div>
+                <button class="btn btn-ok" onclick="createCoverage()">💾 Tạo</button>
+            </div>
+        </div>
+
+        <!-- ===== PATIENT INSURANCE CARDS ===== -->
+        <div class="panel" id="panel_cards">
+            <div class="card">
+                <h3>💳 Thẻ BH Bệnh nhân</h3>
+                <div class="toolbar">
+                    <select id="pi_patient" style="flex:1">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadInsCards()">💳 Xem thẻ</button>
+                    <button class="btn btn-out btn-sm" onclick="loadActiveCards()">✅ Còn hiệu lực</button>
+                    <button class="btn btn-out btn-sm" onclick="loadExpiredCards()">⏰ Hết hạn</button>
+                </div>
+                <div id="cardsList"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Thêm thẻ BH cho Bệnh nhân</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Bệnh nhân *</label><select id="pi_add_patient">
+                            <option value="">-- Chọn bệnh nhân --</option>
+                        </select></div>
+                    <div class="form-group"><label>Đơn vị BH *</label><select id="pi_provider">
+                            <option value="">-- Chọn --</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Số thẻ *</label><input id="pi_number" placeholder="DK2-12345678901">
+                    </div>
+                    <div class="form-group"><label>Tỷ lệ % hưởng</label><input type="number" id="pi_pct"
+                            placeholder="80" min="0" max="100"></div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Ngày bắt đầu *</label><input type="date" id="pi_start"></div>
+                    <div class="form-group"><label>Ngày kết thúc *</label><input type="date" id="pi_end"></div>
+                    <div class="form-group"><label>Thẻ chính?</label><select id="pi_primary">
+                            <option value="true">Có</option>
+                            <option value="false">Không</option>
+                        </select></div>
+                </div>
+                <button class="btn btn-ok" onclick="createInsCard()">💾 Thêm thẻ</button>
+            </div>
+            <div class="card">
+                <h3>📝 Chi tiết / Lịch sử thẻ</h3>
+                <div class="toolbar">
+                    <input id="pi_cardId" placeholder="ID thẻ bảo hiểm" style="flex:1">
+                    <button class="btn btn-p btn-sm" onclick="loadCardDetail()">📄 Chi tiết</button>
+                    <button class="btn btn-out btn-sm" onclick="loadCardHistory()">📝 Lịch sử</button>
+                    <button class="btn btn-err btn-sm" onclick="deleteCard()">🗑️ Xóa thẻ</button>
+                </div>
+                <div id="cardDetailResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api'; let token = null;
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastC'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById('panel_' + t.dataset.t).classList.add('active') }));
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadDropdowns() } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Insurance Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success'); loadDropdowns() } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        // Utils
+        let allProviders = [], allPatients = [];
+        function renderTable(data, cols, containerId) {
+            const el = document.getElementById(containerId); if (!data || data.length === 0) { el.innerHTML = '<div class="empty">Không có dữ liệu</div>'; return }
+            let html = '<div class="tbl-wrap"><table><thead><tr>' + cols.map(c => `<th>${c.label}</th>`).join('') + '</tr></thead><tbody>';
+            for (const row of data) { html += '<tr>' + cols.map(c => { let v = c.key.split('.').reduce((o, k) => o?.[k], row); if (c.render) v = c.render(v, row); return `<td>${v ?? '—'}</td>` }).join('') + '</tr>' }
+            html += '</tbody></table></div>'; el.innerHTML = html;
+        }
+        async function loadDropdowns() {
+            try { const r = await apiFetch(`${API}/insurance-providers?limit=200`); allProviders = r.data?.data || r.data || []; const h = '<option value="">-- Chọn --</option>' + allProviders.map(p => `<option value="${p.insurance_providers_id}">${p.provider_name} (${p.provider_code})</option>`).join('');['pv_sel', 'cv_provider', 'cv_sel_prov', 'pi_provider'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = (id === 'pv_sel' ? '<option value="">-- Tạo mới --</option>' : '<option value="">-- Chọn --</option>') + allProviders.map(p => `<option value="${p.insurance_providers_id}">${p.provider_name} (${p.provider_code})</option>`).join('') }) } catch (e) { console.error(e) }
+            try { const r = await apiFetch(`${API}/patients?limit=100`); allPatients = r.data?.data || r.data || []; const pHtml = '<option value="">-- Chọn bệnh nhân --</option>' + allPatients.map(p => `<option value="${p.id}">${p.full_name} (${p.patient_code || ''})</option>`).join(''); document.getElementById('pi_patient').innerHTML = pHtml; document.getElementById('pi_add_patient').innerHTML = pHtml } catch (e) { console.error(e) }
+        }
+
+        // ======== PROVIDERS ========
+        async function loadProviders() {
+            try {
+                const p = new URLSearchParams(); const s = document.getElementById('pv_search').value; if (s) p.set('search', s); const t = document.getElementById('pv_type').value; if (t) p.set('insurance_type', t); p.set('limit', '50');
+                const r = await apiFetch(`${API}/insurance-providers?${p}`); const list = r.data?.data || r.data || [];
+                renderTable(list, [{ key: 'provider_code', label: 'Mã' }, { key: 'provider_name', label: 'Tên' }, { key: 'insurance_type', label: 'Loại', render: v => v === 'STATE' ? '🏛️ Nhà nước' : '🏢 Tư nhân' }, { key: 'is_active', label: 'TT', render: v => `<span class="badge ${v ? 'badge-ok' : 'badge-err'}">${v ? 'Active' : 'Inactive'}</span>` }, { key: 'contact_phone', label: 'SĐT' }], 'providerList');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        function fillProvider() { const id = document.getElementById('pv_sel').value; const p = allProviders.find(x => x.insurance_providers_id === id); if (p) { document.getElementById('pv_code').value = p.provider_code || ''; document.getElementById('pv_name').value = p.provider_name || ''; document.getElementById('pv_ins_type').value = p.insurance_type || 'STATE'; document.getElementById('pv_phone').value = p.contact_phone || ''; document.getElementById('pv_email').value = p.contact_email || ''; document.getElementById('pv_addr').value = p.address || ''; document.getElementById('pv_notes').value = p.support_notes || '' } }
+        async function saveProvider() {
+            const id = document.getElementById('pv_sel').value;
+            const body = { provider_code: document.getElementById('pv_code').value, provider_name: document.getElementById('pv_name').value, insurance_type: document.getElementById('pv_ins_type').value };
+            const ph = document.getElementById('pv_phone').value; if (ph) body.contact_phone = ph;
+            const em = document.getElementById('pv_email').value; if (em) body.contact_email = em;
+            const ad = document.getElementById('pv_addr').value; if (ad) body.address = ad;
+            const no = document.getElementById('pv_notes').value; if (no) body.support_notes = no;
+            try { if (id) { await apiFetch(`${API}/insurance-providers/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật OK!', 'success') } else { await apiFetch(`${API}/insurance-providers`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo OK!', 'success') } loadDropdowns(); loadProviders() } catch (e) { toast(e.message, 'error') }
+        }
+        async function deleteProvider() { const id = document.getElementById('pv_sel').value; if (!id) { toast('Chọn đơn vị', 'error'); return } if (!confirm('Vô hiệu hóa đơn vị BH?')) return; try { await apiFetch(`${API}/insurance-providers/${id}`, { method: 'DELETE' }); toast('Đã vô hiệu hóa', 'success'); loadDropdowns(); loadProviders() } catch (e) { toast(e.message, 'error') } }
+
+        // ======== COVERAGE ========
+        async function loadCoverages() {
+            try {
+                const p = new URLSearchParams({ limit: '50' }); const pv = document.getElementById('cv_provider').value; if (pv) p.set('provider_id', pv);
+                const r = await apiFetch(`${API}/insurance-coverage?${p}`); const list = r.data?.data || r.data || [];
+                renderTable(list, [{ key: 'coverage_name', label: 'Tên gói' }, { key: 'coverage_percent', label: 'Tỷ lệ %' }, { key: 'provider_name', label: 'Đơn vị BH' }, { key: 'is_active', label: 'TT', render: v => `<span class="badge ${v !== false ? 'badge-ok' : 'badge-err'}">${v !== false ? 'Active' : 'Inactive'}</span>` }, { key: 'description', label: 'Mô tả' }], 'coverageList');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function createCoverage() {
+            const body = { provider_id: document.getElementById('cv_sel_prov').value, coverage_name: document.getElementById('cv_name').value, coverage_percent: parseInt(document.getElementById('cv_percent').value) };
+            const desc = document.getElementById('cv_desc').value; if (desc) body.description = desc;
+            try { await apiFetch(`${API}/insurance-coverage`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo OK!', 'success'); loadCoverages() } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ======== PATIENT INSURANCE CARDS ========
+        function getPiPatient() { const v = document.getElementById('pi_patient').value; if (!v) toast('Chọn bệnh nhân', 'error'); return v }
+        async function loadInsCards() { const id = getPiPatient(); if (!id) return; try { const r = await apiFetch(`${API}/patient-insurances?patient_id=${id}&limit=50`); renderCardTable(r.data?.data || r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadActiveCards() { try { const p = document.getElementById('pi_patient').value; const r = await apiFetch(`${API}/patient-insurances/active?${p ? 'patient_id=' + p + '&' : ''}limit=50`); renderCardTable(r.data?.data || r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadExpiredCards() { try { const p = document.getElementById('pi_patient').value; const r = await apiFetch(`${API}/patient-insurances/expired?${p ? 'patient_id=' + p + '&' : ''}limit=50`); renderCardTable(r.data?.data || r.data || []) } catch (e) { toast(e.message, 'error') } }
+        function renderCardTable(data) { renderTable(data, [{ key: 'insurance_number', label: 'Số thẻ' }, { key: 'provider_name', label: 'Đơn vị' }, { key: 'coverage_percent', label: '%' }, { key: 'start_date', label: 'Bắt đầu', render: v => v?.substring(0, 10) }, { key: 'end_date', label: 'Kết thúc', render: v => v?.substring(0, 10) }, { key: 'is_primary', label: 'Chính', render: v => v ? '⭐' : '—' }, { key: 'patient_insurances_id', label: 'ID', render: v => `<span style="font-size:.7rem;cursor:pointer;color:var(--p)" onclick="document.getElementById('pi_cardId').value='${v}'">${(v || '').substring(0, 16)}…</span>` }], 'cardsList') }
+        async function createInsCard() {
+            const pid = document.getElementById('pi_add_patient').value; if (!pid) { toast('Chọn bệnh nhân', 'error'); return }
+            const provId = document.getElementById('pi_provider').value; if (!provId) { toast('Chọn đơn vị BH', 'error'); return }
+            const insNum = document.getElementById('pi_number').value; if (!insNum) { toast('Nhập số thẻ', 'error'); return }
+            const startD = document.getElementById('pi_start').value; if (!startD) { toast('Chọn ngày bắt đầu', 'error'); return }
+            const endD = document.getElementById('pi_end').value; if (!endD) { toast('Chọn ngày kết thúc', 'error'); return }
+            const body = { patient_id: pid, provider_id: provId, insurance_number: insNum, start_date: startD, end_date: endD };
+            const pct = document.getElementById('pi_pct').value; if (pct) body.coverage_percent = parseInt(pct);
+            body.is_primary = document.getElementById('pi_primary').value === 'true';
+            try { await apiFetch(`${API}/patient-insurances`, { method: 'POST', body: JSON.stringify(body) }); toast('Thêm thẻ OK!', 'success'); loadInsCards() } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadCardDetail() { const id = document.getElementById('pi_cardId').value; if (!id) { toast('Nhập ID thẻ', 'error'); return } try { const r = await apiFetch(`${API}/patient-insurances/${id}`); const d = r.data; let html = '<dl class="detail-grid">'; for (const [k, v] of Object.entries(d || {})) html += `<dt>${k}</dt><dd>${typeof v === 'object' ? JSON.stringify(v) : v ?? '—'}</dd>`; html += '</dl>'; document.getElementById('cardDetailResult').innerHTML = html } catch (e) { toast(e.message, 'error') } }
+        async function loadCardHistory() { const id = document.getElementById('pi_cardId').value; if (!id) { toast('Nhập ID thẻ', 'error'); return } try { const r = await apiFetch(`${API}/patient-insurances/${id}/history?limit=20`); const list = r.data?.data || r.data || []; renderTable(list, [{ key: 'action_type', label: 'Hành động', render: v => `<span class="badge badge-info">${v}</span>` }, { key: 'user_email', label: 'Người thực hiện' }, { key: 'created_at', label: 'Thời gian', render: v => v ? new Date(v).toLocaleString('vi') : '—' }], 'cardDetailResult') } catch (e) { toast(e.message, 'error') } }
+        async function deleteCard() { const id = document.getElementById('pi_cardId').value; if (!id) { toast('Nhập ID thẻ', 'error'); return } if (!confirm('Xóa thẻ bảo hiểm?')) return; try { await apiFetch(`${API}/patient-insurances/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadInsCards() } catch (e) { toast(e.message, 'error') } }
+    </script>
+</body>
+
+</html>

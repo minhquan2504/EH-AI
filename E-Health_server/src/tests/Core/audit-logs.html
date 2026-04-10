@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📜 Audit Logs — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-create {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-update {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-delete {
+            background: #fecdd3;
+            color: #9f1239
+        }
+
+        .b-login {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .b-export {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-other {
+            background: #f1f5f9;
+            color: #64748b
+        }
+
+        .b-mod {
+            background: #ede9fe;
+            color: #5b21b6
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .diff-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .diff-pane {
+            border-radius: 6px;
+            padding: 10px;
+            font-size: .78rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 300px
+        }
+
+        .diff-old {
+            background: #fef2f2;
+            border: 1px solid #fecdd3;
+            color: #9f1239
+        }
+
+        .diff-new {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>📜 Audit Logs</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <div class="card">
+            <h3>📋 Tra cứu Nhật ký Hệ thống</h3>
+            <div class="toolbar">
+                <select id="logModule" title="Module">
+                    <option value="">Tất cả Module</option>
+                    <option>PATIENT</option>
+                    <option>DRUG</option>
+                    <option>APPOINTMENT</option>
+                    <option>FACILITY</option>
+                    <option>USER</option>
+                    <option>ROLE</option>
+                    <option>SYSTEM</option>
+                    <option>NOTIFICATION</option>
+                    <option>MASTER_DATA</option>
+                </select>
+                <select id="logAction" title="Action">
+                    <option value="">Tất cả Action</option>
+                    <option value="CREATE">CREATE</option>
+                    <option value="UPDATE">UPDATE</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="LOGIN">LOGIN</option>
+                    <option value="EXPORT">EXPORT</option>
+                    <option value="OTHER">OTHER</option>
+                </select>
+                <input id="logUser" placeholder="User ID" style="width:130px">
+                <input id="logFrom" type="date" title="Từ ngày">
+                <input id="logTo" type="date" title="Đến ngày">
+                <input id="logLimit" type="number" value="20" min="1" max="100" style="width:60px" title="Số dòng">
+                <button class="btn btn-primary" onclick="loadLogs(1)">🔍 Tìm</button>
+                <button class="btn btn-success" onclick="exportLogs()">📤 Export Excel</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Thời gian</th>
+                        <th>Module</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>User</th>
+                        <th>IP</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="logTable"></tbody>
+            </table>
+            <div class="pagination" id="logPag"></div>
+        </div>
+        <div class="card">
+            <h3>🔍 Chi tiết Log (Before / After)</h3>
+            <div id="logDetailDisplay" style="display:none"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function v(id) { return document.getElementById(id).value; }
+
+        function actionBadge(a) {
+            const map = { CREATE: 'b-create', UPDATE: 'b-update', DELETE: 'b-delete', LOGIN: 'b-login', EXPORT: 'b-export', OTHER: 'b-other' };
+            const icons = { CREATE: '➕', UPDATE: '✏️', DELETE: '🗑️', LOGIN: '🔑', EXPORT: '📤', OTHER: '⚡' };
+            return `<span class="badge ${map[a] || 'b-other'}">${icons[a] || '⚡'} ${a || '-'}</span>`;
+        }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); } };
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: v('loginEmail'), password: v('loginPassword'), clientInfo: { deviceId: 'HTML_TEST', deviceName: 'AuditLogs', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function buildPagination(elId, cur, total, limit, fn) {
+            const el = document.getElementById(elId), tp = Math.ceil(total / limit) || 1;
+            let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (tp <= 7) { for (let i = 1; i <= tp; i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; }
+            else { h += `<button class="${cur === 1 ? 'active' : ''}" onclick="${fn}(1)">1</button>`; if (cur > 3) h += '<span>...</span>'; for (let i = Math.max(2, cur - 1); i <= Math.min(tp - 1, cur + 1); i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; if (cur < tp - 2) h += '<span>...</span>'; h += `<button class="${cur === tp ? 'active' : ''}" onclick="${fn}(${tp})">${tp}</button>`; }
+            h += `<button onclick="${fn}(${cur + 1})" ${cur >= tp ? 'disabled' : ''}>Sau →</button><span style="margin-left:8px">Tổng: ${total}</span>`;
+            el.innerHTML = h;
+        }
+
+        // ============ AUDIT LOGS (GET /api/system/audit-logs) ============
+        async function loadLogs(page = 1) {
+            const p = new URLSearchParams();
+            p.set('page', page);
+            const limit = parseInt(v('logLimit')) || 20;
+            p.set('limit', limit);
+            const m = v('logModule'); if (m) p.set('module_name', m);
+            const a = v('logAction'); if (a) p.set('action_type', a);
+            const u = v('logUser'); if (u) p.set('user_id', u);
+            const f = v('logFrom'); if (f) p.set('start_date', f);
+            const t = v('logTo'); if (t) p.set('end_date', t);
+            try {
+                const res = await apiFetch(`${API}/system/audit-logs?${p}`);
+                // API trả về: { success, data: [...logs], pagination: { total, page, limit, total_pages } }
+                const list = Array.isArray(res.data) ? res.data : [];
+                const pagination = res.pagination || {};
+                const tb = document.getElementById('logTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('logPag').innerHTML = ''; return; }
+                list.forEach((l, i) => {
+                    const id = l.log_id || l.id || '';
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td style="white-space:nowrap;font-size:.78rem">${l.created_at ? new Date(l.created_at).toLocaleString('vi-VN') : '-'}</td>
+                        <td><span class="badge b-mod">${l.module_name || '-'}</span></td>
+                        <td>${actionBadge(l.action_type)}</td>
+                        <td style="font-size:.75rem;max-width:120px;overflow:hidden;text-overflow:ellipsis" title="${l.target_id || ''}">${l.target_id || '-'}</td>
+                        <td style="font-size:.78rem">${l.user_name || l.user_id || '-'}</td>
+                        <td style="font-size:.78rem">${l.ip_address || '-'}</td>
+                        <td><button class="btn btn-sm btn-info" onclick="getLogById('${id}')" title="Chi tiết">👁️</button></td>
+                    </tr>`;
+                });
+                const totalItems = pagination.total || list.length;
+                buildPagination('logPag', page, totalItems, limit, 'loadLogs');
+                toast(`Tải ${list.length} logs`, 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ LOG DETAIL (GET /api/system/audit-logs/:id) ============
+        async function getLogById(id) {
+            if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/system/audit-logs/${id}`);
+                const d = r.data || {};
+                const el = document.getElementById('logDetailDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:10px">📜 Chi tiết Audit Log</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">Log ID</div><div class="dg-value" style="font-size:.75rem">${d.log_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Thời gian</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Module</div><div class="dg-value"><span class="badge b-mod">${d.module_name || '-'}</span></div></div>
+                        <div class="dg-item"><div class="dg-label">Action</div><div class="dg-value">${actionBadge(d.action_type)}</div></div>
+                        <div class="dg-item"><div class="dg-label">User</div><div class="dg-value">${d.user_name || d.user_id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Target ID</div><div class="dg-value" style="font-size:.75rem">${d.target_id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">IP Address</div><div class="dg-value">${d.ip_address || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">User Agent</div><div class="dg-value" style="font-size:.73rem;word-break:break-all">${d.user_agent || '-'}</div></div>
+                    </div>
+                    ${(d.old_value || d.new_value) ? `
+                    <div style="margin-top:14px;font-weight:700;font-size:.88rem;color:#0f3460">🔄 Before / After</div>
+                    <div class="diff-box">
+                        <div>
+                            <div style="font-weight:600;font-size:.8rem;color:#9f1239;margin-bottom:4px">❌ Old Value</div>
+                            <div class="diff-pane diff-old">${d.old_value ? JSON.stringify(d.old_value, null, 2) : '(empty)'}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight:600;font-size:.8rem;color:#166534;margin-bottom:4px">✅ New Value</div>
+                            <div class="diff-pane diff-new">${d.new_value ? JSON.stringify(d.new_value, null, 2) : '(empty)'}</div>
+                        </div>
+                    </div>` : '<div style="margin-top:10px;color:#94a3b8;font-size:.82rem">Không có dữ liệu Before/After</div>'}
+                </div>`;
+                el.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ EXPORT (GET /api/system/audit-logs/export-excel) ============
+        async function exportLogs() {
+            const p = new URLSearchParams();
+            const m = v('logModule'); if (m) p.set('module_name', m);
+            const a = v('logAction'); if (a) p.set('action_type', a);
+            const u = v('logUser'); if (u) p.set('user_id', u);
+            try {
+                const r = await fetch(`${API}/system/audit-logs/export-excel?${p}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.message || 'Export failed'); }
+                const b = await r.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(b);
+                link.download = `audit_logs_${new Date().toISOString().split('T')[0]}.xlsx`;
+                link.click();
+                toast('📤 Export thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Module 2.10 - Quản lý Trang thiết bị Y tế</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --primary-bg: #eef2ff;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, .1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ─────────────────────────────────── */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3);
+        }
+
+        .header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -.3px;
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .75);
+            font-size: .82rem;
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .header a:hover {
+            color: #fff;
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9);
+            outline: none;
+        }
+
+        .auth-bar input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .4);
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: transform .15s, opacity .15s;
+        }
+
+        .auth-bar button:active {
+            transform: scale(.96);
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, .25);
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem;
+        }
+
+        /* ── TABS ───────────────────────────────────── */
+        .tabs {
+            display: flex;
+            background: var(--card);
+            border-bottom: 2px solid var(--border);
+            padding: 0 24px;
+            overflow-x: auto;
+            gap: 2px;
+        }
+
+        .tab {
+            padding: 13px 20px;
+            cursor: pointer;
+            font-size: .88rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: var(--muted);
+            border-bottom: 3px solid transparent;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+            background: var(--primary-bg);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* ── MAIN ───────────────────────────────────── */
+        .main {
+            max-width: 1300px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn .3s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CARDS ──────────────────────────────────── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, .04);
+        }
+
+        .card h3 {
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── TOOLBAR ────────────────────────────────── */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            background: var(--card);
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        /* ── BUTTONS ────────────────────────────────── */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: .78rem;
+            border-radius: 6px;
+        }
+
+        /* ── TABLE ──────────────────────────────────── */
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem;
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background .15s;
+        }
+
+        tbody tr:hover {
+            background: var(--primary-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── BADGES ─────────────────────────────────── */
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .73rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .b-active {
+            background: var(--success-bg);
+            color: #065f46;
+        }
+
+        .b-maintenance {
+            background: var(--warning-bg);
+            color: #92400e;
+        }
+
+        .b-broken {
+            background: var(--danger-bg);
+            color: #991b1b;
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* ── EMPTY / LOADING ────────────────────────── */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty .icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--muted);
+        }
+
+        /* ── PAGINATION ─────────────────────────────── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .pagination button {
+            min-width: 34px;
+            height: 34px;
+            border-radius: 8px;
+        }
+
+        .page-info {
+            font-size: .82rem;
+            color: var(--muted);
+        }
+
+        /* ── MODAL ──────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, .45);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 550px;
+            box-shadow: var(--shadow-lg);
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn .25s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(-16px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--primary-dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ── FORM ───────────────────────────────────── */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .88rem;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            background: var(--card);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ── TOAST ──────────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 280px;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ── DETAIL GRID ────────────────────────────── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 8px 16px;
+            font-size: .88rem;
+            padding: 8px 0;
+        }
+
+        .detail-grid dt {
+            font-weight: 600;
+            color: var(--muted);
+            padding: 6px 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        .detail-grid dd {
+            color: var(--text);
+            padding: 6px 0;
+            border-bottom: 1px dashed #f1f5f9;
+        }
+
+        /* ── ACTION BAR ─────────────────────────────── */
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .action-separator {
+            color: var(--border);
+            font-size: 1.2rem;
+        }
+
+        .action-bar select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .action-bar select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        /* ── DETAILS TOGGLE ─────────────────────────── */
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .88rem;
+            color: var(--primary);
+            padding: 8px 0;
+            transition: color .2s;
+        }
+
+        details summary:hover {
+            color: var(--primary-dark);
+        }
+
+        details[open] summary {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>🔧 Module 2.10 — Quản lý Trang thiết bị Y tế</h1>
+            <a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('list')">📋 Danh sách</div>
+        <div class="tab" onclick="switchTab('create')">➕ Thêm thiết bị</div>
+        <div class="tab" onclick="switchTab('detail')">🔍 Chi tiết & Bảo trì</div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+
+        <!-- ========== TAB 1: LIST ========== -->
+        <div class="panel active" id="panel-list">
+            <div class="card">
+                <h3>📋 Danh sách Thiết bị Y tế</h3>
+                <div class="toolbar">
+                    <input type="text" id="fSearch" placeholder="🔍 Tìm tên, mã, serial..."
+                        onkeyup="debounce(loadEquipments, 400)()">
+                    <select id="fStatus" title="Lọc theo trạng thái" onchange="loadEquipments()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="ACTIVE">🟢 Đang hoạt động</option>
+                        <option value="MAINTENANCE">🟡 Đang bảo trì</option>
+                        <option value="BROKEN">🔴 Hỏng</option>
+                        <option value="INACTIVE">⚫ Ngừng sử dụng</option>
+                    </select>
+                    <select id="fFacilityId" class="fac-select" onchange="onFacChange()" style="max-width:200px"
+                        title="Lọc theo cơ sở">
+                        <option value="">Tất cả cơ sở</option>
+                    </select>
+                    <select id="fBranchId" class="branch-select" onchange="loadEquipments()" style="max-width:200px"
+                        title="Lọc theo chi nhánh">
+                        <option value="">Tất cả chi nhánh</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="loadEquipments()">Tải dữ liệu</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên thiết bị</th>
+                                <th>Chi nhánh</th>
+                                <th>Phòng</th>
+                                <th>Trạng thái</th>
+                                <th>Hạn BH</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eqTableBody">
+                            <tr>
+                                <td colspan="7" class="loading">Vui lòng đăng nhập và nhấn "Tải dữ liệu"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="eqPagination"></div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 2: CREATE ========== -->
+        <div class="panel" id="panel-create">
+            <div class="card">
+                <h3>➕ Thêm mới Thiết bị Y tế</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Cơ sở *</label>
+                        <select id="cFacilityId" class="fac-select" onchange="onCreateFacChange()">
+                            <option value="">-- Chọn cơ sở --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Chi nhánh *</label>
+                        <select id="cBranchId" class="c-branch-select" onchange="populateCreateRoomSelect()">
+                            <option value="">-- Chọn chi nhánh --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mã tài sản (code) *</label><input id="cCode" placeholder="SA-4D-01">
+                    </div>
+                    <div class="form-group"><label>Tên thiết bị *</label><input id="cName" placeholder="Máy siêu âm 4D">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Số serial</label><input id="cSerial" placeholder="SN-2024-001234">
+                    </div>
+                    <div class="form-group"><label>Hãng sản xuất</label><input id="cManufacturer"
+                            placeholder="GE Healthcare"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày sản xuất</label><input type="date" id="cMfgDate"></div>
+                    <div class="form-group"><label>Ngày mua</label><input type="date" id="cPurchaseDate"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Hạn bảo hành</label><input type="date" id="cWarranty"></div>
+                    <div class="form-group"><label>Gán phòng</label>
+                        <select id="cRoomId" class="c-room-select">
+                            <option value="">-- Không gán (để kho) --</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:12px">
+                    <button class="btn btn-primary" onclick="createEquipment()">💾 Tạo thiết bị</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 3: DETAIL & MAINTENANCE ========== -->
+        <div class="panel" id="panel-detail">
+            <div class="card">
+                <h3>🔍 Tra cứu Chi tiết Thiết bị</h3>
+                <div class="toolbar">
+                    <select id="dEquipId" class="eq-select" style="flex:1; min-width: 250px;">
+                        <option value="">-- Chọn thiết bị --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadDetail()">Xem chi tiết</button>
+                </div>
+                <div id="detailContent" class="empty">Chọn thiết bị và nhấn "Xem chi tiết"</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card" id="actionsCard" style="display:none">
+                <h3>⚙️ Thao tác nhanh</h3>
+                <div class="action-bar">
+                    <select id="aStatus" title="Chọn trạng thái mới">
+                        <option value="ACTIVE">🟢 ACTIVE</option>
+                        <option value="MAINTENANCE">🟡 MAINTENANCE</option>
+                        <option value="BROKEN">🔴 BROKEN</option>
+                        <option value="INACTIVE">⚫ INACTIVE</option>
+                    </select>
+                    <button class="btn btn-warning btn-sm" onclick="updateStatus()">Đổi trạng thái</button>
+                    <span class="action-separator">|</span>
+                    <select id="aRoomId" class="a-room-select" style="max-width:200px">
+                        <option value="">📦 Thu hồi về kho</option>
+                    </select>
+                    <button class="btn btn-success btn-sm" onclick="assignRoom()">Gán phòng</button>
+                    <span class="action-separator">|</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteEquipment()">🗑 Xóa thiết bị</button>
+                </div>
+
+                <!-- Update Info -->
+                <details style="margin-top:16px">
+                    <summary>✏️ Cập nhật thông tin cơ bản</summary>
+                    <div style="margin-top:10px">
+                        <div class="form-row">
+                            <div class="form-group"><label>Tên</label><input id="uName" placeholder="Tên mới"></div>
+                            <div class="form-group"><label>Số Serial</label><input id="uSerial"
+                                    placeholder="Serial mới"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Hãng SX</label><input id="uManufacturer"></div>
+                            <div class="form-group"><label>Hạn BH</label><input type="date" id="uWarranty"></div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="updateEquipment()">💾 Cập nhật</button>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Maintenance Logs -->
+            <div class="card" id="maintCard" style="display:none">
+                <h3>🛠 Lịch sử Bảo trì / Kiểm định</h3>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Loại</th>
+                                <th>Mô tả</th>
+                                <th>Thực hiện bởi</th>
+                                <th>Chi phí</th>
+                                <th>BT tiếp theo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintTableBody">
+                            <tr>
+                                <td colspan="7" class="empty">Chưa có dữ liệu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="maintPagination"></div>
+                <hr style="margin:20px 0; border:none; border-top:1px solid var(--border);">
+                <h3 style="margin-bottom:10px">➕ Thêm bản ghi bảo trì</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày thực hiện *</label><input type="date" id="mDate"></div>
+                    <div class="form-group"><label>Loại *</label>
+                        <select id="mType">
+                            <option value="ROUTINE">ROUTINE (Định kỳ)</option>
+                            <option value="REPAIR">REPAIR (Sửa chữa)</option>
+                            <option value="INSPECTION">INSPECTION (Kiểm định)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><textarea id="mDesc"
+                        placeholder="Chi tiết công việc bảo trì..."></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Người/Đơn vị thực hiện</label><input id="mPerformedBy"
+                            placeholder="Công ty ABC"></div>
+                    <div class="form-group"><label>Chi phí (VNĐ)</label><input type="number" id="mCost"
+                            placeholder="2500000"></div>
+                </div>
+                <div class="form-group"><label>Lịch BT tiếp theo</label><input type="date" id="mNextDate"></div>
+                <button class="btn btn-success" onclick="createMaintenanceLog()">📝 Tạo bản ghi</button>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+
+    <!-- EDIT MAINTENANCE MODAL -->
+    <div class="modal-overlay" id="editMaintModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Sửa bản ghi bảo trì</h3>
+                <button class="modal-close" onclick="closeModal('editMaintModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="emLogId">
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày</label><input type="date" id="emDate"></div>
+                    <div class="form-group"><label>Loại</label>
+                        <select id="emType">
+                            <option value="ROUTINE">ROUTINE</option>
+                            <option value="REPAIR">REPAIR</option>
+                            <option value="INSPECTION">INSPECTION</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><textarea id="emDesc"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Thực hiện bởi</label><input id="emPerformedBy"></div>
+                    <div class="form-group"><label>Chi phí</label><input type="number" id="emCost"></div>
+                </div>
+                <div class="form-group"><label>Lịch BT tiếp theo</label><input type="date" id="emNextDate"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('editMaintModal')">Hủy</button>
+                <button class="btn btn-primary" onclick="updateMaintenanceLog()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+        let eqPage = 1;
+        let maintPage = 1;
+        let currentEqId = null;
+
+        // ==================== AUTH ====================
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+
+        window.onload = () => {
+            const auth = getAuth();
+            if (auth?.accessToken) { token = auth.accessToken; showLoggedIn(auth.user); loadDropdowns(); }
+        };
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            try {
+                const res = await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pw, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Equipment Test', userAgent: navigator.userAgent } })
+                });
+                const r = await res.json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function handleLogout() {
+            token = null; localStorage.removeItem('ehealth_auth');
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+            toast('Đã đăng xuất', 'info');
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('currentUser').textContent = `👤 ${user?.name || 'User'} (${user?.role || ''})`;
+        }
+
+        // ==================== UTILS ====================
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`; t.textContent = msg;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        }
+        function debounce(fn, ms) { let t; return () => { clearTimeout(t); t = setTimeout(fn, ms); }; }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function money(v) { return v != null ? Number(v).toLocaleString('vi-VN') + 'đ' : '-'; }
+
+        function statusBadge(s) {
+            const map = { ACTIVE: 'b-active', MAINTENANCE: 'b-maintenance', BROKEN: 'b-broken', INACTIVE: 'b-inactive' };
+            const label = { ACTIVE: '🟢 Hoạt động', MAINTENANCE: '🟡 Bảo trì', BROKEN: '🔴 Hỏng', INACTIVE: '⚫ Ngừng' };
+            return `<span class="badge ${map[s] || ''}">${label[s] || s}</span>`;
+        }
+
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                const tabs = ['list', 'create', 'detail'];
+                t.classList.toggle('active', tabs[i] === name);
+            });
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+        }
+
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập trước', 'error'); throw new Error('No token'); }
+            const res = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        // ==================== DROPDOWNS ====================
+        let allFacilities = [], allBranches = [], allRooms = [], allEquipments = [];
+
+        async function loadDropdowns() {
+            try {
+                const [facRes, branchRes, roomRes, eqRes] = await Promise.allSettled([
+                    apiFetch(`${API}/facilities/dropdown`),
+                    apiFetch(`${API}/branches?limit=200`),
+                    apiFetch(`${API}/medical-rooms/dropdown`),
+                    apiFetch(`${API}/equipments?limit=200`)
+                ]);
+                if (facRes.status === 'fulfilled') {
+                    allFacilities = facRes.value.data || [];
+                    document.querySelectorAll('.fac-select').forEach(sel => {
+                        const val = sel.value;
+                        const defaultLabel = sel.id === 'fFacilityId' ? 'Tất cả cơ sở' : '-- Chọn cơ sở --';
+                        sel.innerHTML = `<option value="">${defaultLabel}</option>` + allFacilities.map(f => `<option value="${f.facilities_id}">${f.name}</option>`).join('');
+                        if (val) sel.value = val;
+                    });
+                }
+                if (branchRes.status === 'fulfilled') {
+                    allBranches = branchRes.value.data?.data || branchRes.value.data?.items || branchRes.value.data || [];
+                    populateBranchSelects();
+                }
+                if (roomRes.status === 'fulfilled') {
+                    allRooms = roomRes.value.data || [];
+                    populateRoomSelects();
+                }
+                if (eqRes.status === 'fulfilled') {
+                    allEquipments = eqRes.value.data?.data || eqRes.value.data || [];
+                    const eqSel = document.getElementById('dEquipId');
+                    eqSel.innerHTML = '<option value="">-- Chọn thiết bị --</option>' + allEquipments.map(e => `<option value="${e.equipment_id}">${e.code} - ${e.name} (${e.status})</option>`).join('');
+                }
+            } catch (e) { console.error('loadDropdowns error:', e); }
+        }
+
+        function populateBranchSelects() {
+            // Filter branch_select by fFacilityId
+            const facId = document.getElementById('fFacilityId').value;
+            const filtered = facId ? allBranches.filter(b => b.facility_id === facId) : allBranches;
+            const sel = document.getElementById('fBranchId');
+            const val = sel.value;
+            sel.innerHTML = '<option value="">Tất cả chi nhánh</option>' + filtered.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+            if (val) sel.value = val;
+        }
+
+        function populateCreateBranchSelect() {
+            const facId = document.getElementById('cFacilityId').value;
+            const filtered = facId ? allBranches.filter(b => b.facility_id === facId) : allBranches;
+            const sel = document.querySelector('.c-branch-select');
+            sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>' + filtered.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+            populateCreateRoomSelect();
+        }
+
+        function populateCreateRoomSelect() {
+            const branchId = document.querySelector('.c-branch-select')?.value;
+            const filtered = branchId ? allRooms.filter(r => r.branch_id === branchId) : allRooms;
+            const sel = document.querySelector('.c-room-select');
+            if (sel) {
+                sel.innerHTML = '<option value="">-- Không gán (để kho) --</option>' + filtered.map(r => `<option value="${r.medical_rooms_id || r.room_id}">${r.room_number || r.code || ''} - ${r.name || ''}</option>`).join('');
+            }
+        }
+
+        function populateRoomSelects() {
+            populateCreateRoomSelect();
+            // For actions card room select
+            const aSel = document.querySelector('.a-room-select');
+            if (aSel) {
+                const val = aSel.value;
+                aSel.innerHTML = '<option value="">📦 Thu hồi về kho</option>' + allRooms.map(r => `<option value="${r.medical_rooms_id || r.room_id}">${r.room_number || r.code || ''} - ${r.name || ''}</option>`).join('');
+                if (val) aSel.value = val;
+            }
+        }
+
+        function onFacChange() {
+            populateBranchSelects();
+            loadEquipments();
+        }
+
+        function onCreateFacChange() {
+            populateCreateBranchSelect();
+        }
+
+        function renderPagination(containerId, currentPage, totalPages, onPageChange) {
+            const c = document.getElementById(containerId);
+            if (totalPages <= 1) { c.innerHTML = ''; return; }
+            let html = '';
+            html += `<button class="btn btn-outline btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="(${onPageChange})(${currentPage - 1})">◀</button>`;
+            html += `<span class="page-info">Trang ${currentPage} / ${totalPages}</span>`;
+            html += `<button class="btn btn-outline btn-sm" ${currentPage >= totalPages ? 'disabled' : ''} onclick="(${onPageChange})(${currentPage + 1})">▶</button>`;
+            c.innerHTML = html;
+        }
+
+        // ==================== 1. LIST EQUIPMENTS ====================
+        async function loadEquipments() {
+            const params = new URLSearchParams({ page: eqPage, limit: 20 });
+            const search = document.getElementById('fSearch').value;
+            const status = document.getElementById('fStatus').value;
+            const facilityId = document.getElementById('fFacilityId').value;
+            const branchId = document.getElementById('fBranchId').value;
+            if (search) params.set('search', search);
+            if (status) params.set('status', status);
+            if (facilityId) params.set('facility_id', facilityId);
+            if (branchId) params.set('branch_id', branchId);
+
+            try {
+                const r = await apiFetch(`${API}/equipments?${params}`);
+                const items = r.data?.data || [];
+                const totalPages = r.data?.totalPages || 1;
+                const tbody = document.getElementById('eqTableBody');
+
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">📭 Không có thiết bị nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = items.map(e => `<tr>
+                <td><strong>${e.code}</strong></td>
+                <td>${e.name}</td>
+                <td>${e.branch_name || e.branch_id || '-'}</td>
+                <td>${e.room_name || (e.current_room_id ? e.current_room_id : '📦 Kho')}</td>
+                <td>${statusBadge(e.status)}</td>
+                <td>${e.warranty_expiration ? e.warranty_expiration.substring(0, 10) : '-'}</td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick="viewDetail('${e.equipment_id}')">🔍</button>
+                </td>
+            </tr>`).join('');
+
+                renderPagination('eqPagination', eqPage, totalPages, goEqPage);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function goEqPage(p) { eqPage = p; loadEquipments(); }
+
+        function viewDetail(id) {
+            document.getElementById('dEquipId').value = id;
+            switchTab('detail');
+            loadDetail();
+        }
+
+        // ==================== 2. CREATE EQUIPMENT ====================
+        async function createEquipment() {
+            const body = {
+                facility_id: document.getElementById('cFacilityId').value,
+                branch_id: document.getElementById('cBranchId').value,
+                code: document.getElementById('cCode').value,
+                name: document.getElementById('cName').value,
+            };
+            const serial = document.getElementById('cSerial').value;
+            const mfr = document.getElementById('cManufacturer').value;
+            const mfgDate = document.getElementById('cMfgDate').value;
+            const purchaseDate = document.getElementById('cPurchaseDate').value;
+            const warranty = document.getElementById('cWarranty').value;
+            const roomId = document.getElementById('cRoomId').value;
+            if (serial) body.serial_number = serial;
+            if (mfr) body.manufacturer = mfr;
+            if (mfgDate) body.manufacturing_date = mfgDate;
+            if (purchaseDate) body.purchase_date = purchaseDate;
+            if (warranty) body.warranty_expiration = warranty;
+            if (roomId) body.current_room_id = roomId;
+
+            try {
+                const r = await apiFetch(`${API}/equipments`, { method: 'POST', body: JSON.stringify(body) });
+                toast(`Tạo thành công! ID: ${r.data.equipment_id}`, 'success');
+                // Auto-fill detail
+                document.getElementById('dEquipId').value = r.data.equipment_id;
+                switchTab('detail');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 3. DETAIL & ACTIONS ====================
+        async function loadDetail() {
+            const id = document.getElementById('dEquipId').value.trim();
+            if (!id) { toast('Vui lòng nhập equipment_id', 'error'); return; }
+            currentEqId = id;
+
+            try {
+                const r = await apiFetch(`${API}/equipments/${id}`);
+                const e = r.data;
+                document.getElementById('detailContent').innerHTML = `
+                <dl class="detail-grid">
+                    <dt>Equipment ID</dt><dd><strong>${e.equipment_id}</strong></dd>
+                    <dt>Mã tài sản</dt><dd>${e.code}</dd>
+                    <dt>Tên</dt><dd>${e.name}</dd>
+                    <dt>Cơ sở</dt><dd>${e.facility_name || e.facility_id}</dd>
+                    <dt>Chi nhánh</dt><dd>${e.branch_name || e.branch_id}</dd>
+                    <dt>Phòng</dt><dd>${e.room_name ? `${e.room_name} (${e.room_code})` : (e.current_room_id || '📦 Đang để trong kho')}</dd>
+                    <dt>Trạng thái</dt><dd>${statusBadge(e.status)}</dd>
+                    <dt>Serial</dt><dd>${e.serial_number || '-'}</dd>
+                    <dt>Hãng SX</dt><dd>${e.manufacturer || '-'}</dd>
+                    <dt>Ngày SX</dt><dd>${e.manufacturing_date ? e.manufacturing_date.substring(0, 10) : '-'}</dd>
+                    <dt>Ngày mua</dt><dd>${e.purchase_date ? e.purchase_date.substring(0, 10) : '-'}</dd>
+                    <dt>Hạn BH</dt><dd>${e.warranty_expiration ? e.warranty_expiration.substring(0, 10) : '-'}</dd>
+                    <dt>Tạo lúc</dt><dd>${e.created_at ? new Date(e.created_at).toLocaleString('vi-VN') : '-'}</dd>
+                </dl>
+            `;
+                document.getElementById('actionsCard').style.display = 'block';
+                document.getElementById('maintCard').style.display = 'block';
+
+                // Pre-fill update form
+                document.getElementById('uName').value = e.name || '';
+                document.getElementById('uSerial').value = e.serial_number || '';
+                document.getElementById('uManufacturer').value = e.manufacturer || '';
+                document.getElementById('uWarranty').value = e.warranty_expiration ? e.warranty_expiration.substring(0, 10) : '';
+                document.getElementById('aStatus').value = e.status;
+                document.getElementById('aRoomId').value = e.current_room_id || '';
+
+                // Load maintenance logs
+                maintPage = 1;
+                loadMaintenanceLogs();
+            } catch (e) {
+                document.getElementById('detailContent').innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+                document.getElementById('actionsCard').style.display = 'none';
+                document.getElementById('maintCard').style.display = 'none';
+                toast(e.message, 'error');
+            }
+        }
+
+        async function updateStatus() {
+            if (!currentEqId) return;
+            const status = document.getElementById('aStatus').value;
+            try {
+                await apiFetch(`${API}/equipments/${currentEqId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+                toast(`Trạng thái → ${status}`, 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function assignRoom() {
+            if (!currentEqId) return;
+            const roomId = document.getElementById('aRoomId').value.trim();
+            try {
+                await apiFetch(`${API}/equipments/${currentEqId}/assign-room`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ room_id: roomId || null })
+                });
+                toast(roomId ? `Đã gán vào phòng ${roomId}` : 'Đã thu hồi về kho', 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateEquipment() {
+            if (!currentEqId) return;
+            const body = {};
+            const name = document.getElementById('uName').value;
+            const serial = document.getElementById('uSerial').value;
+            const mfr = document.getElementById('uManufacturer').value;
+            const warranty = document.getElementById('uWarranty').value;
+            if (name) body.name = name;
+            if (serial) body.serial_number = serial;
+            if (mfr) body.manufacturer = mfr;
+            if (warranty) body.warranty_expiration = warranty;
+            try {
+                await apiFetch(`${API}/equipments/${currentEqId}`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Cập nhật thành công', 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteEquipment() {
+            if (!currentEqId) return;
+            if (!confirm('Bạn có chắc muốn xóa thiết bị này?')) return;
+            try {
+                await apiFetch(`${API}/equipments/${currentEqId}`, { method: 'DELETE' });
+                toast('Đã xóa thiết bị', 'success');
+                document.getElementById('detailContent').innerHTML = '<div class="empty">Thiết bị đã bị xóa</div>';
+                document.getElementById('actionsCard').style.display = 'none';
+                document.getElementById('maintCard').style.display = 'none';
+                currentEqId = null;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 4. MAINTENANCE LOGS ====================
+        async function loadMaintenanceLogs() {
+            if (!currentEqId) return;
+            try {
+                const r = await apiFetch(`${API}/equipments/${currentEqId}/maintenance?page=${maintPage}&limit=10`);
+                const items = r.data?.data || [];
+                const totalPages = r.data?.totalPages || 1;
+                const tbody = document.getElementById('maintTableBody');
+
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">Chưa có bản ghi bảo trì</td></tr>';
+                    return;
+                }
+
+                const typeLabel = { ROUTINE: '🔄 Định kỳ', REPAIR: '🔧 Sửa chữa', INSPECTION: '📋 Kiểm định' };
+
+                tbody.innerHTML = items.map(l => `<tr>
+                <td>${l.maintenance_date ? l.maintenance_date.substring(0, 10) : '-'}</td>
+                <td>${typeLabel[l.maintenance_type] || l.maintenance_type}</td>
+                <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${(l.description || '').replace(/"/g, '&quot;')}">${l.description || '-'}</td>
+                <td>${l.performed_by || '-'}</td>
+                <td>${money(l.cost)}</td>
+                <td>${l.next_maintenance_date ? l.next_maintenance_date.substring(0, 10) : '-'}</td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick='editMaintLog(${JSON.stringify(l).replace(/'/g, "\\'")})'>✏️</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteMaintLog('${l.log_id}')">🗑</button>
+                </td>
+            </tr>`).join('');
+
+                renderPagination('maintPagination', maintPage, totalPages, goMaintPage);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function goMaintPage(p) { maintPage = p; loadMaintenanceLogs(); }
+
+        async function createMaintenanceLog() {
+            if (!currentEqId) return;
+            const body = {
+                maintenance_date: document.getElementById('mDate').value,
+                maintenance_type: document.getElementById('mType').value,
+            };
+            const desc = document.getElementById('mDesc').value;
+            const performedBy = document.getElementById('mPerformedBy').value;
+            const cost = document.getElementById('mCost').value;
+            const nextDate = document.getElementById('mNextDate').value;
+            if (desc) body.description = desc;
+            if (performedBy) body.performed_by = performedBy;
+            if (cost) body.cost = Number(cost);
+            if (nextDate) body.next_maintenance_date = nextDate;
+
+            try {
+                await apiFetch(`${API}/equipments/${currentEqId}/maintenance`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Tạo bản ghi bảo trì thành công!', 'success');
+                // Clear form
+                document.getElementById('mDate').value = '';
+                document.getElementById('mDesc').value = '';
+                document.getElementById('mPerformedBy').value = '';
+                document.getElementById('mCost').value = '';
+                document.getElementById('mNextDate').value = '';
+                loadMaintenanceLogs();
+                loadDetail(); // Refresh status in case of auto-heal
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function editMaintLog(log) {
+            document.getElementById('emLogId').value = log.log_id;
+            document.getElementById('emDate').value = log.maintenance_date ? log.maintenance_date.substring(0, 10) : '';
+            document.getElementById('emType').value = log.maintenance_type;
+            document.getElementById('emDesc').value = log.description || '';
+            document.getElementById('emPerformedBy').value = log.performed_by || '';
+            document.getElementById('emCost').value = log.cost || 0;
+            document.getElementById('emNextDate').value = log.next_maintenance_date ? log.next_maintenance_date.substring(0, 10) : '';
+            openModal('editMaintModal');
+        }
+
+        async function updateMaintenanceLog() {
+            const logId = document.getElementById('emLogId').value;
+            const body = {};
+            const date = document.getElementById('emDate').value;
+            const type = document.getElementById('emType').value;
+            const desc = document.getElementById('emDesc').value;
+            const performedBy = document.getElementById('emPerformedBy').value;
+            const cost = document.getElementById('emCost').value;
+            const nextDate = document.getElementById('emNextDate').value;
+            if (date) body.maintenance_date = date;
+            if (type) body.maintenance_type = type;
+            if (desc) body.description = desc;
+            if (performedBy) body.performed_by = performedBy;
+            if (cost !== '') body.cost = Number(cost);
+            if (nextDate) body.next_maintenance_date = nextDate;
+
+            try {
+                await apiFetch(`${API}/equipments/maintenance/${logId}`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Cập nhật bản ghi thành công', 'success');
+                closeModal('editMaintModal');
+                loadMaintenanceLogs();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteMaintLog(logId) {
+            if (!confirm('Xóa bản ghi bảo trì này?')) return;
+            try {
+                await apiFetch(`${API}/equipments/maintenance/${logId}`, { method: 'DELETE' });
+                toast('Đã xóa bản ghi', 'success');
+                loadMaintenanceLogs();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Lịch sử Khám & Điều trị — Test</title>
+    <style>
+        :root {
+            --p: #4f46e5;
+            --pl: #818cf8;
+            --pd: #3730a3;
+            --pbg: #eef2ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --bg: #f1f5f9;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1060px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--pd)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        .btn-p {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-out {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem;
+            border-radius: 6px
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tbody tr {
+            transition: background .15s
+        }
+
+        tbody tr:hover {
+            background: var(--pbg)
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .badge-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px
+        }
+
+        .detail-grid dt {
+            background: #f8fafc;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: .82rem;
+            color: var(--muted)
+        }
+
+        .detail-grid dd {
+            background: var(--card);
+            padding: 10px 14px;
+            font-size: .84rem;
+            word-break: break-all
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted)
+        }
+
+        .timeline {
+            margin-top: 12px
+        }
+
+        .tl-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .tl-item:last-child {
+            border-bottom: none
+        }
+
+        .tl-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0
+        }
+
+        .tl-body {
+            flex: 1
+        }
+
+        .tl-title {
+            font-weight: 600;
+            font-size: .88rem
+        }
+
+        .tl-date {
+            font-size: .78rem;
+            color: var(--muted)
+        }
+
+        .tl-desc {
+            font-size: .82rem;
+            color: #475569;
+            margin-top: 2px
+        }
+
+        .toast-c {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s;
+            min-width: 260px
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669)
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626)
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--p), var(--pd))
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>📋 Lịch sử Khám & Điều trị</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input id="loginEmail" value="admin@ehealth.com"><input
+                    type="password" id="loginPassword" value="Admin@123"><button class="btn-login"
+                    onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-c" id="toastC"></div>
+    <div class="main">
+        <!-- 1. Encounter List -->
+        <div class="card">
+            <h3>📋 Danh sách Lượt khám</h3>
+            <div class="toolbar">
+                <select id="f_patient" style="flex:1">
+                    <option value="">-- Tất cả BN --</option>
+                </select>
+                <select id="f_type">
+                    <option value="">-- Loại --</option>
+                    <option value="OUTPATIENT">Ngoại trú</option>
+                    <option value="INPATIENT">Nội trú</option>
+                    <option value="EMERGENCY">Cấp cứu</option>
+                    <option value="TELEMED">Từ xa</option>
+                </select>
+                <select id="f_status">
+                    <option value="">-- TT --</option>
+                    <option value="IN_PROGRESS">Đang khám</option>
+                    <option value="WAITING_FOR_RESULTS">Chờ KQ</option>
+                    <option value="COMPLETED">Hoàn thành</option>
+                    <option value="CLOSED">Đóng</option>
+                </select>
+            </div>
+            <div class="toolbar">
+                <input type="date" id="f_from" title="Từ ngày"> <input type="date" id="f_to" title="Đến ngày">
+                <button class="btn btn-p" onclick="loadEncounters()">🔄 Tải</button>
+            </div>
+            <div id="encounterList"></div>
+        </div>
+
+        <!-- 2. Patient Medical Summary -->
+        <div class="card">
+            <h3>📊 Tổng hợp & Lần khám gần nhất</h3>
+            <div class="toolbar">
+                <select id="sm_patient" style="flex:1">
+                    <option value="">-- Chọn BN --</option>
+                </select>
+                <button class="btn btn-p btn-sm" onclick="loadMedSummary()">📊 Tổng hợp</button>
+                <button class="btn btn-out btn-sm" onclick="loadLatest()">🕐 Gần nhất</button>
+            </div>
+            <div id="summaryResult"></div>
+        </div>
+
+        <!-- 3. Timeline -->
+        <div class="card">
+            <h3>🔄 Dòng thời gian Sức khỏe</h3>
+            <div class="toolbar">
+                <select id="tl_patient" style="flex:1">
+                    <option value="">-- Chọn BN --</option>
+                </select>
+                <input type="date" id="tl_from" title="Từ ngày"> <input type="date" id="tl_to" title="Đến ngày">
+                <button class="btn btn-p btn-sm" onclick="loadTimeline()">🔄 Timeline</button>
+            </div>
+            <div id="timelineResult"></div>
+        </div>
+
+        <!-- 4. Encounter Detail -->
+        <div class="card">
+            <h3>🔍 Chi tiết Lượt khám</h3>
+            <div class="toolbar">
+                <input id="enc_id" placeholder="Encounter ID (VD: ENC_260310_abc12345)" style="flex:1">
+                <button class="btn btn-p" onclick="loadEncDetail()">🔍 Xem</button>
+            </div>
+            <div id="encDetailResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api'; let token = null;
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastC'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+        function renderTable(data, cols, containerId) { const el = document.getElementById(containerId); if (!data || data.length === 0) { el.innerHTML = '<div class="empty">Không có dữ liệu</div>'; return } let html = '<div class="tbl-wrap"><table><thead><tr>' + cols.map(c => `<th>${c.label}</th>`).join('') + '</tr></thead><tbody>'; for (const row of data) { html += '<tr>' + cols.map(c => { let v = c.key.split('.').reduce((o, k) => o?.[k], row); if (c.render) v = c.render(v, row); return `<td>${v ?? '—'}</td>` }).join('') + '</tr>' } html += '</tbody></table></div>'; el.innerHTML = html }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadDropdowns() } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'MedHistory Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success'); loadDropdowns() } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        async function loadDropdowns() {
+            try { const r = await apiFetch(`${API}/patients?limit=100`); const list = r.data?.data || r.data || []; const h = '<option value="">-- Chọn BN --</option>' + list.map(p => `<option value="${p.id}">${p.full_name} (${p.patient_code || ''})</option>`).join('');['f_patient', 'sm_patient', 'tl_patient'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = h }) } catch (e) { console.error(e) }
+        }
+
+        // 1. Encounters
+        async function loadEncounters() {
+            try {
+                const p = new URLSearchParams({ limit: '30' });
+                const pt = document.getElementById('f_patient').value; if (pt) p.set('patient_id', pt);
+                const tp = document.getElementById('f_type').value; if (tp) p.set('type', tp);
+                const st = document.getElementById('f_status').value; if (st) p.set('status', st);
+                const fr = document.getElementById('f_from').value; if (fr) p.set('from', fr);
+                const to = document.getElementById('f_to').value; if (to) p.set('to', to);
+                const r = await apiFetch(`${API}/medical-history?${p}`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'encounters_id', label: 'ID', render: v => `<span style="font-size:.7rem">${v || '—'}</span>` },
+                    { key: 'encounter_type', label: 'Loại', render: v => ({ OUTPATIENT: '🏥 Ngoại trú', INPATIENT: '🛏️ Nội trú', EMERGENCY: '🚑 Cấp cứu', TELEMED: '💻 Từ xa' })[v] || v },
+                    { key: 'status', label: 'TT', render: v => `<span class="badge badge-info">${v || '—'}</span>` },
+                    { key: 'encounter_date', label: 'Ngày', render: v => v ? v.substring(0, 10) : '—' },
+                    { key: 'doctor_name', label: 'Bác sĩ' },
+                    { key: 'chief_complaint', label: 'Triệu chứng chính' },
+                    { key: 'primary_diagnosis', label: 'Chẩn đoán' }
+                ], 'encounterList');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // 2. Summary & Latest
+        async function loadMedSummary() {
+            const id = document.getElementById('sm_patient').value; if (!id) { toast('Chọn BN', 'error'); return }
+            try { const r = await apiFetch(`${API}/medical-history/patient/${id}/summary`); const d = r.data; let html = '<dl class="detail-grid">'; for (const [k, v] of Object.entries(d || {})) html += `<dt>${k}</dt><dd>${typeof v === 'object' ? JSON.stringify(v) : v ?? '—'}</dd>`; html += '</dl>'; document.getElementById('summaryResult').innerHTML = html } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadLatest() {
+            const id = document.getElementById('sm_patient').value; if (!id) { toast('Chọn BN', 'error'); return }
+            try { const r = await apiFetch(`${API}/medical-history/patient/${id}/latest`); const d = r.data; if (!d) { document.getElementById('summaryResult').innerHTML = '<div class="empty">Chưa có lượt khám</div>'; return } let html = '<dl class="detail-grid">'; for (const [k, v] of Object.entries(d || {})) { if (typeof v === 'object' && v !== null) continue; html += `<dt>${k}</dt><dd>${v ?? '—'}</dd>` } html += '</dl>'; document.getElementById('summaryResult').innerHTML = html } catch (e) { toast(e.message, 'error') }
+        }
+
+        // 3. Timeline
+        async function loadTimeline() {
+            const id = document.getElementById('tl_patient').value; if (!id) { toast('Chọn BN', 'error'); return }
+            try {
+                const p = new URLSearchParams({ limit: '50' });
+                const fr = document.getElementById('tl_from').value; if (fr) p.set('from', fr);
+                const to = document.getElementById('tl_to').value; if (to) p.set('to', to);
+                const r = await apiFetch(`${API}/medical-history/patient/${id}/timeline?${p}`);
+                const events = r.data || [];
+                if (events.length === 0) { document.getElementById('timelineResult').innerHTML = '<div class="empty">Chưa có sự kiện</div>'; return }
+                const icons = { ENCOUNTER: '🏥', LAB_RESULT: '🧪', PRESCRIPTION: '💊', VACCINATION: '💉', SURGERY: '🔪' };
+                const colors = { ENCOUNTER: '#eef2ff', LAB_RESULT: '#f0fdf4', PRESCRIPTION: '#fef3c7', VACCINATION: '#dbeafe', SURGERY: '#fee2e2' };
+                let html = '<div class="timeline">';
+                for (const ev of events) {
+                    const icon = icons[ev.event_type] || '📌';
+                    const bg = colors[ev.event_type] || '#f8fafc';
+                    html += `<div class="tl-item"><div class="tl-icon" style="background:${bg}">${icon}</div><div class="tl-body"><div class="tl-title">${ev.title || ev.event_type || 'Sự kiện'}</div><div class="tl-date">${ev.event_date ? new Date(ev.event_date).toLocaleString('vi') : '—'}</div><div class="tl-desc">${ev.description || ev.details || ''}</div></div></div>`;
+                }
+                html += '</div>';
+                document.getElementById('timelineResult').innerHTML = html;
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // 4. Encounter Detail
+        async function loadEncDetail() {
+            const id = document.getElementById('enc_id').value; if (!id) { toast('Nhập Encounter ID', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/medical-history/${id}`); const d = r.data;
+                let html = '<dl class="detail-grid">';
+                const flat = (obj, prefix = '') => { for (const [k, v] of Object.entries(obj || {})) { if (v && typeof v === 'object' && !Array.isArray(v)) flat(v, prefix + k + '.'); else if (Array.isArray(v)) html += `<dt>${prefix}${k}</dt><dd>${v.length} mục</dd>`; else html += `<dt>${prefix}${k}</dt><dd>${v ?? '—'}</dd>` } };
+                flat(d);
+                html += '</dl>';
+                document.getElementById('encDetailResult').innerHTML = html;
+            } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

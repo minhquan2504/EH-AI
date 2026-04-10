@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Check-in & Trạng thái — Test</title>
+    <style>
+        :root {
+            --p: #0f3460;
+            --pl: #3b82f6;
+            --pd: #16213e;
+            --pbg: #eff6ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --warn: #f59e0b;
+            --bg: #f0f2f5;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(15, 52, 96, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .84rem;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            color: var(--muted);
+            transition: all .2s
+        }
+
+        .tab:hover {
+            color: var(--p)
+        }
+
+        .tab.active {
+            color: var(--p);
+            border-bottom-color: var(--p);
+            background: var(--pbg);
+            border-radius: 8px 8px 0 0
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--pd)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .1)
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        .btn-p {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-ok {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .btn-err {
+            background: var(--err);
+            color: #fff
+        }
+
+        .btn-warn {
+            background: var(--warn);
+            color: #000
+        }
+
+        .btn-out {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem;
+            border-radius: 6px
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .1)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .form-row-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tbody tr {
+            transition: background .15s
+        }
+
+        tbody tr:hover {
+            background: var(--pbg)
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-err {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .badge-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .badge-purple {
+            background: #f3e8ff;
+            color: #6b21a8
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 12px 0
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center
+        }
+
+        .stat-card .num {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--p)
+        }
+
+        .stat-card .lbl {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted)
+        }
+
+        .toast-c {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s;
+            min-width: 260px
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669)
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626)
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--pl), var(--p))
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .result {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: .78rem;
+            font-family: 'Cascadia Code', monospace
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px
+        }
+
+        .room-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: #fff;
+            transition: all .15s
+        }
+
+        .room-card.available {
+            border-left: 4px solid var(--ok)
+        }
+
+        .room-card.occupied {
+            border-left: 4px solid var(--err);
+            background: #fff5f5
+        }
+
+        .room-card.maintenance {
+            border-left: 4px solid var(--warn);
+            background: #fffbeb
+        }
+
+        .room-name {
+            font-weight: 700;
+            font-size: .9rem
+        }
+
+        .room-info {
+            font-size: .75rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>✅ Check-in & Trạng thái</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input id="loginEmail" value="admin@ehealth.com"><input
+                    type="password" id="loginPassword" value="Admin@123"><button class="btn-login"
+                    onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="toast-c" id="toastC"></div>
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" data-t="dashboard">📊 Dashboard</div>
+            <div class="tab" data-t="queue">🔢 Hàng đợi</div>
+            <div class="tab" data-t="rooms">🏥 Phòng khám</div>
+            <div class="tab" data-t="checkin">🎫 Check-in</div>
+            <div class="tab" data-t="exam">🩺 Khám bệnh</div>
+            <div class="tab" data-t="settings">⚙️ Cấu hình</div>
+        </div>
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="panel active" id="panel_dashboard">
+            <div class="card">
+                <h3>📊 Dashboard Trạng thái Hôm nay</h3>
+                <div class="toolbar">
+                    <input id="db_branch" placeholder="Branch ID (tuỳ chọn)">
+                    <button class="btn btn-p btn-sm" onclick="loadDashToday()">📊 Hôm nay</button>
+                </div>
+                <div id="dashToday"></div>
+            </div>
+            <div class="card">
+                <h3>📅 Dashboard theo Ngày</h3>
+                <div class="toolbar">
+                    <input type="date" id="db_date">
+                    <input id="db_branch2" placeholder="Branch ID (tuỳ chọn)">
+                    <button class="btn btn-p btn-sm" onclick="loadDashDate()">📅 Xem</button>
+                </div>
+                <div id="dashDate"></div>
+            </div>
+        </div>
+
+        <!-- ===== QUEUE ===== -->
+        <div class="panel" id="panel_queue">
+            <div class="card">
+                <h3>🔢 Hàng đợi Khám bệnh Hôm nay</h3>
+                <div class="toolbar">
+                    <input id="q_branch" placeholder="Branch ID">
+                    <input id="q_room" placeholder="Room ID">
+                    <select id="q_status">
+                        <option value="">-- Trạng thái --</option>
+                        <option>CHECKED_IN</option>
+                        <option>IN_PROGRESS</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadQueue()">🔄 Tải</button>
+                </div>
+                <div id="queueResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== ROOMS ===== -->
+        <div class="panel" id="panel_rooms">
+            <div class="card">
+                <h3>🏥 Trạng thái Phòng khám</h3>
+                <div class="toolbar">
+                    <input id="rm_branch" placeholder="Branch ID (tuỳ chọn)">
+                    <button class="btn btn-p btn-sm" onclick="loadRoomStatus()">🔄 Tải</button>
+                </div>
+                <div id="roomGrid" class="room-grid"></div>
+            </div>
+        </div>
+
+        <!-- ===== CHECK-IN ===== -->
+        <div class="panel" id="panel_checkin">
+            <div class="card">
+                <h3>🎫 Check-in tại Quầy (Lễ tân)</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Appointment ID *</label><input id="ci_id" placeholder="APT_...">
+                    </div>
+                    <div class="form-group"><label>&nbsp;</label><button class="btn btn-ok" onclick="checkInCounter()"
+                            style="margin-top:2px">✅ Check-in</button></div>
+                </div>
+                <div id="ciResult"></div>
+            </div>
+            <div class="card">
+                <h3>📱 Sinh mã QR Check-in</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Appointment ID *</label><input id="qr_id" placeholder="APT_...">
+                    </div>
+                    <div class="form-group"><label>&nbsp;</label><button class="btn btn-p" onclick="generateQR()"
+                            style="margin-top:2px">📱 Tạo QR</button></div>
+                </div>
+                <div id="qrResult"></div>
+            </div>
+            <div class="card">
+                <h3>📷 Check-in bằng QR</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>QR Token *</label><input id="qr_token" placeholder="QR_a1b2c3d4-...">
+                    </div>
+                    <div class="form-group"><label>&nbsp;</label><button class="btn btn-ok" onclick="checkInQR()"
+                            style="margin-top:2px">📷 Quét QR</button></div>
+                </div>
+                <div id="qrCheckResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== EXAM ===== -->
+        <div class="panel" id="panel_exam">
+            <div class="card">
+                <h3>🩺 Bắt đầu Khám (CHECKED_IN → IN_PROGRESS)</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Appointment ID *</label><input id="ex_start_id"
+                            placeholder="APT_..."></div>
+                    <div class="form-group"><label>&nbsp;</label><button class="btn btn-warn" onclick="startExam()"
+                            style="margin-top:2px">▶️ Bắt đầu</button></div>
+                </div>
+                <div id="startResult"></div>
+            </div>
+            <div class="card">
+                <h3>✅ Hoàn tất Khám (IN_PROGRESS → COMPLETED)</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Appointment ID *</label><input id="ex_complete_id"
+                            placeholder="APT_..."></div>
+                    <div class="form-group"><label>&nbsp;</label><button class="btn btn-ok" onclick="completeExam()"
+                            style="margin-top:2px">✅ Hoàn tất</button></div>
+                </div>
+                <div id="completeResult"></div>
+            </div>
+            <div class="card">
+                <h3>❌ Đánh dấu No-Show</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Appointment ID *</label><input id="ns_id" placeholder="APT_...">
+                    </div>
+                    <div class="form-group"><label>Ghi chú</label><input id="ns_note"
+                            placeholder="BN không đến, đã gọi 3 lần..."></div>
+                </div>
+                <button class="btn btn-err" onclick="markNoShow()">❌ No-Show</button>
+                <div id="noShowResult"></div>
+            </div>
+        </div>
+
+        <!-- ===== SETTINGS ===== -->
+        <div class="panel" id="panel_settings">
+            <div class="card">
+                <h3>⚙️ Cấu hình Check-in & No-Show</h3>
+                <button class="btn btn-p btn-sm" onclick="loadSettings()" style="margin-bottom:12px">🔄 Tải cấu
+                    hình</button>
+                <div class="form-row">
+                    <div class="form-group"><label>No-Show buffer (phút)</label><input type="number" id="st_noshow_min"
+                            min="5" max="120" placeholder="30"></div>
+                    <div class="form-group"><label>Tự động No-Show?</label><select id="st_auto">
+                            <option value="true">Bật</option>
+                            <option value="false">Tắt</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Cho phép QR Check-in?</label><select id="st_qr">
+                            <option value="true">Bật</option>
+                            <option value="false">Tắt</option>
+                        </select></div>
+                    <div class="form-group"><label>Late threshold (phút)</label><input type="number" id="st_late"
+                            min="0" max="60" placeholder="0"></div>
+                </div>
+                <button class="btn btn-ok" onclick="saveSettings()">💾 Lưu cấu hình</button>
+                <div id="settingsResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api'; let token = null;
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastC'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+        function showJson(id, data) { const el = document.getElementById(id); el.innerHTML = '<div class="result"><pre>' + JSON.stringify(data, null, 2) + '</pre></div>' }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById('panel_' + t.dataset.t).classList.add('active') }));
+
+        // Auth
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user) } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Status Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success') } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        // ========== DASHBOARD ==========
+        function renderDash(data, containerId) {
+            const el = document.getElementById(containerId);
+            if (!data) { el.innerHTML = '<div class="empty">Không có dữ liệu</div>'; return }
+            const s = data.summary || {}; const q = data.queue || {};
+            let html = `<div class="stat-grid">
+        <div class="stat-card"><div class="num">${s.total || 0}</div><div class="lbl">Tổng</div></div>
+        <div class="stat-card"><div class="num" style="color:#f59e0b">${s.pending || 0}</div><div class="lbl">Chờ duyệt</div></div>
+        <div class="stat-card"><div class="num" style="color:#3b82f6">${s.confirmed || 0}</div><div class="lbl">Đã xác nhận</div></div>
+        <div class="stat-card"><div class="num" style="color:#8b5cf6">${s.checked_in || 0}</div><div class="lbl">Đã check-in</div></div>
+        <div class="stat-card"><div class="num" style="color:#f97316">${s.in_progress || 0}</div><div class="lbl">Đang khám</div></div>
+        <div class="stat-card"><div class="num" style="color:#10b981">${s.completed || 0}</div><div class="lbl">Hoàn tất</div></div>
+        <div class="stat-card"><div class="num" style="color:#ef4444">${s.cancelled || 0}</div><div class="lbl">Đã huỷ</div></div>
+        <div class="stat-card"><div class="num" style="color:#6b21a8">${s.no_show || 0}</div><div class="lbl">No-Show</div></div>
+    </div>`;
+            if (q.current_serving !== undefined) {
+                html += `<div style="margin-top:12px;padding:12px;background:#eff6ff;border-radius:8px">
+            <strong>🔢 Hàng đợi:</strong> STT đang phục vụ: <strong>${q.current_serving || '—'}</strong> |
+            Tiếp theo: <strong>${q.next_in_line || '—'}</strong> |
+            Đang chờ: <strong>${q.total_waiting || 0}</strong>
+        </div>`;
+            }
+            el.innerHTML = html;
+        }
+
+        async function loadDashToday() {
+            try {
+                const p = new URLSearchParams(); const b = document.getElementById('db_branch').value; if (b) p.set('branch_id', b);
+                const r = await apiFetch(`${API}/appointment-status/dashboard/today?${p}`);
+                renderDash(r.data, 'dashToday'); toast('Dashboard hôm nay', 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadDashDate() {
+            const dt = document.getElementById('db_date').value; if (!dt) { toast('Chọn ngày', 'error'); return }
+            try {
+                const p = new URLSearchParams(); const b = document.getElementById('db_branch2').value; if (b) p.set('branch_id', b);
+                const r = await apiFetch(`${API}/appointment-status/dashboard/${dt}?${p}`);
+                renderDash(r.data, 'dashDate'); toast(`Dashboard ${dt}`, 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ========== QUEUE ==========
+        async function loadQueue() {
+            try {
+                const p = new URLSearchParams();
+                const b = document.getElementById('q_branch').value; if (b) p.set('branch_id', b);
+                const rm = document.getElementById('q_room').value; if (rm) p.set('room_id', rm);
+                const st = document.getElementById('q_status').value; if (st) p.set('status', st);
+                const r = await apiFetch(`${API}/appointment-status/queue/today?${p}`);
+                const list = r.data || [];
+                if (!list.length) { document.getElementById('queueResult').innerHTML = '<div class="empty">Hàng đợi trống</div>'; return }
+                let html = '<div class="tbl-wrap"><table><thead><tr><th>STT</th><th>Bệnh nhân</th><th>Bác sĩ</th><th>Phòng</th><th>Slot</th><th>Trạng thái</th><th>Trễ</th></tr></thead><tbody>';
+                list.forEach(q => {
+                    const badge = q.status === 'CHECKED_IN' ? 'badge-info' : q.status === 'IN_PROGRESS' ? 'badge-warn' : 'badge-ok';
+                    html += `<tr><td><strong>${q.queue_number || '—'}</strong></td><td>${q.patient_name || '—'}</td><td>${q.doctor_name || '—'}</td><td>${q.room_name || '—'}</td><td>${q.slot_start_time?.substring(0, 5) || '—'}-${q.slot_end_time?.substring(0, 5) || '—'}</td><td><span class="badge ${badge}">${q.status}</span></td><td>${q.is_late ? `<span class="badge badge-err">${q.late_minutes}p trễ</span>` : '✅ Đúng giờ'}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                document.getElementById('queueResult').innerHTML = html;
+                toast(`${list.length} bệnh nhân trong hàng đợi`, 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ========== ROOM STATUS ==========
+        async function loadRoomStatus() {
+            try {
+                const p = new URLSearchParams(); const b = document.getElementById('rm_branch').value; if (b) p.set('branch_id', b);
+                const r = await apiFetch(`${API}/appointment-status/room-status?${p}`);
+                const list = r.data || [];
+                if (!list.length) { document.getElementById('roomGrid').innerHTML = '<div class="empty">Không có phòng</div>'; return }
+                document.getElementById('roomGrid').innerHTML = list.map(rm => {
+                    const cls = rm.status === 'AVAILABLE' ? 'available' : rm.status === 'OCCUPIED' ? 'occupied' : 'maintenance';
+                    let info = `<div class="room-info">${rm.status === 'OCCUPIED' ? `🧑‍⚕️ ${rm.doctor_name || ''}  |  👤 ${rm.patient_name || ''}` : `✅ Sẵn sàng`}</div>`;
+                    return `<div class="room-card ${cls}"><div class="room-name">${rm.room_name || rm.room_id}</div><div class="room-info"><span class="badge ${rm.status === 'AVAILABLE' ? 'badge-ok' : rm.status === 'OCCUPIED' ? 'badge-err' : 'badge-warn'}">${rm.status}</span></div>${info}</div>`;
+                }).join('');
+                toast(`${list.length} phòng`, 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ========== CHECK-IN ==========
+        async function checkInCounter() {
+            const id = document.getElementById('ci_id').value; if (!id) { toast('Nhập Appointment ID', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/appointment-status/${id}/check-in`, { method: 'POST' });
+                let html = `<div class="result"><div style="font-size:1.1rem;font-weight:700;color:var(--ok);margin-bottom:8px">✅ Check-in thành công!</div>`;
+                if (r.data) { html += `<p>🔢 Số thứ tự: <strong style="font-size:1.3rem">${r.data.queue_number}</strong></p><p>${r.data.is_late ? `⚠️ Trễ ${r.data.late_minutes} phút` : '✅ Đúng giờ'}</p>` }
+                html += '<pre>' + JSON.stringify(r, null, 2) + '</pre></div>';
+                document.getElementById('ciResult').innerHTML = html;
+                toast('Check-in OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); showJson('ciResult', { error: e.message }) }
+        }
+        async function generateQR() {
+            const id = document.getElementById('qr_id').value; if (!id) { toast('Nhập Appointment ID', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/appointment-status/generate-qr/${id}`, { method: 'POST' });
+                let html = `<div class="result"><p>📱 QR Token: <strong style="color:var(--p);word-break:break-all">${r.data?.qr_token || ''}</strong></p><p>⏰ Hết hạn: ${r.data?.expires_at || '—'}</p><pre>${JSON.stringify(r, null, 2)}</pre></div>`;
+                document.getElementById('qrResult').innerHTML = html;
+                toast('Tạo QR thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showJson('qrResult', { error: e.message }) }
+        }
+        async function checkInQR() {
+            const tk = document.getElementById('qr_token').value; if (!tk) { toast('Nhập QR Token', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/appointment-status/check-in-qr`, { method: 'POST', body: JSON.stringify({ qr_token: tk }) });
+                showJson('qrCheckResult', r); toast('Check-in QR thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); showJson('qrCheckResult', { error: e.message }) }
+        }
+
+        // ========== EXAM ==========
+        async function startExam() {
+            const id = document.getElementById('ex_start_id').value; if (!id) { toast('Nhập Appointment ID', 'error'); return }
+            try { const r = await apiFetch(`${API}/appointment-status/${id}/start-exam`, { method: 'PATCH' }); showJson('startResult', r); toast('Bắt đầu khám!', 'success') } catch (e) { toast(e.message, 'error'); showJson('startResult', { error: e.message }) }
+        }
+        async function completeExam() {
+            const id = document.getElementById('ex_complete_id').value; if (!id) { toast('Nhập Appointment ID', 'error'); return }
+            try { const r = await apiFetch(`${API}/appointment-status/${id}/complete-exam`, { method: 'PATCH' }); showJson('completeResult', r); toast('Hoàn tất khám!', 'success') } catch (e) { toast(e.message, 'error'); showJson('completeResult', { error: e.message }) }
+        }
+        async function markNoShow() {
+            const id = document.getElementById('ns_id').value; if (!id) { toast('Nhập Appointment ID', 'error'); return }
+            const body = {}; const note = document.getElementById('ns_note').value; if (note) body.note = note;
+            try { const r = await apiFetch(`${API}/appointment-status/${id}/no-show`, { method: 'PATCH', body: JSON.stringify(body) }); showJson('noShowResult', r); toast('Đánh dấu No-Show', 'success') } catch (e) { toast(e.message, 'error'); showJson('noShowResult', { error: e.message }) }
+        }
+
+        // ========== SETTINGS ==========
+        async function loadSettings() {
+            try {
+                const r = await apiFetch(`${API}/appointment-status/settings`);
+                const d = r.data || {};
+                document.getElementById('st_noshow_min').value = d.no_show_buffer_minutes || 30;
+                document.getElementById('st_auto').value = String(d.auto_no_show_enabled ?? true);
+                document.getElementById('st_qr').value = String(d.allow_qr_checkin ?? true);
+                document.getElementById('st_late').value = d.late_threshold_minutes || 0;
+                showJson('settingsResult', r); toast('Tải cấu hình OK', 'success');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveSettings() {
+            const body = {
+                no_show_buffer_minutes: parseInt(document.getElementById('st_noshow_min').value),
+                auto_no_show_enabled: document.getElementById('st_auto').value === 'true',
+                allow_qr_checkin: document.getElementById('st_qr').value === 'true',
+                late_threshold_minutes: parseInt(document.getElementById('st_late').value)
+            };
+            try { const r = await apiFetch(`${API}/appointment-status/settings`, { method: 'PUT', body: JSON.stringify(body) }); showJson('settingsResult', r); toast('Lưu cấu hình OK!', 'success') } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

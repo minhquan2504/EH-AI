@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛏 Module 2.11 - Quản lý Giường bệnh</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --primary-bg: #eef2ff;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, .1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ─── */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3);
+        }
+
+        .header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -.3px;
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .75);
+            font-size: .82rem;
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .header a:hover {
+            color: #fff;
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9);
+            outline: none;
+        }
+
+        .auth-bar input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .4);
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: transform .15s;
+        }
+
+        .auth-bar button:active {
+            transform: scale(.96);
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, .25);
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem;
+        }
+
+        /* ── TABS ─── */
+        .tabs {
+            display: flex;
+            background: var(--card);
+            border-bottom: 2px solid var(--border);
+            padding: 0 24px;
+            overflow-x: auto;
+            gap: 2px;
+        }
+
+        .tab {
+            padding: 13px 20px;
+            cursor: pointer;
+            font-size: .88rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: var(--muted);
+            border-bottom: 3px solid transparent;
+            transition: all .2s;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+            background: var(--primary-bg);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* ── MAIN ─── */
+        .main {
+            max-width: 1300px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn .3s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CARDS ─── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, .04);
+        }
+
+        .card h3 {
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── TOOLBAR ─── */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            background: var(--card);
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        /* ── BUTTONS ─── */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: .78rem;
+            border-radius: 6px;
+        }
+
+        /* ── TABLE ─── */
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem;
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background .15s;
+        }
+
+        tbody tr:hover {
+            background: var(--primary-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── BADGES ─── */
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .73rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .b-empty {
+            background: var(--success-bg);
+            color: #065f46;
+        }
+
+        .b-occupied {
+            background: var(--danger-bg);
+            color: #991b1b;
+        }
+
+        .b-cleaning {
+            background: var(--warning-bg);
+            color: #92400e;
+        }
+
+        .b-maintenance {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .pagination button {
+            min-width: 34px;
+            height: 34px;
+            border-radius: 8px;
+        }
+
+        .page-info {
+            font-size: .82rem;
+            color: var(--muted);
+        }
+
+        /* ── FORMS ─── */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .88rem;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            background: var(--card);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ── TOAST ─── */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 280px;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ── DETAIL GRID ─── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 8px 16px;
+            font-size: .88rem;
+            padding: 8px 0;
+        }
+
+        .detail-grid dt {
+            font-weight: 600;
+            color: var(--muted);
+            padding: 6px 0;
+        }
+
+        .detail-grid dd {
+            color: var(--text);
+            padding: 6px 0;
+            border-bottom: 1px dashed #f1f5f9;
+        }
+
+        /* ── ACTION BAR ─── */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .action-bar select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .action-bar select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .action-separator {
+            color: var(--border);
+            font-size: 1.2rem;
+        }
+
+        .status-flow {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: var(--primary-bg);
+            border-radius: 8px;
+            font-size: .78rem;
+            color: var(--primary-dark);
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .88rem;
+            color: var(--primary);
+            padding: 8px 0;
+            transition: color .2s;
+        }
+
+        details summary:hover {
+            color: var(--primary-dark);
+        }
+
+        details[open] summary {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>🛏 Module 2.11 — Quản lý Giường bệnh</h1>
+            <a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('list')">📋 Danh sách</div>
+        <div class="tab" onclick="switchTab('create')">➕ Thêm giường</div>
+        <div class="tab" onclick="switchTab('detail')">🔍 Chi tiết & Thao tác</div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+
+        <!-- ========== TAB 1: LIST ========== -->
+        <div class="panel active" id="panel-list">
+            <div class="card">
+                <h3>📋 Danh sách Giường bệnh</h3>
+                <div class="toolbar">
+                    <input type="text" id="fSearch" placeholder="🔍 Tìm mã, tên giường...">
+                    <select id="fFacility" class="fac-select" title="Lọc theo cơ sở" onchange="onFilterFacChange()">
+                        <option value="">Tất cả cơ sở</option>
+                    </select>
+                    <select id="fBranch" class="f-branch-select" title="Lọc theo chi nhánh" onchange="loadBeds()">
+                        <option value="">Tất cả chi nhánh</option>
+                    </select>
+                    <select id="fDept" class="dept-select" title="Lọc theo khoa" onchange="loadBeds()">
+                        <option value="">Tất cả khoa</option>
+                    </select>
+                    <select id="fRoom" class="room-select" title="Lọc theo phòng" onchange="loadBeds()">
+                        <option value="">Tất cả phòng</option>
+                    </select>
+                    <select id="fStatus" title="Lọc theo trạng thái" onchange="loadBeds()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="EMPTY">🟢 Trống</option>
+                        <option value="OCCUPIED">🔴 Đang dùng</option>
+                        <option value="CLEANING">🟡 Đang dọn</option>
+                        <option value="MAINTENANCE">🔵 Bảo trì</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="loadBeds()">Tải dữ liệu</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên giường</th>
+                                <th>Loại</th>
+                                <th>Phòng</th>
+                                <th>Khoa</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bedTableBody">
+                            <tr>
+                                <td colspan="7" class="empty">Vui lòng đăng nhập và nhấn "Tải dữ liệu"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="bedPagination"></div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 2: CREATE ========== -->
+        <div class="panel" id="panel-create">
+            <div class="card">
+                <h3>➕ Thêm mới Giường bệnh</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Cơ sở *</label>
+                        <select id="cFacility" class="fac-select" onchange="onCreateFacChange()">
+                            <option value="">-- Chọn cơ sở --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Chi nhánh *</label>
+                        <select id="cBranch" class="c-branch-select" onchange="onCreateBranchChange()">
+                            <option value="">-- Chọn chi nhánh --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mã giường (code) *</label><input id="cCode" placeholder="BED-A101">
+                    </div>
+                    <div class="form-group"><label>Tên giường *</label><input id="cName" placeholder="Giường A-101">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Loại giường</label>
+                        <select id="cType" title="Loại giường">
+                            <option value="STANDARD">Tiêu chuẩn (STANDARD)</option>
+                            <option value="EMERGENCY">Cấp cứu (EMERGENCY)</option>
+                            <option value="ICU">Hồi sức (ICU)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Khoa (tuỳ chọn)</label>
+                        <select id="cDept" class="c-dept-select">
+                            <option value="">-- Không chọn --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Phòng (tuỳ chọn)</label>
+                        <select id="cRoom" class="c-room-select">
+                            <option value="">-- Không gán --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Mô tả</label><input id="cDesc" placeholder="Ghi chú thêm..."></div>
+                </div>
+                <div style="margin-top:12px">
+                    <button class="btn btn-success" onclick="createBed()">💾 Tạo giường</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TAB 3: DETAIL & ACTIONS ========== -->
+        <div class="panel" id="panel-detail">
+            <div class="card">
+                <h3>🔍 Tra cứu Chi tiết Giường</h3>
+                <div class="toolbar">
+                    <select id="dBedId" class="bed-select" style="flex:1; min-width:280px">
+                        <option value="">-- Chọn giường --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadDetail()">Xem chi tiết</button>
+                </div>
+                <div id="detailContent" class="empty">Chọn giường và nhấn "Xem chi tiết"</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card" id="actionsCard" style="display:none">
+                <h3>⚙️ Thao tác nhanh</h3>
+
+                <!-- Status change -->
+                <div class="action-bar">
+                    <select id="aStatus" title="Chọn trạng thái mới">
+                        <option value="EMPTY">🟢 EMPTY</option>
+                        <option value="OCCUPIED">🔴 OCCUPIED</option>
+                        <option value="CLEANING">🟡 CLEANING</option>
+                        <option value="MAINTENANCE">🔵 MAINTENANCE</option>
+                    </select>
+                    <button class="btn btn-warning btn-sm" onclick="changeStatus()">🔄 Đổi trạng thái</button>
+                    <span class="action-separator">|</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteBed()">🗑 Xóa giường</button>
+                </div>
+                <div class="status-flow">
+                    <span>📌 Luồng: EMPTY → OCCUPIED → CLEANING → EMPTY | bất kỳ ↔ MAINTENANCE</span>
+                </div>
+
+                <!-- Assign room -->
+                <details style="margin-top:16px">
+                    <summary>📌 Gán phòng / Khoa</summary>
+                    <div class="form-row">
+                        <div class="form-group"><label>Khoa</label>
+                            <select id="aDept" class="dept-select">
+                                <option value="">-- Thu hồi / Không chọn --</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Phòng</label>
+                            <select id="aRoom" class="room-select">
+                                <option value="">-- Thu hồi / Không chọn --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="assignBed()">📌 Gán phòng</button>
+                </details>
+
+                <!-- Update info -->
+                <details style="margin-top:12px">
+                    <summary>✏️ Cập nhật thông tin cơ bản</summary>
+                    <div class="form-row">
+                        <div class="form-group"><label>Tên mới</label><input id="uName" placeholder="Tên mới"></div>
+                        <div class="form-group"><label>Mã mới</label><input id="uCode" placeholder="Mã mới"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Loại giường</label>
+                            <select id="uType" title="Loại giường mới">
+                                <option value="">-- Giữ nguyên --</option>
+                                <option value="STANDARD">STANDARD</option>
+                                <option value="EMERGENCY">EMERGENCY</option>
+                                <option value="ICU">ICU</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Mô tả</label><input id="uDesc" placeholder="Mô tả mới"></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="updateBed()">💾 Cập nhật</button>
+                </details>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+        let bedPage = 1;
+        let currentBedId = null;
+
+        // ==================== AUTH ====================
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+
+        window.onload = () => {
+            const auth = getAuth();
+            if (auth?.accessToken) { token = auth.accessToken; showLoggedIn(auth.user); loadDropdowns(); }
+        };
+
+        async function handleLogin() {
+            try {
+                const res = await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Bed Test', userAgent: navigator.userAgent } })
+                });
+                const r = await res.json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function handleLogout() {
+            token = null; localStorage.removeItem('ehealth_auth');
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+            toast('Đã đăng xuất', 'info');
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('currentUser').textContent = `👤 ${user?.name || 'User'} (${user?.role || ''})`;
+        }
+
+        // ==================== UTILS ====================
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`; t.textContent = msg;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        }
+        function debounce(fn, ms) { let t; return () => { clearTimeout(t); t = setTimeout(fn, ms); }; }
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['list', 'create', 'detail'][i] === name));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+        }
+
+        function statusBadge(s) {
+            const map = { EMPTY: 'b-empty', OCCUPIED: 'b-occupied', CLEANING: 'b-cleaning', MAINTENANCE: 'b-maintenance' };
+            const label = { EMPTY: '🟢 Trống', OCCUPIED: '🔴 Đang dùng', CLEANING: '🟡 Đang dọn', MAINTENANCE: '🔵 Bảo trì' };
+            return `<span class="badge ${map[s] || ''}">${label[s] || s}</span>`;
+        }
+
+        function typeBadge(t) {
+            const label = { STANDARD: 'Tiêu chuẩn', EMERGENCY: '🚨 Cấp cứu', ICU: '🏥 Hồi sức' };
+            return label[t] || t || '-';
+        }
+
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập trước', 'error'); throw new Error('No token'); }
+            const res = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        // ==================== DROPDOWNS ====================
+        let allFacilities = [], allBranches = [], allDepts = [], allRooms = [], allBeds = [];
+
+        async function loadDropdowns() {
+            try {
+                const [facRes, branchRes, deptRes, roomRes, bedRes] = await Promise.allSettled([
+                    apiFetch(`${API}/facilities/dropdown`),
+                    apiFetch(`${API}/branches?limit=200`),
+                    apiFetch(`${API}/departments?limit=200`),
+                    apiFetch(`${API}/medical-rooms/dropdown`),
+                    apiFetch(`${API}/beds?limit=200`)
+                ]);
+                if (facRes.status === 'fulfilled') {
+                    allFacilities = facRes.value.data || [];
+                    document.querySelectorAll('.fac-select').forEach(sel => {
+                        const val = sel.value;
+                        const defaultLabel = sel.id === 'fFacility' ? 'Tất cả cơ sở' : '-- Chọn cơ sở --';
+                        sel.innerHTML = `<option value="">${defaultLabel}</option>` + allFacilities.map(f => `<option value="${f.facilities_id}">${f.name}</option>`).join('');
+                        if (val) sel.value = val;
+                    });
+                }
+                if (branchRes.status === 'fulfilled') {
+                    allBranches = branchRes.value.data?.data || branchRes.value.data?.items || branchRes.value.data || [];
+                    populateFilterBranch();
+                }
+                if (deptRes.status === 'fulfilled') {
+                    allDepts = deptRes.value.data?.items || deptRes.value.data || [];
+                    populateDeptSelects();
+                }
+                if (roomRes.status === 'fulfilled') {
+                    allRooms = roomRes.value.data || [];
+                    populateRoomSelects();
+                }
+                if (bedRes.status === 'fulfilled') {
+                    allBeds = bedRes.value.data?.data || bedRes.value.data || [];
+                    const bedSel = document.getElementById('dBedId');
+                    bedSel.innerHTML = '<option value="">-- Chọn giường --</option>' + allBeds.map(b => `<option value="${b.beds_id || b.bed_id}">${b.code} - ${b.name} (${b.status})</option>`).join('');
+                }
+            } catch (e) { console.error('loadDropdowns error:', e); }
+        }
+
+        function populateFilterBranch() {
+            const facId = document.getElementById('fFacility').value;
+            const filtered = facId ? allBranches.filter(b => b.facility_id === facId) : allBranches;
+            const sel = document.getElementById('fBranch');
+            const val = sel.value;
+            sel.innerHTML = '<option value="">Tất cả chi nhánh</option>' + filtered.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+            if (val) sel.value = val;
+        }
+
+        function populateCreateBranch() {
+            const facId = document.getElementById('cFacility').value;
+            const filtered = facId ? allBranches.filter(b => b.facility_id === facId) : allBranches;
+            const sel = document.getElementById('cBranch');
+            sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>' + filtered.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+            populateCreateDept();
+            populateCreateRoom();
+        }
+
+        function populateDeptSelects() {
+            document.querySelectorAll('.dept-select').forEach(sel => {
+                const val = sel.value;
+                const defaultLabel = sel.id === 'fDept' ? 'Tất cả khoa' : '-- Thu hồi / Không chọn --';
+                sel.innerHTML = `<option value="">${defaultLabel}</option>` + allDepts.map(d => `<option value="${d.departments_id}">${d.name}</option>`).join('');
+                if (val) sel.value = val;
+            });
+        }
+
+        function populateCreateDept() {
+            const sel = document.getElementById('cDept');
+            sel.innerHTML = '<option value="">-- Không chọn --</option>' + allDepts.map(d => `<option value="${d.departments_id}">${d.name}</option>`).join('');
+        }
+
+        function populateRoomSelects() {
+            document.querySelectorAll('.room-select').forEach(sel => {
+                const val = sel.value;
+                const defaultLabel = sel.id === 'fRoom' ? 'Tất cả phòng' : '-- Thu hồi / Không chọn --';
+                sel.innerHTML = `<option value="">${defaultLabel}</option>` + allRooms.map(r => `<option value="${r.medical_rooms_id}">${r.code} - ${r.name}</option>`).join('');
+                if (val) sel.value = val;
+            });
+        }
+
+        function populateCreateRoom() {
+            const branchId = document.getElementById('cBranch')?.value;
+            const filtered = branchId ? allRooms.filter(r => r.branch_id === branchId) : allRooms;
+            const sel = document.getElementById('cRoom');
+            if (sel) {
+                sel.innerHTML = '<option value="">-- Không gán --</option>' + filtered.map(r => `<option value="${r.medical_rooms_id}">${r.code} - ${r.name}</option>`).join('');
+            }
+        }
+
+        function onFilterFacChange() { populateFilterBranch(); loadBeds(); }
+        function onCreateFacChange() { populateCreateBranch(); }
+        function onCreateBranchChange() { populateCreateRoom(); }
+
+        // ==================== 1. LIST BEDS ====================
+        async function loadBeds(page) {
+            if (page) bedPage = page;
+            const params = new URLSearchParams({ page: bedPage, limit: 20 });
+            const search = document.getElementById('fSearch').value;
+            const facId = document.getElementById('fFacility').value;
+            const branchId = document.getElementById('fBranch').value;
+            const deptId = document.getElementById('fDept').value;
+            const roomId = document.getElementById('fRoom').value;
+            const status = document.getElementById('fStatus').value;
+            if (search) params.set('search', search);
+            if (facId) params.set('facility_id', facId);
+            if (branchId) params.set('branch_id', branchId);
+            if (deptId) params.set('department_id', deptId);
+            if (roomId) params.set('room_id', roomId);
+            if (status) params.set('status', status);
+
+            try {
+                const r = await apiFetch(`${API}/beds?${params}`);
+                const items = r.data?.data || r.data || [];
+                const tbody = document.getElementById('bedTableBody');
+
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="empty">📭 Không có giường nào</td></tr>';
+                    document.getElementById('bedPagination').innerHTML = '';
+                    return;
+                }
+
+                tbody.innerHTML = items.map(b => `<tr>
+                    <td><strong>${b.code || ''}</strong></td>
+                    <td>${b.name || ''}</td>
+                    <td>${typeBadge(b.type || b.bed_type)}</td>
+                    <td>${b.room_name || b.room_id || '—'}</td>
+                    <td>${b.department_name || b.department_id || '—'}</td>
+                    <td>${statusBadge(b.status || 'EMPTY')}</td>
+                    <td><button class="btn btn-outline btn-sm" onclick="viewDetail('${b.beds_id || b.bed_id}')">🔍</button></td>
+                </tr>`).join('');
+
+                const totalPages = r.data?.totalPages || r.pagination?.totalPages || 1;
+                const pgEl = document.getElementById('bedPagination');
+                if (totalPages > 1) {
+                    pgEl.innerHTML = `
+                        <button class="btn btn-outline btn-sm" onclick="loadBeds(${bedPage - 1})" ${bedPage <= 1 ? 'disabled' : ''}>◀</button>
+                        <span class="page-info">Trang ${bedPage} / ${totalPages}</span>
+                        <button class="btn btn-outline btn-sm" onclick="loadBeds(${bedPage + 1})" ${bedPage >= totalPages ? 'disabled' : ''}>▶</button>`;
+                } else { pgEl.innerHTML = ''; }
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function viewDetail(id) {
+            document.getElementById('dBedId').value = id;
+            switchTab('detail');
+            loadDetail();
+        }
+
+        // ==================== 2. CREATE BED ====================
+        async function createBed() {
+            const body = {
+                facility_id: document.getElementById('cFacility').value,
+                branch_id: document.getElementById('cBranch').value,
+                code: document.getElementById('cCode').value,
+                name: document.getElementById('cName').value,
+            };
+            const type = document.getElementById('cType').value;
+            const deptId = document.getElementById('cDept').value;
+            const roomId = document.getElementById('cRoom').value;
+            const desc = document.getElementById('cDesc').value;
+            if (type) body.type = type;
+            if (deptId) body.department_id = deptId;
+            if (roomId) body.room_id = roomId;
+            if (desc) body.description = desc;
+
+            try {
+                const r = await apiFetch(`${API}/beds`, { method: 'POST', body: JSON.stringify(body) });
+                const bedId = r.data?.beds_id || r.data?.bed_id || '';
+                toast(`Tạo thành công! ID: ${bedId}`, 'success');
+                document.getElementById('dBedId').value = bedId;
+                switchTab('detail');
+                loadDetail();
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 3. DETAIL ====================
+        async function loadDetail() {
+            const id = (document.getElementById('dBedId').value || '').trim();
+            if (!id) { toast('Vui lòng chọn giường', 'error'); return; }
+            currentBedId = id;
+
+            try {
+                const r = await apiFetch(`${API}/beds/${id}`);
+                const b = r.data;
+                document.getElementById('detailContent').innerHTML = `
+                    <dl class="detail-grid">
+                        <dt>Bed ID</dt><dd><strong>${b.beds_id || b.bed_id}</strong></dd>
+                        <dt>Mã</dt><dd>${b.code || '-'}</dd>
+                        <dt>Tên</dt><dd>${b.name || '-'}</dd>
+                        <dt>Loại</dt><dd>${typeBadge(b.type || b.bed_type)}</dd>
+                        <dt>Cơ sở</dt><dd>${b.facility_name || b.facility_id || '-'}</dd>
+                        <dt>Chi nhánh</dt><dd>${b.branch_name || b.branch_id || '-'}</dd>
+                        <dt>Khoa</dt><dd>${b.department_name || b.department_id || '— Chưa gán'}</dd>
+                        <dt>Phòng</dt><dd>${b.room_name || b.room_id || '— Chưa gán'}</dd>
+                        <dt>Trạng thái</dt><dd>${statusBadge(b.status)}</dd>
+                        <dt>Mô tả</dt><dd>${b.description || '-'}</dd>
+                        <dt>Tạo lúc</dt><dd>${b.created_at ? new Date(b.created_at).toLocaleString('vi-VN') : '-'}</dd>
+                    </dl>`;
+
+                document.getElementById('actionsCard').style.display = 'block';
+                document.getElementById('aStatus').value = b.status;
+
+                // Pre-fill update form
+                document.getElementById('uName').value = b.name || '';
+                document.getElementById('uCode').value = b.code || '';
+                document.getElementById('uDesc').value = b.description || '';
+            } catch (e) {
+                document.getElementById('detailContent').innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+                document.getElementById('actionsCard').style.display = 'none';
+                toast(e.message, 'error');
+            }
+        }
+
+        // ==================== 4. UPDATE BED ====================
+        async function updateBed() {
+            if (!currentBedId) return;
+            const body = {};
+            const name = document.getElementById('uName').value;
+            const code = document.getElementById('uCode').value;
+            const type = document.getElementById('uType').value;
+            const desc = document.getElementById('uDesc').value;
+            if (name) body.name = name;
+            if (code) body.code = code;
+            if (type) body.type = type;
+            if (desc) body.description = desc;
+            try {
+                await apiFetch(`${API}/beds/${currentBedId}`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Cập nhật thành công', 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 5. ASSIGN BED ====================
+        async function assignBed() {
+            if (!currentBedId) return;
+            const body = {};
+            const deptId = document.getElementById('aDept').value;
+            const roomId = document.getElementById('aRoom').value;
+            body.department_id = deptId || null;
+            body.room_id = roomId || null;
+            try {
+                await apiFetch(`${API}/beds/${currentBedId}/assign`, { method: 'PUT', body: JSON.stringify(body) });
+                toast(roomId ? `Đã gán vào phòng` : 'Đã thu hồi', 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 6. CHANGE STATUS ====================
+        async function changeStatus() {
+            if (!currentBedId) return;
+            const status = document.getElementById('aStatus').value;
+            try {
+                await apiFetch(`${API}/beds/${currentBedId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+                toast(`Trạng thái → ${status}`, 'success');
+                loadDetail();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== 7. DELETE BED ====================
+        async function deleteBed() {
+            if (!currentBedId) return;
+            if (!confirm('Bạn có chắc muốn xóa giường này?')) return;
+            try {
+                await apiFetch(`${API}/beds/${currentBedId}`, { method: 'DELETE' });
+                toast('Đã xóa giường', 'success');
+                document.getElementById('detailContent').innerHTML = '<div class="empty">Giường đã bị xóa</div>';
+                document.getElementById('actionsCard').style.display = 'none';
+                currentBedId = null;
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

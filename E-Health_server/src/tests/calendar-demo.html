@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Calendar API 2.6.3</title>
+    <!-- Tailwind CSS for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .calendar-day {
+            background-color: white;
+            min-height: 120px;
+            padding: 8px;
+        }
+
+        .day-header {
+            font-weight: bold;
+            text-align: right;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .shift-item {
+            font-size: 0.75rem;
+            padding: 4px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .shift-item.afternoon {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-left-color: #f59e0b;
+        }
+
+        .shift-item.night {
+            background-color: #f3f4f6;
+            color: #111827;
+            border-left-color: #4b5563;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Lịch Làm Việc Bác Sĩ (Demo API)</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                    <span class="text-xs text-gray-600">Ca Sáng</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-amber-500 rounded-full mr-2"></span>
+                    <span class="text-xs text-gray-600">Ca Chiều</span>
+                </div>
+                <!-- Token input for auth -->
+                <input type="text" id="tokenInput" placeholder="Nhập Bearer Token..."
+                    class="ml-4 p-2 border rounded text-sm w-64">
+                <button onclick="fetchCalendarData()"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm font-medium">Tải Dữ
+                    Liệu Lịch</button>
+            </div>
+        </div>
+
+        <div id="error-message" class="hidden mb-4 p-4 bg-red-100 text-red-700 rounded-md"></div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- Day of week headers -->
+            <div class="grid grid-cols-7 gap-px text-center font-medium text-gray-700 bg-gray-200 py-3">
+                <div>Chủ Nhật</div>
+                <div>Thứ 2</div>
+                <div>Thứ 3</div>
+                <div>Thứ 4</div>
+                <div>Thứ 5</div>
+                <div>Thứ 6</div>
+                <div>Thứ 7</div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div id="calendar-body" class="calendar-grid">
+                <!-- Days will be generated here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate a simple calendar for March 2026 (Month 2 in JS since it's 0-indexed)
+        const year = 2026;
+        const month = 2; // March
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startDayOfWeek = new Date(year, month, 1).getDay(); // 0 is Sunday
+
+        const calendarBody = document.getElementById('calendar-body');
+
+        function renderEmptyCalendar() {
+            calendarBody.innerHTML = '';
+
+            // Empty days before start of month
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day bg-gray-50';
+                calendarBody.appendChild(emptyDay);
+            }
+
+            // Days of the month
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.id = `day-${dateKey}`;
+
+                dayDiv.innerHTML = `
+                    <div class="day-header">${d}</div>
+                    <div id="shifts-${dateKey}" class="shifts-container min-h-[80px]">
+                        <!-- Shifts will go here -->
+                    </div>
+                `;
+
+                calendarBody.appendChild(dayDiv);
+            }
+        }
+
+        async function fetchCalendarData() {
+            const token = document.getElementById('tokenInput').value;
+            const errorDiv = document.getElementById('error-message');
+
+            if (!token) {
+                errorDiv.textContent = 'Vui lòng nhập Bearer Token để Authorization!';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+
+            try {
+                // Fetch group-by-date API
+                const response = await fetch('http://localhost:3000/api/staff-schedules/calendar', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const json = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(json.message || 'Lỗi lấy dữ liệu API');
+                }
+
+                // Clear old shifts before rendering new ones
+                document.querySelectorAll('.shifts-container').forEach(el => el.innerHTML = '');
+
+                const groupedData = json.data;
+
+                // Iterate through dates returned by API
+                for (const [dateString, shifts] of Object.entries(groupedData)) {
+                    // Normalize date string (API returns ISO date string like '2026-03-09T17:00:00.000Z' sometimes, we need to extract YYYY-MM-DD safely)
+                    let targetDateKey = dateString;
+                    if (dateString.includes('T')) {
+                        const dateObj = new Date(dateString);
+                        targetDateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+                    }
+
+                    const shiftsContainer = document.getElementById(`shifts-${targetDateKey}`);
+
+                    if (shiftsContainer) {
+                        // Clear old shift containers initially done before the loop
+                        shifts.forEach(shift => {
+                            const shiftEl = document.createElement('div');
+
+                            // Determine style class based on time or name
+                            let colorClass = '';
+                            if (shift.start_time >= '12:00:00' && shift.start_time < '18:00:00') {
+                                colorClass = 'afternoon';
+                            } else if (shift.start_time >= '18:00:00' || shift.end_time <= '06:00:00') {
+                                colorClass = 'night';
+                            }
+
+                            shiftEl.className = `shift-item ${colorClass}`;
+                            shiftEl.innerHTML = `
+                                <div class="font-bold truncate" title="${shift.full_name}">${shift.full_name}</div>
+                                <div class="text-[10px] truncate" title="${shift.room_name}">${shift.room_name}</div>
+                                <div class="text-[10px] mt-1">${shift.start_time.substring(0, 5)} - ${shift.end_time.substring(0, 5)}</div>
+                            `;
+
+                            if (shift.is_leave) {
+                                shiftEl.style.backgroundColor = '#fee2e2'; // red-100
+                                shiftEl.style.borderColor = '#ef4444'; // red-500
+                                shiftEl.style.color = '#b91c1c'; // red-700
+                                shiftEl.style.textDecoration = 'line-through';
+                                shiftEl.title = `Nghỉ phép: ${shift.leave_reason || ''}`;
+                            }
+
+                            shiftsContainer.appendChild(shiftEl);
+                        });
+                    }
+                }
+
+                alert('Tải dữ liệu thành công!');
+
+            } catch (err) {
+                errorDiv.textContent = `Lỗi: ${err.message}`;
+                errorDiv.classList.remove('hidden');
+                console.error(err);
+            }
+        }
+
+        // Initialize empty grid on load
+        renderEmptyCalendar();
+    </script>
+</body>
+
+</html>

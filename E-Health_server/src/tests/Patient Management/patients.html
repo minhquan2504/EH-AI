@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👤 Hồ sơ Bệnh nhân — Test</title>
+    <style>
+        :root {
+            --p: #4f46e5;
+            --pl: #818cf8;
+            --pd: #3730a3;
+            --pbg: #eef2ff;
+            --ok: #10b981;
+            --err: #ef4444;
+            --warn: #f59e0b;
+            --bg: #f1f5f9;
+            --card: #fff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --r: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06)
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--pd), var(--p));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3)
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .7);
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .header a:hover {
+            color: #fff
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9)
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem
+        }
+
+        .main {
+            max-width: 1060px;
+            margin: 20px auto;
+            padding: 0 16px
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .84rem;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            color: var(--muted);
+            transition: all .2s
+        }
+
+        .tab:hover {
+            color: var(--p)
+        }
+
+        .tab.active {
+            color: var(--p);
+            border-bottom-color: var(--p);
+            background: var(--pbg);
+            border-radius: 8px 8px 0 0
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, .04)
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--pd)
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        .btn:active {
+            transform: translateY(0)
+        }
+
+        .btn-p {
+            background: var(--p);
+            color: #fff
+        }
+
+        .btn-ok {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .btn-err {
+            background: var(--err);
+            color: #fff
+        }
+
+        .btn-warn {
+            background: var(--warn);
+            color: #000
+        }
+
+        .btn-out {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem;
+            border-radius: 6px
+        }
+
+        .form-group {
+            margin-bottom: 12px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 4px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--pl);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .84rem
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .76rem;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tbody tr {
+            transition: background .15s
+        }
+
+        tbody tr:hover {
+            background: var(--pbg)
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .badge-ok {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .badge-err {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .badge-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px
+        }
+
+        .detail-grid dt {
+            background: #f8fafc;
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: .82rem;
+            color: var(--muted)
+        }
+
+        .detail-grid dd {
+            background: var(--card);
+            padding: 10px 14px;
+            font-size: .84rem
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted)
+        }
+
+        .toast-c {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .84rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s;
+            min-width: 260px
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669)
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626)
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--p), var(--pd))
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .hint {
+            font-size: .78rem;
+            color: var(--muted)
+        }
+
+        .clickable {
+            cursor: pointer;
+            color: var(--p);
+            text-decoration: underline
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-overlay.open {
+            display: flex
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: var(--r);
+            padding: 24px;
+            width: 480px;
+            max-width: 92vw;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .2);
+            animation: modalIn .25s
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            color: var(--pd);
+            font-size: 1.05rem
+        }
+
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--muted)
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.95)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>👤 Hồ sơ Bệnh nhân</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast-c" id="toastC"></div>
+    <div class="main">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('list')">📋 Danh sách</div>
+            <div class="tab" onclick="switchTab('create')">➕ Tạo mới</div>
+            <div class="tab" onclick="switchTab('search')">🔍 Tìm kiếm</div>
+            <div class="tab" onclick="switchTab('detail')">📄 Chi tiết</div>
+            <div class="tab" onclick="switchTab('contacts')">👨‍👩‍👧 Người thân</div>
+            <div class="tab" onclick="switchTab('docs')">📎 Tài liệu</div>
+            <div class="tab" onclick="switchTab('tags')">🏷️ Thẻ</div>
+        </div>
+
+        <!-- ============ TAB: LIST ============ -->
+        <div class="panel active" id="panel_list">
+            <div class="card">
+                <h3>📋 Danh sách Hồ sơ Bệnh nhân</h3>
+                <div class="toolbar">
+                    <input id="f_search" placeholder="Tìm tên, mã, SĐT..." style="flex:1">
+                    <select id="f_status">
+                        <option value="">-- Trạng thái --</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                    <select id="f_gender">
+                        <option value="">-- Giới tính --</option>
+                        <option value="MALE">Nam</option>
+                        <option value="FEMALE">Nữ</option>
+                        <option value="OTHER">Khác</option>
+                    </select>
+                    <button class="btn btn-p" onclick="loadPatients()">🔄 Tải</button>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-out btn-sm" onclick="loadPatientsInsurance(true)">🛡️ Có BH</button>
+                    <button class="btn btn-out btn-sm" onclick="loadPatientsInsurance(false)">❌ Không BH</button>
+                </div>
+                <div id="patientListResult">
+                    <div class="empty">Nhấn "Tải" để xem danh sách</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: CREATE ============ -->
+        <div class="panel" id="panel_create">
+            <div class="card">
+                <h3>➕ Tạo mới Hồ sơ Bệnh nhân</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Họ tên *</label><input id="c_name" placeholder="Nguyễn Văn An"></div>
+                    <div class="form-group"><label>Ngày sinh *</label><input type="date" id="c_dob"></div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Giới tính *</label><select id="c_gender">
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                            <option value="OTHER">Khác</option>
+                        </select></div>
+                    <div class="form-group"><label>SĐT</label><input id="c_phone" placeholder="0901234567"></div>
+                    <div class="form-group"><label>Email</label><input id="c_email" placeholder="email@gmail.com"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>CMND/CCCD</label><input id="c_idcard" placeholder="079090123456">
+                    </div>
+                    <div class="form-group"><label>Địa chỉ</label><input id="c_address"
+                            placeholder="123 Nguyễn Trãi, Q5"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Người liên hệ khẩn cấp</label><input id="c_emergency_name"></div>
+                    <div class="form-group"><label>SĐT khẩn cấp</label><input id="c_emergency_phone"></div>
+                </div>
+                <button class="btn btn-ok" onclick="createPatient()">✅ Tạo hồ sơ</button>
+                <div id="createResult"></div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: SEARCH ============ -->
+        <div class="panel" id="panel_search">
+            <div class="card">
+                <h3>🔍 Tìm kiếm nâng cao</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Từ khóa</label><input id="s_kw" placeholder="Tên, mã, SĐT, CCCD">
+                    </div>
+                    <div class="form-group"><label>Giới tính</label><select id="s_gender">
+                            <option value="">Tất cả</option>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                        </select></div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Trạng thái</label><select id="s_status">
+                            <option value="">Tất cả</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select></div>
+                    <div class="form-group"><label>Tuổi tối thiểu</label><input type="number" id="s_ageMin"
+                            placeholder="18"></div>
+                    <div class="form-group"><label>Tuổi tối đa</label><input type="number" id="s_ageMax"
+                            placeholder="65"></div>
+                </div>
+                <button class="btn btn-p" onclick="advancedSearch()">🔍 Tìm nâng cao</button>
+                <div id="searchResult"></div>
+            </div>
+            <div class="card">
+                <h3>⚡ Tra cứu nhanh (Autocomplete)</h3>
+                <div class="toolbar">
+                    <input id="qs_q" placeholder="Gõ tên / mã / SĐT" style="flex:1">
+                    <button class="btn btn-out" onclick="quickSearch()">⚡ Tra cứu</button>
+                </div>
+                <div id="quickSearchResult"></div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: DETAIL ============ -->
+        <div class="panel" id="panel_detail">
+            <div class="card">
+                <h3>📄 Chi tiết Hồ sơ Bệnh nhân</h3>
+                <div class="toolbar">
+                    <select id="d_patient" style="flex:1">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-p" onclick="loadDetail()">📄 Xem</button>
+                    <button class="btn btn-out" onclick="loadSummary()">📊 Tóm tắt</button>
+                    <button class="btn btn-out" onclick="loadAuditLogs()">📝 Audit</button>
+                </div>
+                <div id="detailResult"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Cập nhật thông tin</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Họ tên</label><input id="u_name"></div>
+                    <div class="form-group"><label>SĐT</label><input id="u_phone"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Email</label><input id="u_email"></div>
+                    <div class="form-group"><label>Địa chỉ</label><input id="u_address"></div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-ok" onclick="updatePatient()">💾 Cập nhật</button>
+                    <select id="u_status">
+                        <option value="">-- Đổi trạng thái --</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                    <button class="btn btn-warn btn-sm" onclick="changeStatus()">🔄 Đổi TT</button>
+                    <button class="btn btn-err btn-sm" onclick="deletePatient()">🗑️ Xóa</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🔗 Liên kết Tài khoản App</h3>
+                <div class="toolbar">
+                    <input id="link_acc" placeholder="Account ID (user_id)" style="flex:1">
+                    <button class="btn btn-p btn-sm" onclick="linkAccount()">🔗 Liên kết</button>
+                    <button class="btn btn-err btn-sm" onclick="unlinkAccount()">❌ Hủy liên kết</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🛡️ Trạng thái Bảo hiểm</h3>
+                <div class="toolbar">
+                    <select id="ins_flag">
+                        <option value="true">Có bảo hiểm</option>
+                        <option value="false">Không có</option>
+                    </select>
+                    <button class="btn btn-ok btn-sm" onclick="updateInsuranceStatus()">Cập nhật cờ BH</button>
+                </div>
+                <div id="patInsResult"></div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: CONTACTS ============ -->
+        <div class="panel" id="panel_contacts">
+            <div class="card">
+                <h3>👨‍👩‍👧 Người thân & Liên hệ</h3>
+                <div class="toolbar">
+                    <select id="ct_patient" style="flex:1" onchange="loadRelations()">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-ok btn-sm" onclick="openAddContactModal()">➕ Thêm người thân</button>
+                    <button class="btn btn-p btn-sm" onclick="loadRelations()">Tất cả</button>
+                    <button class="btn btn-out btn-sm" onclick="loadEmergency()">🚨 Khẩn cấp</button>
+                    <button class="btn btn-out btn-sm" onclick="loadGuardians()">👨‍⚖️ Giám hộ</button>
+                    <button class="btn btn-out btn-sm" onclick="loadRelatives()">👨‍👩‍👧 Người thân</button>
+                    <button class="btn btn-out btn-sm" onclick="loadLegalRep()">⚖️ Đại diện PL</button>
+                </div>
+                <div id="contactsResult"></div>
+            </div>
+        </div>
+
+        <!-- ============ TAB: DOCS ============ -->
+        <div class="panel" id="panel_docs">
+            <div class="card">
+                <h3>📎 Tài liệu Bệnh nhân</h3>
+                <div class="toolbar">
+                    <select id="doc_patient" style="flex:1">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadPatientDocs()">📎 Xem tài liệu</button>
+                </div>
+                <div id="docsResult"></div>
+            </div>
+            <div class="card">
+                <h3>📤 Upload tài liệu</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Tên tài liệu *</label><input id="doc_name"
+                            placeholder="CCCD Nguyễn Văn A"></div>
+                    <div class="form-group"><label>Chọn file *</label><input type="file" id="doc_file"
+                            accept=".jpg,.png,.webp,.pdf"></div>
+                </div>
+                <div class="form-group"><label>Ghi chú</label><input id="doc_notes" placeholder="Bản scan mặt trước">
+                </div>
+                <button class="btn btn-ok" onclick="uploadDoc()">📤 Upload</button>
+            </div>
+        </div>
+
+        <!-- ============ TAB: TAGS ============ -->
+        <div class="panel" id="panel_tags">
+            <div class="card">
+                <h3>🏷️ Thẻ gắn trên Bệnh nhân</h3>
+                <div class="toolbar">
+                    <select id="tag_patient" style="flex:1">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadPatientTags()">🏷️ Xem thẻ</button>
+                </div>
+                <div id="tagsResult"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Gắn thẻ & 🔍 Lọc theo thẻ</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Tag ID</label><select id="tag_sel">
+                            <option value="">-- Chọn thẻ --</option>
+                        </select></div>
+                    <div class="form-group"><label>Match All?</label><select id="tag_match">
+                            <option value="false">Bất kỳ (OR)</option>
+                            <option value="true">Tất cả (AND)</option>
+                        </select></div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-ok btn-sm" onclick="assignTag()">➕ Gắn thẻ</button>
+                    <button class="btn btn-err btn-sm" onclick="removeTag()">🗑️ Gỡ thẻ</button>
+                    <button class="btn btn-p btn-sm" onclick="filterByTags()">🔍 Lọc BN theo thẻ</button>
+                </div>
+                <div id="tagActionResult"></div>
+            </div>
+            <div class="card">
+                <h3>📅 Lịch khám Bệnh nhân</h3>
+                <div class="toolbar">
+                    <select id="apt_patient" style="flex:1">
+                        <option value="">-- Chọn bệnh nhân --</option>
+                    </select>
+                    <button class="btn btn-p btn-sm" onclick="loadAppointments()">📅 Xem lịch khám</button>
+                </div>
+                <div id="aptsResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Thêm người thân -->
+    <div class="modal-overlay" id="addContactModal" onclick="if(event.target===this)closeContactModal()">
+        <div class="modal">
+            <button class="modal-close" onclick="closeContactModal()">✕</button>
+            <h3>➕ Thêm người thân / Liên hệ</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Họ tên *</label><input id="nc_name" placeholder="Nguyễn Thị B"></div>
+                <div class="form-group"><label>SĐT *</label><input id="nc_phone" placeholder="0987654321"></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Loại quan hệ *</label><select id="nc_relType">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Liên hệ khẩn cấp?</label><select id="nc_emergency">
+                        <option value="false">Không</option>
+                        <option value="true">Có</option>
+                    </select></div>
+                <div class="form-group"><label>Đại diện pháp lý?</label><select id="nc_legal">
+                        <option value="false">Không</option>
+                        <option value="true">Có</option>
+                    </select></div>
+            </div>
+            <div class="form-group"><label>Địa chỉ</label><input id="nc_addr" placeholder="123 Nguyễn Trãi, Q5"></div>
+            <button class="btn btn-ok" onclick="createContact()" style="width:100%;margin-top:4px">✅ Thêm người
+                thân</button>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api'; let token = null;
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastC'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        function switchTab(id) { document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', t.textContent.includes(({ 'list': 'Danh sách', 'create': 'Tạo mới', 'search': 'Tìm kiếm', 'detail': 'Chi tiết', 'contacts': 'Người thân', 'docs': 'Tài liệu', 'tags': 'Thẻ' })[id]))); document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById('panel_' + id).classList.add('active') }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadDropdowns() } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Patient Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success'); loadDropdowns() } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+
+        // ==================== DROPDOWNS ====================
+        let allPatients = [], allTags = [], allRelTypes = [];
+        async function loadDropdowns() {
+            try {
+                const pr = await apiFetch(`${API}/patients?limit=100`);
+                allPatients = pr.data?.data || pr.data || [];
+                const html = '<option value="">-- Chọn bệnh nhân --</option>' + allPatients.map(p => `<option value="${p.id}">${p.full_name} (${p.patient_code || p.id})</option>`).join('');
+                ['d_patient', 'ct_patient', 'doc_patient', 'tag_patient', 'apt_patient'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = html });
+            } catch (e) { console.error('loadPatients dropdown:', e) }
+            try {
+                const tr = await apiFetch(`${API}/patient-tags?limit=100`);
+                allTags = tr.data?.data || tr.data || [];
+                const thtml = '<option value="">-- Chọn thẻ --</option>' + allTags.map(t => `<option value="${t.tag_id || t.tags_id}">${t.name} (${t.code})</option>`).join('');
+                document.getElementById('tag_sel').innerHTML = thtml;
+            } catch (e) { console.error('loadTags dropdown:', e) }
+            try {
+                const rr = await apiFetch(`${API}/relation-types`);
+                allRelTypes = rr.data || [];
+                document.getElementById('nc_relType').innerHTML = '<option value="">-- Chọn --</option>' + allRelTypes.map(r => `<option value="${r.relation_types_id}">${r.name} (${r.code})</option>`).join('');
+            } catch (e) { console.error('loadRelTypes dropdown:', e) }
+        }
+
+        function getPatientId(selId) { const v = document.getElementById(selId).value; if (!v) toast('Chọn bệnh nhân', 'error'); return v }
+        function renderTable(data, cols, containerId) {
+            const el = document.getElementById(containerId);
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty">Không có dữ liệu</div>'; return }
+            let html = '<div class="tbl-wrap"><table><thead><tr>' + cols.map(c => `<th>${c.label}</th>`).join('') + '</tr></thead><tbody>';
+            for (const row of data) {
+                html += '<tr>' + cols.map(c => {
+                    let v = c.key.split('.').reduce((o, k) => o?.[k], row);
+                    if (c.render) v = c.render(v, row);
+                    return `<td>${v ?? '—'}</td>`
+                }).join('') + '</tr>'
+            }
+            html += '</tbody></table></div>'; el.innerHTML = html;
+        }
+
+        // ==================== 1. LIST ====================
+        async function loadPatients() {
+            try {
+                const p = new URLSearchParams();
+                const s = document.getElementById('f_search').value; if (s) p.set('search', s);
+                const st = document.getElementById('f_status').value; if (st) p.set('status', st);
+                const g = document.getElementById('f_gender').value; if (g) p.set('gender', g);
+                p.set('limit', '50');
+                const r = await apiFetch(`${API}/patients?${p}`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'patient_code', label: 'Mã BN' },
+                    { key: 'full_name', label: 'Họ tên' },
+                    { key: 'gender', label: 'GT', render: v => v === 'MALE' ? 'Nam' : v === 'FEMALE' ? 'Nữ' : 'Khác' },
+                    { key: 'date_of_birth', label: 'Ngày sinh', render: v => v ? v.substring(0, 10) : '—' },
+                    { key: 'phone_number', label: 'SĐT' },
+                    { key: 'status', label: 'TT', render: v => `<span class="badge ${v === 'ACTIVE' ? 'badge-ok' : 'badge-err'}">${v}</span>` },
+                    { key: 'has_insurance', label: 'BH', render: v => v ? '🛡️' : '❌' }
+                ], 'patientListResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadPatientsInsurance(has) {
+            try {
+                const url = has ? `${API}/patients/with-insurance?limit=50` : `${API}/patients/without-insurance?limit=50`;
+                const r = await apiFetch(url);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'patient_code', label: 'Mã BN' }, { key: 'full_name', label: 'Họ tên' }, { key: 'phone_number', label: 'SĐT' },
+                    { key: 'status', label: 'TT', render: v => `<span class="badge ${v === 'ACTIVE' ? 'badge-ok' : 'badge-err'}">${v}</span>` },
+                    { key: 'has_insurance', label: 'BH', render: v => v ? '🛡️' : '❌' }
+                ], 'patientListResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 2. CREATE ====================
+        async function createPatient() {
+            try {
+                const body = { full_name: document.getElementById('c_name').value, date_of_birth: document.getElementById('c_dob').value, gender: document.getElementById('c_gender').value };
+                const phone = document.getElementById('c_phone').value; if (phone) body.phone_number = phone;
+                const email = document.getElementById('c_email').value; if (email) body.email = email;
+                const idc = document.getElementById('c_idcard').value; if (idc) body.id_card_number = idc;
+                const addr = document.getElementById('c_address').value; if (addr) body.address = addr;
+                const en = document.getElementById('c_emergency_name').value; if (en) body.emergency_contact_name = en;
+                const ep = document.getElementById('c_emergency_phone').value; if (ep) body.emergency_contact_phone = ep;
+                const r = await apiFetch(`${API}/patients`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Tạo hồ sơ thành công!', 'success');
+                document.getElementById('createResult').innerHTML = `<p class="hint" style="margin-top:10px">✅ ID: ${r.data?.id || JSON.stringify(r.data)}</p>`;
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 3. SEARCH ====================
+        async function advancedSearch() {
+            try {
+                const p = new URLSearchParams();
+                const kw = document.getElementById('s_kw').value; if (kw) p.set('keyword', kw);
+                const g = document.getElementById('s_gender').value; if (g) p.set('gender', g);
+                const st = document.getElementById('s_status').value; if (st) p.set('status', st);
+                const amin = document.getElementById('s_ageMin').value; if (amin) p.set('ageMin', amin);
+                const amax = document.getElementById('s_ageMax').value; if (amax) p.set('ageMax', amax);
+                const r = await apiFetch(`${API}/patients/search?${p}`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'patient_code', label: 'Mã BN' }, { key: 'full_name', label: 'Họ tên' }, { key: 'gender', label: 'GT' },
+                    { key: 'date_of_birth', label: 'Ngày sinh', render: v => v ? v.substring(0, 10) : '—' }, { key: 'phone_number', label: 'SĐT' },
+                    { key: 'status', label: 'TT', render: v => `<span class="badge ${v === 'ACTIVE' ? 'badge-ok' : 'badge-err'}">${v}</span>` }
+                ], 'searchResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function quickSearch() {
+            try {
+                const q = document.getElementById('qs_q').value; if (!q) { toast('Nhập từ khóa', 'error'); return }
+                const r = await apiFetch(`${API}/patients/quick-search?q=${encodeURIComponent(q)}`);
+                const list = r.data || [];
+                renderTable(list, [
+                    { key: 'patient_code', label: 'Mã BN' }, { key: 'full_name', label: 'Họ tên' }, { key: 'phone_number', label: 'SĐT' },
+                    { key: 'gender', label: 'GT' }, { key: 'date_of_birth', label: 'Ngày sinh', render: v => v ? v.substring(0, 10) : '—' }
+                ], 'quickSearchResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 4. DETAIL ====================
+        async function loadDetail() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}`);
+                const d = r.data;
+                let html = '<dl class="detail-grid">';
+                const fields = [['ID', d.id], ['Mã BN', d.patient_code], ['Họ tên', d.full_name], ['Giới tính', d.gender], ['Ngày sinh', d.date_of_birth?.substring(0, 10)], ['SĐT', d.phone_number], ['Email', d.email], ['CMND/CCCD', d.id_card_number], ['Địa chỉ', d.address], ['Trạng thái', d.status], ['Bảo hiểm', d.has_insurance ? 'Có' : 'Không'], ['Account ID', d.account_id], ['Liên hệ KC', d.emergency_contact_name], ['SĐT KC', d.emergency_contact_phone]];
+                for (const [k, v] of fields) html += `<dt>${k}</dt><dd>${v || '—'}</dd>`;
+                html += '</dl>';
+                document.getElementById('detailResult').innerHTML = html;
+                if (d.full_name) { document.getElementById('u_name').value = d.full_name || ''; document.getElementById('u_phone').value = d.phone_number || ''; document.getElementById('u_email').value = d.email || ''; document.getElementById('u_address').value = d.address || '' }
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadSummary() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}/summary`);
+                const d = r.data;
+                let html = '<dl class="detail-grid">';
+                for (const [k, v] of Object.entries(d || {})) html += `<dt>${k}</dt><dd>${typeof v === 'object' ? JSON.stringify(v) : v ?? '—'}</dd>`;
+                html += '</dl>';
+                document.getElementById('detailResult').innerHTML = html;
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadAuditLogs() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}/audit-logs?limit=20`);
+                const list = r.data || [];
+                renderTable(list, [
+                    { key: 'action_type', label: 'Hành động', render: v => `<span class="badge badge-info">${v}</span>` },
+                    { key: 'user_email', label: 'Người thực hiện' }, { key: 'created_at', label: 'Thời gian', render: v => v ? new Date(v).toLocaleString('vi') : '—' },
+                    { key: 'module_name', label: 'Module' }
+                ], 'detailResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function updatePatient() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            const body = {};
+            const n = document.getElementById('u_name').value; if (n) body.full_name = n;
+            const p = document.getElementById('u_phone').value; if (p) body.phone_number = p;
+            const e = document.getElementById('u_email').value; if (e) body.email = e;
+            const a = document.getElementById('u_address').value; if (a) body.address = a;
+            try { await apiFetch(`${API}/patients/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật thành công!', 'success'); loadDetail() } catch (e) { toast(e.message, 'error') }
+        }
+        async function changeStatus() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            const st = document.getElementById('u_status').value; if (!st) { toast('Chọn trạng thái', 'error'); return }
+            try { await apiFetch(`${API}/patients/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: st }) }); toast('Đổi trạng thái OK!', 'success'); loadDetail() } catch (e) { toast(e.message, 'error') }
+        }
+        async function deletePatient() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            if (!confirm('Xóa hồ sơ bệnh nhân này?')) return;
+            try { await apiFetch(`${API}/patients/${id}`, { method: 'DELETE' }); toast('Đã xóa hồ sơ', 'success'); loadDropdowns() } catch (e) { toast(e.message, 'error') }
+        }
+        async function linkAccount() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            const accId = document.getElementById('link_acc').value; if (!accId) { toast('Nhập Account ID', 'error'); return }
+            try { await apiFetch(`${API}/patients/${id}/link-account`, { method: 'PATCH', body: JSON.stringify({ account_id: accId }) }); toast('Liên kết thành công!', 'success'); loadDetail() } catch (e) { toast(e.message, 'error') }
+        }
+        async function unlinkAccount() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            try { await apiFetch(`${API}/patients/${id}/unlink-account`, { method: 'PATCH' }); toast('Hủy liên kết OK!', 'success'); loadDetail() } catch (e) { toast(e.message, 'error') }
+        }
+        async function updateInsuranceStatus() {
+            const id = getPatientId('d_patient'); if (!id) return;
+            const v = document.getElementById('ins_flag').value === 'true';
+            try { await apiFetch(`${API}/patients/${id}/insurance-status`, { method: 'PATCH', body: JSON.stringify({ has_insurance: v }) }); toast('Cập nhật cờ BH OK!', 'success') } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 5. CONTACTS ====================
+        async function loadRelations() { const id = getPatientId('ct_patient'); if (!id) return; try { const r = await apiFetch(`${API}/patients/${id}/relations`); renderContactTable(r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadEmergency() { const id = getPatientId('ct_patient'); if (!id) return; try { const r = await apiFetch(`${API}/patients/${id}/emergency-contacts`); renderContactTable(r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadGuardians() { const id = getPatientId('ct_patient'); if (!id) return; try { const r = await apiFetch(`${API}/patients/${id}/guardians`); renderContactTable(r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadRelatives() { const id = getPatientId('ct_patient'); if (!id) return; try { const r = await apiFetch(`${API}/patients/${id}/relatives`); renderContactTable(r.data || []) } catch (e) { toast(e.message, 'error') } }
+        async function loadLegalRep() { const id = getPatientId('ct_patient'); if (!id) return; try { const r = await apiFetch(`${API}/patients/${id}/legal-representative`); const d = r.data; if (!d) { document.getElementById('contactsResult').innerHTML = '<div class="empty">Chưa có người đại diện pháp lý</div>'; return } renderContactTable([d]) } catch (e) { toast(e.message, 'error') } }
+        function renderContactTable(data) {
+            renderTable(data, [
+                { key: 'contact_name', label: 'Họ tên' }, { key: 'phone_number', label: 'SĐT' }, { key: 'relation_type_name', label: 'Quan hệ' },
+                { key: 'is_emergency_contact', label: 'Khẩn cấp', render: v => v ? '🚨 Có' : '—' },
+                { key: 'is_legal_representative', label: 'Đại diện PL', render: v => v ? '⚖️ Có' : '—' },
+                { key: 'address', label: 'Địa chỉ' }
+            ], 'contactsResult');
+        }
+
+        // ==================== MODAL: ADD CONTACT ====================
+        function openAddContactModal() { const id = getPatientId('ct_patient'); if (!id) return; document.getElementById('addContactModal').classList.add('open') }
+        function closeContactModal() { document.getElementById('addContactModal').classList.remove('open');['nc_name', 'nc_phone', 'nc_addr'].forEach(i => document.getElementById(i).value = ''); document.getElementById('nc_emergency').value = 'false'; document.getElementById('nc_legal').value = 'false' }
+        async function createContact() {
+            const pid = getPatientId('ct_patient'); if (!pid) return;
+            const name = document.getElementById('nc_name').value; if (!name) { toast('Nhập họ tên', 'error'); return }
+            const phone = document.getElementById('nc_phone').value; if (!phone) { toast('Nhập SĐT', 'error'); return }
+            const relId = document.getElementById('nc_relType').value; if (!relId) { toast('Chọn loại quan hệ', 'error'); return }
+            const body = { patient_id: pid, relation_type_id: relId, contact_name: name, phone_number: phone };
+            const addr = document.getElementById('nc_addr').value; if (addr) body.address = addr;
+            body.is_emergency_contact = document.getElementById('nc_emergency').value === 'true';
+            body.is_legal_representative = document.getElementById('nc_legal').value === 'true';
+            try { await apiFetch(`${API}/patient-relations`, { method: 'POST', body: JSON.stringify(body) }); toast('Thêm người thân thành công!', 'success'); closeContactModal(); loadRelations() } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 6. DOCS ====================
+        async function loadPatientDocs() {
+            const id = getPatientId('doc_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}/documents?limit=50`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'document_name', label: 'Tên' }, { key: 'file_format', label: 'Định dạng' },
+                    { key: 'version_number', label: 'Phiên bản' }, { key: 'created_at', label: 'Ngày tạo', render: v => v ? new Date(v).toLocaleString('vi') : '—' },
+                    { key: 'file_url', label: 'Xem', render: v => v ? `<a href="${v}" target="_blank">🔗</a>` : '—' }
+                ], 'docsResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function uploadDoc() {
+            const id = getPatientId('doc_patient'); if (!id) return;
+            const file = document.getElementById('doc_file').files[0]; if (!file) { toast('Chọn file', 'error'); return }
+            const name = document.getElementById('doc_name').value; if (!name) { toast('Nhập tên tài liệu', 'error'); return }
+            const fd = new FormData(); fd.append('file', file); fd.append('document_name', name);
+            const notes = document.getElementById('doc_notes').value; if (notes) fd.append('notes', notes);
+            try {
+                const r = await fetch(`${API}/patients/${id}/documents`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+                const d = await r.json(); if (!r.ok) throw new Error(d.message);
+                toast('Upload thành công!', 'success'); loadPatientDocs();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 7. TAGS & APPOINTMENTS ====================
+        async function loadPatientTags() {
+            const id = getPatientId('tag_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}/tags`);
+                const list = r.data || [];
+                renderTable(list, [
+                    { key: 'tag_code', label: 'Code', render: (v, row) => v || row.code }, { key: 'tag_name', label: 'Tên', render: (v, row) => v || row.name },
+                    { key: 'tag_color_hex', label: 'Màu', render: (v, row) => { const c = v || row.color_hex; return c ? `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${c}"></span>` : '—' } },
+                    { key: 'assigned_at', label: 'Ngày gắn', render: v => v ? new Date(v).toLocaleString('vi') : '—' }
+                ], 'tagsResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function assignTag() {
+            const id = getPatientId('tag_patient'); if (!id) return;
+            const tagId = document.getElementById('tag_sel').value; if (!tagId) { toast('Chọn thẻ', 'error'); return }
+            try { await apiFetch(`${API}/patients/${id}/tags`, { method: 'POST', body: JSON.stringify({ tag_id: tagId }) }); toast('Gắn thẻ thành công!', 'success'); loadPatientTags() } catch (e) { toast(e.message, 'error') }
+        }
+        async function removeTag() {
+            const id = getPatientId('tag_patient'); if (!id) return;
+            const tagId = document.getElementById('tag_sel').value; if (!tagId) { toast('Chọn thẻ', 'error'); return }
+            try { await apiFetch(`${API}/patients/${id}/tags/${tagId}`, { method: 'DELETE' }); toast('Gỡ thẻ thành công!', 'success'); loadPatientTags() } catch (e) { toast(e.message, 'error') }
+        }
+        async function filterByTags() {
+            const tagId = document.getElementById('tag_sel').value; if (!tagId) { toast('Chọn thẻ', 'error'); return }
+            const match = document.getElementById('tag_match').value;
+            try {
+                const r = await apiFetch(`${API}/patients/filter-by-tags?tagIds=${tagId}&matchAll=${match}`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'patient_code', label: 'Mã BN' }, { key: 'full_name', label: 'Họ tên' }, { key: 'phone_number', label: 'SĐT' }
+                ], 'tagActionResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function loadAppointments() {
+            const id = getPatientId('apt_patient'); if (!id) return;
+            try {
+                const r = await apiFetch(`${API}/patients/${id}/appointments?limit=20`);
+                const list = r.data?.data || r.data || [];
+                renderTable(list, [
+                    { key: 'appointment_code', label: 'Mã LK' }, { key: 'appointment_date', label: 'Ngày', render: v => v ? v.substring(0, 10) : '—' },
+                    { key: 'status', label: 'TT', render: v => `<span class="badge badge-info">${v || '—'}</span>` },
+                    { key: 'reason_for_visit', label: 'Lý do' },
+                    { key: 'booking_channel', label: 'Kênh' }
+                ], 'aptsResult');
+            } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

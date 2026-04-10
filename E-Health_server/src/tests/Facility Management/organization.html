@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Cơ sở & Tổ chức — Test Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db;
+            color: #333;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        .tbl-wrap {
+            overflow-x: auto
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600;
+            display: inline-block
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .b-type {
+            background: #ede9fe;
+            color: #5b21b6
+        }
+
+        .b-maint {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 10px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 10px
+        }
+
+        .pagination button {
+            min-width: 32px;
+            height: 32px
+        }
+
+        .page-info {
+            font-size: .8rem;
+            color: #64748b
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .45);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px
+        }
+
+        .modal-overlay.show {
+            display: flex
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1rem
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #94a3b8
+        }
+
+        .modal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 4px 12px;
+            font-size: .85rem
+        }
+
+        .detail-grid .label {
+            color: #64748b;
+            font-weight: 600
+        }
+
+        .detail-grid .value {
+            color: #1e293b;
+            word-break: break-all
+        }
+
+        .img-preview {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 4px;
+            object-fit: contain;
+            background: #f1f5f9;
+            padding: 2px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .room-service-list {
+            list-style: none;
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .room-service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.82rem;
+        }
+
+        .room-service-item:last-child {
+            border-bottom: none;
+        }
+
+        .rs-name {
+            font-weight: 600;
+            color: #0f3460;
+        }
+
+        .rs-price {
+            color: #10b981;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🏢 Cơ sở & Tổ chức</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3); margin-right: 10px;"
+                onclick="loadAllDropdowns()">🔄 Tải lại Dữ liệu Dropdown</button>
+            <div class="auth-bar" id="authSection" style="display:inline-flex;">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">🏢 Cơ sở</div>
+        <div class="tab" onclick="switchTab(1)">🏬 Chi nhánh</div>
+        <div class="tab" onclick="switchTab(2)">🏛 Khoa / Phòng ban</div>
+        <div class="tab" onclick="switchTab(3)">🚪 Phòng khám</div>
+        <div class="tab" onclick="switchTab(4)">🎓 Chuyên khoa</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+
+        <!-- ========== FACILITY ========== -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>🏢 Danh sách Cơ sở Y tế</h3>
+                <div class="toolbar">
+                    <input id="f0Search" placeholder="🔍 Tìm tên, mã..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadFacilities()">
+                    <select id="f0Status" title="Trạng thái">
+                        <option value="">Tất cả</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="SUSPENDED">Suspended</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadFacilities()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('facModal','Tạo Cơ sở mới',null)">➕ Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Logo</th>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f0Body">
+                            <tr>
+                                <td colspan="7" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f0Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== BRANCH ========== -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>🏬 Danh sách Chi nhánh</h3>
+                <div class="toolbar">
+                    <input id="f1Search" placeholder="🔍 Tìm tên, mã..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadBranches()">
+                    <select id="f1FacId" title="Lọc theo Cơ sở" class="facility-select" onchange="loadBranches()">
+                        <option value="">-- Tất cả cơ sở --</option>
+                    </select>
+                    <select id="f1Status" title="Trạng thái" onchange="loadBranches()">
+                        <option value="">Tất cả</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="UNDER_MAINTENANCE">Bảo trì</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadBranches()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('branchModal','Tạo Chi nhánh mới',null)">➕
+                        Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Cơ sở</th>
+                                <th>Địa chỉ</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f1Body">
+                            <tr>
+                                <td colspan="7" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f1Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== DEPARTMENT ========== -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>🏛 Danh sách Khoa / Phòng ban</h3>
+                <div class="toolbar">
+                    <input id="f2Search" placeholder="🔍 Tìm..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadDepts()">
+                    <select id="f2FacId" title="Lọc theo Cơ sở" class="facility-select"
+                        onchange="filterBranchSelect(this.value, 'f2BranchId', null, true); loadDepts()">
+                        <option value="">-- Tất cả cơ sở --</option>
+                    </select>
+                    <select id="f2BranchId" title="Lọc theo Chi nhánh" class="branch-select" onchange="loadDepts()">
+                        <option value="">-- Tất cả chi nhánh --</option>
+                    </select>
+                    <select id="f2Status" title="Trạng thái" onchange="loadDepts()">
+                        <option value="">Tất cả</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadDepts()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('deptModal','Tạo Khoa mới',null)">➕ Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Chi nhánh</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f2Body">
+                            <tr>
+                                <td colspan="6" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f2Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== MEDICAL ROOM ========== -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>🚪 Danh sách Phòng khám</h3>
+                <div class="toolbar">
+                    <input id="f3Search" placeholder="🔍 Tìm..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadRooms()">
+                    <select id="f3FacId" title="Lọc theo Cơ sở" class="facility-select"
+                        onchange="filterBranchSelect(this.value, 'f3BranchId', 'f3DeptId', true); loadRooms()">
+                        <option value="">-- Tất cả cơ sở --</option>
+                    </select>
+                    <select id="f3BranchId" title="Lọc theo Chi nhánh" class="branch-select"
+                        onchange="filterDeptSelect(this.value, 'f3DeptId', true); loadRooms()">
+                        <option value="">-- Tất cả chi nhánh --</option>
+                    </select>
+                    <select id="f3DeptId" title="Lọc theo Khoa" class="dept-select" onchange="loadRooms()">
+                        <option value="">-- Tất cả Khoa --</option>
+                    </select>
+                    <select id="f3RType" title="Loại phòng" onchange="loadRooms()">
+                        <option value="">Tất cả loại</option>
+                        <option value="CONSULTATION">Khám bệnh</option>
+                        <option value="LAB">Xét nghiệm</option>
+                        <option value="IMAGING">CĐHA</option>
+                        <option value="OPERATING">Phẫu thuật</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadRooms()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('roomModal','Tạo Phòng mới',null)">➕
+                        Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Loại</th>
+                                <th>Chi nhánh</th>
+                                <th>Khoa</th>
+                                <th>Sức chứa</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f3Body">
+                            <tr>
+                                <td colspan="8" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f3Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== SPECIALTY ========== -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>🎓 Danh sách Chuyên khoa</h3>
+                <div class="toolbar">
+                    <input id="f4Search" placeholder="🔍 Tìm..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadSpecs()">
+                    <button class="btn btn-primary" onclick="loadSpecs()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('specModal','Tạo Chuyên khoa',null)">➕
+                        Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f4Body">
+                            <tr>
+                                <td colspan="5" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f4Pag"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== DETAIL MODAL ====== -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="detailTitle">Chi tiết</h3><button class="modal-close"
+                    onclick="closeM('detailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="detailBody"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('detailModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== ROOM SERVICES MODAL ====== -->
+    <div class="modal-overlay" id="roomServicesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="roomServicesModalTitle">Dịch vụ tại Phòng</h3><button class="modal-close"
+                    onclick="closeM('roomServicesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rsRoomId">
+                <div class="form-group">
+                    <label>Gán thêm dịch vụ (Nhập các ID dịch vụ tại Cơ sở ngăm cách bởi dấu phẩy)</label>
+                    <div style="display:flex; gap:6px;">
+                        <input type="text" id="rsIdsInput" placeholder="VD: FS_01, FS_02">
+                        <button class="btn btn-success" onclick="assignRoomServices()">Gán</button>
+                    </div>
+                </div>
+                <h4 style="margin-top:15px; font-size:0.9rem; color:#475569;">Danh sách dịch vụ đang hỗ trợ:</h4>
+                <div id="rsListBody" class="room-service-list">
+                    <div class="empty">Đang tải...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('roomServicesModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== FACILITY MODAL ====== -->
+    <div class="modal-overlay" id="facModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="facModalTitle">Tạo Cơ sở</h3><button class="modal-close"
+                    onclick="closeM('facModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="facEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Mã (code) *</label><input id="fmCode" placeholder="FCL-MED"></div>
+                    <div class="form-group"><label>Tên *</label><input id="fmName" placeholder="Bệnh viện Đa khoa">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Logo (Hình ảnh)</label><input type="file" id="fmLogo"
+                            accept="image/*"></div>
+                    <div class="form-group"><label>Mã số thuế</label><input id="fmTax" placeholder="0101234567"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Email</label><input id="fmEmail" placeholder="contact@medlatec.vn">
+                    </div>
+                    <div class="form-group"><label>Điện thoại</label><input id="fmPhone" placeholder="0909123456"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Địa chỉ trụ sở</label><input id="fmAddr"
+                            placeholder="123 Láng Hạ, Đống Đa, Hà Nội"></div>
+                    <div class="form-group"><label>Website</label><input id="fmWeb" placeholder="https://medlatec.vn">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('facModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveFacility()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== BRANCH MODAL ====== -->
+    <div class="modal-overlay" id="branchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="branchModalTitle">Tạo Chi nhánh</h3><button class="modal-close"
+                    onclick="closeM('branchModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="brEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Thuộc Cơ sở (facility_id) *</label><select id="bmFacId"
+                            class="facility-select">
+                            <option value="">-- Chọn Cơ sở --</option>
+                        </select></div>
+                    <div class="form-group"><label>Mã (code) *</label><input id="bmCode" placeholder="BR-HN-01"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Tên *</label><input id="bmName" placeholder="Chi nhánh Hoàn Kiếm">
+                    </div>
+                    <div class="form-group"><label>Điện thoại</label><input id="bmPhone" placeholder="0909123456"></div>
+                </div>
+                <div class="form-group"><label>Địa chỉ</label><input id="bmAddr" placeholder="124 Hoàn Kiếm, HN"></div>
+                <div class="form-group"><label>Ngày thành lập</label><input type="date" id="bmDate"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('branchModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveBranch()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== DEPT MODAL ====== -->
+    <div class="modal-overlay" id="deptModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="deptModalTitle">Tạo Khoa</h3><button class="modal-close"
+                    onclick="closeM('deptModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="dpEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Thuộc Cơ sở (Lọc)</label><select id="dmFacId" class="facility-select"
+                            onchange="filterBranchSelect(this.value, 'dmBranch')">
+                            <option value="">-- Chọn Cơ sở --</option>
+                        </select></div>
+                    <div class="form-group"><label>Thuộc Chi nhánh (branch_id) *</label><select id="dmBranch"
+                            class="branch-select">
+                            <option value="">-- Chọn CN --</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Mã (code) *</label><input id="dmCode" placeholder="KHOA_NOI"></div>
+                    <div class="form-group"><label>Tên *</label><input id="dmName" placeholder="Khoa Nội Tổng Hợp">
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="dmDesc" placeholder="Mô tả khoa..."></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('deptModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveDept()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== ROOM MODAL ====== -->
+    <div class="modal-overlay" id="roomModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="roomModalTitle">Tạo Phòng</h3><button class="modal-close"
+                    onclick="closeM('roomModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rmEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Thuộc Cơ sở (Lọc)</label><select id="rmFacId" class="facility-select"
+                            onchange="filterBranchSelect(this.value, 'rmBranch', 'rmDept')">
+                            <option value="">-- Chọn Cơ sở --</option>
+                        </select></div>
+                    <div class="form-group"><label>Thuộc Chi nhánh *</label><select id="rmBranch" class="branch-select"
+                            onchange="filterDeptSelect(this.value, 'rmDept')">
+                            <option value="">-- Chọn CN --</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Thuộc Khoa (Tùy chọn)</label><select id="rmDept" class="dept-select">
+                            <option value="">-- Chọn Khoa --</option>
+                        </select></div>
+                    <div class="form-group"><label>Mã phòng (code) *</label><input id="rmCode" placeholder="P101"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Tên phòng *</label><input id="rmName" placeholder="Phòng Khám Nội 1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Loại phòng</label>
+                        <select id="rmType" title="Loại phòng">
+                            <option value="CONSULTATION">Khám bệnh</option>
+                            <option value="LAB">Xét nghiệm</option>
+                            <option value="IMAGING">CĐHA</option>
+                            <option value="OPERATING">Phẫu thuật</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Sức chứa</label><input type="number" id="rmCapacity" value="1"
+                            min="1"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('roomModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveRoom()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SPECIALTY MODAL ====== -->
+    <div class="modal-overlay" id="specModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="specModalTitle">Tạo Chuyên khoa</h3><button class="modal-close"
+                    onclick="closeM('specModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="spEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Mã (code) *</label><input id="smCode" placeholder="TIM_MACH"></div>
+                    <div class="form-group"><label>Tên *</label><input id="smName" placeholder="Tim Mạch"></div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="smDesc"
+                        placeholder="Chuyên khoa Tim mạch can thiệp"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('specModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveSpec()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api', TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null;
+        const pages = { fac: 1, br: 1, dept: 1, room: 1, spec: 1 };
+
+        // Lookup Data for Dropdowns
+        let cachedDropdowns = { facilities: [], branches: [], departments: [] };
+
+        // === AUTH ===
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)) }
+        window.onload = () => {
+            const a = getAuth();
+            if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user) }
+            loadAllDropdowns();
+        }
+
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Org Test', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success');
+                loadAllDropdowns();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'inline-flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token') }
+            const h = { 'Authorization': `Bearer ${token}` };
+            if (!(opts.body instanceof FormData)) h['Content-Type'] = 'application/json';
+
+            const r = await fetch(url, { ...opts, headers: { ...h, ...(opts.headers || {}) } });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+            return d;
+        }
+
+        // === HELPERS & DROPDOWNS ===
+        function sBadge(s) {
+            if (s === 'ACTIVE') return `<span class="badge b-active">${s}</span>`;
+            if (s === 'MAINTENANCE' || s === 'UNDER_MAINTENANCE' || s === 'SUSPENDED') return `<span class="badge b-maint">${s}</span>`;
+            return `<span class="badge b-inactive">${s || '—'}</span>`;
+        }
+        function tBadge(t) { return `<span class="badge b-type">${t || '—'}</span>` }
+        function closeM(id) { document.getElementById(id).classList.remove('show') }
+        function openModal(id, title, editId) {
+            try {
+                const titleEl = document.getElementById(id + 'Title');
+                if (titleEl) titleEl.textContent = title;
+
+                // Reset dropdowns if opening a "Create" modal
+                if (!editId) {
+                    if (id === 'deptModal') {
+                        const el = document.getElementById('dmFacId'); if (el) el.value = '';
+                        filterBranchSelect('', 'dmBranch', null, false);
+                    }
+                    if (id === 'roomModal') {
+                        const el = document.getElementById('rmFacId'); if (el) el.value = '';
+                        filterBranchSelect('', 'rmBranch', 'rmDept', false);
+                    }
+                    if (id === 'branchModal') {
+                        const el = document.getElementById('bmFacId'); if (el) el.value = '';
+                    }
+                }
+
+                document.getElementById(id).classList.add('show');
+            } catch (error) {
+                console.error('Modal Open Error:', error);
+                toast('Lỗi mở hộp thoại: ' + error.message, 'error');
+            }
+        }
+        function paginate(el, pg, loadFn, key) {
+            if (!pg || !pg.totalPages || pg.totalPages <= 1) { el.innerHTML = ''; return }
+            el.innerHTML = `<button class="btn btn-outline btn-sm" onclick="pages.${key}=${pages[key] - 1};${loadFn}()" ${pages[key] <= 1 ? 'disabled' : ''}>◀</button>
+                <span class="page-info">Trang ${pages[key]} / ${pg.totalPages} (${pg.total || pg.totalItems || pg.total_records || ''} kết quả)</span>
+                <button class="btn btn-outline btn-sm" onclick="pages.${key}=${pages[key] + 1};${loadFn}()" ${pages[key] >= pg.totalPages ? 'disabled' : ''}>▶</button>`;
+        }
+
+        function showDetail(title, data) {
+            document.getElementById('detailTitle').textContent = title;
+            let html = '<div class="detail-grid">';
+            for (const [k, v] of Object.entries(data)) {
+                if (v === null || v === undefined) continue;
+                if (typeof v === 'object') {
+                    html += `<div class="label">${k}</div><div class="value"><pre style="margin:0;font-size:.78rem;white-space:pre-wrap">${JSON.stringify(v, null, 2)}</pre></div>`;
+                } else {
+                    if (k === 'logo_url' && v) {
+                        html += `<div class="label">${k}</div><div class="value"><a href="${v}" target="_blank">${v}</a><br><img src="${v}" style="max-width:100px; margin-top:5px; border-radius:5px;" /></div>`;
+                    } else {
+                        html += `<div class="label">${k}</div><div class="value">${v}</div>`;
+                    }
+                }
+            }
+            html += '</div>';
+            document.getElementById('detailBody').innerHTML = html;
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        async function loadAllDropdowns() {
+            if (!token) return;
+            try {
+                // Fetch all in parallel. Departments uses limit=1000 because /dropdown requires branch_id.
+                const [facReq, brReq, deptReq] = await Promise.all([
+                    apiFetch(`${API}/facilities/dropdown`),
+                    apiFetch(`${API}/branches/dropdown`),
+                    apiFetch(`${API}/departments?limit=1000`).catch(() => ({ data: { items: [] } }))
+                ]);
+
+                cachedDropdowns.facilities = facReq.data || [];
+                cachedDropdowns.branches = brReq.data || [];
+                cachedDropdowns.departments = (deptReq.data && deptReq.data.items) ? deptReq.data.items : (deptReq.data || []);
+
+                // Populate Fac selects
+                let facHtml = cachedDropdowns.facilities.map(x => `<option value="${x.facilities_id || x.facility_id}">${x.name} (${x.code})</option>`).join('');
+                document.querySelectorAll('.facility-select').forEach(el => { el.innerHTML = '<option value="">-- Chọn Cơ sở --</option>' + facHtml; });
+
+                // Populate Branch selects
+                let brHtml = cachedDropdowns.branches.map(x => `<option value="${x.branches_id || x.branch_id}">${x.name} (${x.code})</option>`).join('');
+                document.querySelectorAll('.branch-select').forEach(el => { el.innerHTML = '<option value="">-- Chọn CN --</option>' + brHtml; });
+
+                // Populate Dept selects
+                let dpHtml = cachedDropdowns.departments.map(x => `<option value="${x.departments_id || x.department_id}">${x.name} (${x.code})</option>`).join('');
+                document.querySelectorAll('.dept-select').forEach(el => { el.innerHTML = '<option value="">-- Chọn Khoa --</option>' + dpHtml; });
+
+                // Set text for generic 'All' dropdowns in toolbars
+                ['f1FacId', 'f2FacId', 'f3FacId'].forEach(id => {
+                    const el = document.getElementById(id); if (el && el.options[0]) el.options[0].text = '-- Tất cả cơ sở --';
+                });
+                ['f2BranchId', 'f3BranchId'].forEach(id => {
+                    const el = document.getElementById(id); if (el && el.options[0]) el.options[0].text = '-- Tất cả chi nhánh --';
+                });
+                const f3DeptEl = document.getElementById('f3DeptId');
+                if (f3DeptEl && f3DeptEl.options[0]) f3DeptEl.options[0].text = '-- Tất cả Khoa --';
+
+            } catch (e) { console.error('Lỗi tải dropdown', e); toast('Không thể tải dữ liệu dropdown', 'error'); }
+        }
+
+        function filterBranchSelect(facId, branchSelectId, deptSelectId = null, allowAll = false) {
+            const list = facId ? cachedDropdowns.branches.filter(b => b.facility_id === facId) : (allowAll ? cachedDropdowns.branches : []);
+            let defaultText = allowAll ? '-- Tất cả chi nhánh --' : '-- Chọn CN --';
+            let html = `<option value="">${defaultText}</option>` + list.map(x => `<option value="${x.branches_id || x.branch_id}">${x.name} (${x.code})</option>`).join('');
+            const brSel = document.getElementById(branchSelectId);
+            if (brSel) {
+                brSel.innerHTML = html;
+                brSel.value = '';
+            }
+            if (deptSelectId) {
+                filterDeptSelect('', deptSelectId, allowAll);
+            }
+        }
+
+        function filterDeptSelect(branchId, deptSelectId, allowAll = false) {
+            const list = branchId ? cachedDropdowns.departments.filter(d => d.branch_id === branchId) : (allowAll ? cachedDropdowns.departments : []);
+            let defaultText = allowAll ? '-- Tất cả Khoa --' : '-- Chọn Khoa --';
+            let html = `<option value="">${defaultText}</option>` + list.map(x => `<option value="${x.departments_id || x.department_id}">${x.name} (${x.code})</option>`).join('');
+            const dpSel = document.getElementById(deptSelectId);
+            if (dpSel) {
+                dpSel.innerHTML = html;
+                dpSel.value = '';
+            }
+        }
+
+        // ==================== FACILITIES ====================
+        async function loadFacilities() {
+            const p = new URLSearchParams({ page: pages.fac, limit: 15 });
+            const s = document.getElementById('f0Search').value; if (s) p.set('search', s);
+            const st = document.getElementById('f0Status').value; if (st) p.set('status', st);
+            try {
+                const r = await apiFetch(`${API}/facilities?${p}`);
+                const items = r.data?.data || r.data || [];
+                const body = document.getElementById('f0Body');
+                if (!items.length) { body.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return }
+                body.innerHTML = items.map(i => `<tr>
+                    <td>${i.logo_url ? `<img src="${i.logo_url}" class="img-preview">` : '—'}</td>
+                    <td><strong>${i.code || ''}</strong></td>
+                    <td>${i.name || ''}</td>
+                    <td>${i.email || '—'}</td>
+                    <td>${i.phone || '—'}</td>
+                    <td>${sBadge(i.status)}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewFacility('${i.facilities_id}')">👁</button>
+                        <button class="btn btn-outline btn-sm" onclick="editFacility('${i.facilities_id}')">✏️</button>
+                        <button class="btn btn-sm ${i.status === 'ACTIVE' ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus('facilities','${i.facilities_id}','${i.status}')">${i.status === 'ACTIVE' ? '⏸' : '▶'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="softDelete('facilities','${i.facilities_id}')">🗑</button>
+                    </td></tr>`).join('');
+                paginate(document.getElementById('f0Pag'), r.pagination || r.data?.pagination, 'loadFacilities', 'fac');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function viewFacility(id) { try { const r = await apiFetch(`${API}/facilities/${id}`); showDetail('🏢 Chi tiết Cơ sở', r.data || r) } catch (e) { toast(e.message, 'error') } }
+        async function editFacility(id) {
+            try {
+                const r = await apiFetch(`${API}/facilities/${id}`); const d = r.data || r;
+                document.getElementById('facEditId').value = id;
+                document.getElementById('fmCode').value = d.code || '';
+                document.getElementById('fmName').value = d.name || '';
+                document.getElementById('fmTax').value = d.tax_code || '';
+                document.getElementById('fmEmail').value = d.email || '';
+                document.getElementById('fmPhone').value = d.phone || '';
+                document.getElementById('fmWeb').value = d.website || '';
+                document.getElementById('fmAddr').value = d.headquarters_address || '';
+                document.getElementById('fmLogo').value = ''; // clear file input
+                openModal('facModal', '✏️ Sửa Cơ sở: ' + (d.code || id), id);
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveFacility() {
+            const id = document.getElementById('facEditId').value;
+            const logoFile = document.getElementById('fmLogo').files[0];
+
+            // Build body based on whether a file is selected or not
+            let body, opts = {};
+
+            if (logoFile) {
+                body = new FormData();
+                body.append('code', document.getElementById('fmCode').value);
+                body.append('name', document.getElementById('fmName').value);
+                body.append('logo', logoFile);
+                if (document.getElementById('fmTax').value) body.append('tax_code', document.getElementById('fmTax').value);
+                if (document.getElementById('fmEmail').value) body.append('email', document.getElementById('fmEmail').value);
+                if (document.getElementById('fmPhone').value) body.append('phone', document.getElementById('fmPhone').value);
+                if (document.getElementById('fmWeb').value) body.append('website', document.getElementById('fmWeb').value);
+                if (document.getElementById('fmAddr').value) body.append('headquarters_address', document.getElementById('fmAddr').value);
+                opts.body = body;
+            } else {
+                body = { code: document.getElementById('fmCode').value, name: document.getElementById('fmName').value };
+                const tax = document.getElementById('fmTax').value; if (tax) body.tax_code = tax;
+                const em = document.getElementById('fmEmail').value; if (em) body.email = em;
+                const ph = document.getElementById('fmPhone').value; if (ph) body.phone = ph;
+                const wb = document.getElementById('fmWeb').value; if (wb) body.website = wb;
+                const ad = document.getElementById('fmAddr').value; if (ad) body.headquarters_address = ad;
+                opts.body = JSON.stringify(body);
+            }
+
+            try {
+                if (id) {
+                    opts.method = 'PUT';
+                    await apiFetch(`${API}/facilities/${id}`, opts);
+                    toast('Cập nhật cơ sở thành công!', 'success')
+                } else {
+                    opts.method = 'POST';
+                    await apiFetch(`${API}/facilities`, opts);
+                    toast('Tạo cơ sở thành công!', 'success')
+                }
+                closeM('facModal'); document.getElementById('facEditId').value = ''; loadFacilities();
+                loadAllDropdowns(); // Refresh dropdowns
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== BRANCHES ====================
+        async function loadBranches() {
+            const p = new URLSearchParams({ page: pages.br, limit: 15 });
+            const s = document.getElementById('f1Search').value; if (s) p.set('search', s);
+            const f = document.getElementById('f1FacId').value; if (f) p.set('facility_id', f);
+            const st = document.getElementById('f1Status').value; if (st) p.set('status', st);
+            try {
+                const r = await apiFetch(`${API}/branches?${p}`);
+                const items = r.data?.items || r.data?.data || r.data || [];
+                const pg = r.data?.pagination || r.pagination;
+                const body = document.getElementById('f1Body');
+                if (!items.length) { body.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return }
+                body.innerHTML = items.map(i => `<tr>
+                    <td><strong>${i.code || ''}</strong></td>
+                    <td>${i.name || ''}</td>
+                    <td>${i.facility_name || i.facility_id || '—'}</td>
+                    <td>${i.address || '—'}</td>
+                    <td>${i.phone || '—'}</td>
+                    <td>${sBadge(i.status)}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewBranch('${i.branches_id}')">👁</button>
+                        <button class="btn btn-outline btn-sm" onclick="editBranch('${i.branches_id}')">✏️</button>
+                        <button class="btn btn-sm ${i.status === 'ACTIVE' ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus('branches','${i.branches_id}','${i.status}')">${i.status === 'ACTIVE' ? '⏸' : '▶'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="softDelete('branches','${i.branches_id}')">🗑</button>
+                    </td></tr>`).join('');
+                paginate(document.getElementById('f1Pag'), pg, 'loadBranches', 'br');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function viewBranch(id) { try { const r = await apiFetch(`${API}/branches/${id}`); showDetail('🏬 Chi tiết Chi nhánh', r.data || r) } catch (e) { toast(e.message, 'error') } }
+        async function editBranch(id) {
+            try {
+                const r = await apiFetch(`${API}/branches/${id}`); const d = r.data || r;
+                document.getElementById('brEditId').value = id;
+                document.getElementById('bmFacId').value = d.facility_id || '';
+                document.getElementById('bmCode').value = d.code || '';
+                document.getElementById('bmName').value = d.name || '';
+                document.getElementById('bmPhone').value = d.phone || '';
+                document.getElementById('bmAddr').value = d.address || '';
+                document.getElementById('bmDate').value = d.established_date ? d.established_date.split('T')[0] : '';
+                openModal('branchModal', '✏️ Sửa Chi nhánh: ' + (d.code || id), id);
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveBranch() {
+            const id = document.getElementById('brEditId').value;
+            const body = { facility_id: document.getElementById('bmFacId').value, code: document.getElementById('bmCode').value, name: document.getElementById('bmName').value };
+            const ph = document.getElementById('bmPhone').value; if (ph) body.phone = ph;
+            const ad = document.getElementById('bmAddr').value; if (ad) body.address = ad;
+            const dt = document.getElementById('bmDate').value; if (dt) body.established_date = dt;
+            try {
+                if (id) { await apiFetch(`${API}/branches/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật chi nhánh thành công!', 'success') }
+                else { await apiFetch(`${API}/branches`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo chi nhánh thành công!', 'success') }
+                closeM('branchModal'); document.getElementById('brEditId').value = ''; loadBranches();
+                loadAllDropdowns();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== DEPARTMENTS ====================
+        async function loadDepts() {
+            const p = new URLSearchParams({ page: pages.dept, limit: 15 });
+            const s = document.getElementById('f2Search').value; if (s) p.set('search', s);
+            const b = document.getElementById('f2BranchId').value; if (b) p.set('branch_id', b);
+            const st = document.getElementById('f2Status').value; if (st) p.set('status', st);
+            try {
+                const r = await apiFetch(`${API}/departments?${p}`);
+                const items = r.data?.items || r.data?.data || r.data || [];
+                const pg = r.data?.pagination || r.pagination;
+                const body = document.getElementById('f2Body');
+                if (!items.length) { body.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; return }
+                body.innerHTML = items.map(i => `<tr>
+                    <td><strong>${i.code || ''}</strong></td>
+                    <td>${i.name || ''}</td>
+                    <td>${i.branch_name || i.branch_id || '—'}</td>
+                    <td>${i.description || '—'}</td>
+                    <td>${sBadge(i.status)}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewDept('${i.departments_id}')">👁</button>
+                        <button class="btn btn-outline btn-sm" onclick="editDept('${i.departments_id}')">✏️</button>
+                        <button class="btn btn-sm ${i.status === 'ACTIVE' ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus('departments','${i.departments_id}','${i.status}')">${i.status === 'ACTIVE' ? '⏸' : '▶'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="softDelete('departments','${i.departments_id}')">🗑</button>
+                    </td></tr>`).join('');
+                paginate(document.getElementById('f2Pag'), pg, 'loadDepts', 'dept');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function viewDept(id) { try { const r = await apiFetch(`${API}/departments/${id}`); showDetail('🏛 Chi tiết Khoa', r.data || r) } catch (e) { toast(e.message, 'error') } }
+        async function editDept(id) {
+            try {
+                const r = await apiFetch(`${API}/departments/${id}`); const d = r.data || r;
+                document.getElementById('dpEditId').value = id;
+                const branch = cachedDropdowns.branches.find(b => b.branches_id === d.branch_id);
+                if (branch) {
+                    document.getElementById('dmFacId').value = branch.facility_id;
+                    filterBranchSelect(branch.facility_id, 'dmBranch', null, false);
+                }
+                document.getElementById('dmBranch').value = d.branch_id || '';
+                document.getElementById('dmCode').value = d.code || '';
+                document.getElementById('dmName').value = d.name || '';
+                document.getElementById('dmDesc').value = d.description || '';
+                openModal('deptModal', '✏️ Sửa Khoa: ' + (d.code || id), id);
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveDept() {
+            const id = document.getElementById('dpEditId').value;
+            const body = { branch_id: document.getElementById('dmBranch').value, code: document.getElementById('dmCode').value, name: document.getElementById('dmName').value };
+            const desc = document.getElementById('dmDesc').value; if (desc) body.description = desc;
+            try {
+                if (id) { await apiFetch(`${API}/departments/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật khoa thành công!', 'success') }
+                else { await apiFetch(`${API}/departments`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo khoa thành công!', 'success') }
+                closeM('deptModal'); document.getElementById('dpEditId').value = ''; loadDepts();
+                loadAllDropdowns();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== MEDICAL ROOMS ====================
+        async function loadRooms() {
+            const p = new URLSearchParams({ page: pages.room, limit: 15 });
+            const s = document.getElementById('f3Search').value; if (s) p.set('search', s);
+            const b = document.getElementById('f3BranchId').value; if (b) p.set('branch_id', b);
+            const d = document.getElementById('f3DeptId').value; if (d) p.set('department_id', d);
+            const t = document.getElementById('f3RType').value; if (t) p.set('room_type', t);
+            try {
+                const r = await apiFetch(`${API}/medical-rooms?${p}`);
+                const items = r.data?.items || r.data?.data || r.data || [];
+                const pg = r.data?.pagination || r.pagination;
+                const body = document.getElementById('f3Body');
+                if (!items.length) { body.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; return }
+                body.innerHTML = items.map(i => {
+                    const id = i.medical_rooms_id || i.room_id || i.id;
+                    return `<tr>
+                    <td><strong>${i.code || ''}</strong></td>
+                    <td>${i.name || ''}</td>
+                    <td>${tBadge(i.room_type)}</td>
+                    <td>${i.branch_name || i.branch_id || '—'}</td>
+                    <td>${i.department_name || i.department_id || '—'}</td>
+                    <td>${i.capacity || '—'}</td>
+                    <td>${sBadge(i.status)}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="manageRoomServices('${id}', '${i.name}')">🩺 D.Vụ</button>
+                        <button class="btn btn-outline btn-sm" onclick="viewRoom('${id}')">👁</button>
+                        <button class="btn btn-outline btn-sm" onclick="editRoom('${id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" title="Delete" onclick="softDelete('medical-rooms','${id}')">🗑</button>
+                    </td></tr>`
+                }).join('');
+                paginate(document.getElementById('f3Pag'), pg, 'loadRooms', 'room');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function viewRoom(id) { try { const r = await apiFetch(`${API}/medical-rooms/${id}`); showDetail('🚪 Chi tiết Phòng', r.data || r) } catch (e) { toast(e.message, 'error') } }
+        async function editRoom(id) {
+            try {
+                const r = await apiFetch(`${API}/medical-rooms/${id}`); const d = r.data || r;
+                document.getElementById('rmEditId').value = id;
+
+                const branch = cachedDropdowns.branches.find(b => b.branches_id === d.branch_id);
+                if (branch) {
+                    document.getElementById('rmFacId').value = branch.facility_id;
+                    filterBranchSelect(branch.facility_id, 'rmBranch', 'rmDept', false);
+                }
+                document.getElementById('rmBranch').value = d.branch_id || '';
+
+                if (d.branch_id) {
+                    filterDeptSelect(d.branch_id, 'rmDept', false);
+                }
+                document.getElementById('rmDept').value = d.department_id || '';
+
+                document.getElementById('rmCode').value = d.code || '';
+                document.getElementById('rmName').value = d.name || '';
+                document.getElementById('rmType').value = d.room_type || 'CONSULTATION';
+                document.getElementById('rmCapacity').value = d.capacity || 1;
+                openModal('roomModal', '✏️ Sửa Phòng: ' + (d.code || id), id);
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveRoom() {
+            const id = document.getElementById('rmEditId').value;
+            const body = { branch_id: document.getElementById('rmBranch').value, code: document.getElementById('rmCode').value, name: document.getElementById('rmName').value, room_type: document.getElementById('rmType').value, capacity: parseInt(document.getElementById('rmCapacity').value) || 1 };
+            const dept = document.getElementById('rmDept').value; if (dept) body.department_id = dept;
+            try {
+                if (id) { await apiFetch(`${API}/medical-rooms/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật phòng thành công!', 'success') }
+                else { await apiFetch(`${API}/medical-rooms`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo phòng thành công!', 'success') }
+                closeM('roomModal'); document.getElementById('rmEditId').value = ''; loadRooms();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // --- Room Services (MODULE 3.4) ---
+        async function manageRoomServices(roomId, roomName) {
+            document.getElementById('rsRoomId').value = roomId;
+            // set title automatically by openModal later
+            document.getElementById('rsIdsInput').value = '';
+            openModal('roomServicesModal', `🩺 Dịch vụ tại: ${roomName}`, null);
+            await fetchRoomServices(roomId);
+        }
+
+        async function fetchRoomServices(roomId) {
+            const listBody = document.getElementById('rsListBody');
+            listBody.innerHTML = '<div class="empty">Đang tải...</div>';
+            try {
+                const r = await apiFetch(`${API}/medical-rooms/${roomId}/services`);
+                const items = r.data || [];
+                if (!items.length) {
+                    listBody.innerHTML = '<div class="empty">Chưa có dịch vụ nào được gán cho phòng này.</div>';
+                    return;
+                }
+                listBody.innerHTML = items.map(s => `
+                    <div class="room-service-item">
+                        <div>
+                            <div class="rs-name">${s.service_name || s.name || s.facility_service_id}</div>
+                            ${s.price ? `<div class="rs-price">${s.price.toLocaleString('vi-VN')} VND</div>` : ''}
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="removeRoomService('${roomId}', '${s.facility_service_id}')">Gỡ</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                listBody.innerHTML = `<div class="empty" style="color:red">Lỗi: ${e.message}</div>`;
+            }
+        }
+
+        async function assignRoomServices() {
+            const roomId = document.getElementById('rsRoomId').value;
+            const idsStr = document.getElementById('rsIdsInput').value;
+            if (!idsStr.trim()) { toast('Vui lòng nhập ID dịch vụ!', 'error'); return; }
+
+            const ids = idsStr.split(',').map(x => x.trim()).filter(x => x);
+            try {
+                await apiFetch(`${API}/medical-rooms/${roomId}/services`, {
+                    method: 'POST',
+                    body: JSON.stringify({ facility_service_ids: ids })
+                });
+                toast('Gán dịch vụ thành công!', 'success');
+                document.getElementById('rsIdsInput').value = '';
+                await fetchRoomServices(roomId);
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function removeRoomService(roomId, serviceId) {
+            if (!confirm('Bạn có chắc muốn gỡ dịch vụ này khỏi phòng?')) return;
+            try {
+                await apiFetch(`${API}/medical-rooms/${roomId}/services/${serviceId}`, { method: 'DELETE' });
+                toast('Đã gỡ dịch vụ khỏi phòng!', 'success');
+                await fetchRoomServices(roomId);
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+
+        // ==================== SPECIALTIES ====================
+        async function loadSpecs() {
+            const p = new URLSearchParams({ page: pages.spec, limit: 15 });
+            const s = document.getElementById('f4Search').value; if (s) p.set('search', s);
+            try {
+                const r = await apiFetch(`${API}/specialties?${p}`);
+                const items = r.data?.data || r.data || [];
+                const pg = r.meta || r.pagination || r.data?.pagination;
+                const body = document.getElementById('f4Body');
+                if (!items.length) { body.innerHTML = '<tr><td colspan="5" class="empty">Không có dữ liệu</td></tr>'; return }
+                body.innerHTML = items.map(i => `<tr>
+                    <td><strong>${i.code || ''}</strong></td>
+                    <td>${i.name || ''}</td>
+                    <td>${i.description || '—'}</td>
+                    <td>${sBadge(i.status || 'ACTIVE')}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewSpec('${i.specialties_id}')">👁</button>
+                        <button class="btn btn-outline btn-sm" onclick="editSpec('${i.specialties_id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="softDelete('specialties','${i.specialties_id}')">🗑</button>
+                    </td></tr>`).join('');
+                paginate(document.getElementById('f4Pag'), pg, 'loadSpecs', 'spec');
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function viewSpec(id) { try { const r = await apiFetch(`${API}/specialties/${id}`); showDetail('🎓 Chi tiết Chuyên khoa', r.data || r) } catch (e) { toast(e.message, 'error') } }
+        async function editSpec(id) {
+            try {
+                const r = await apiFetch(`${API}/specialties/${id}`); const d = r.data || r;
+                document.getElementById('spEditId').value = id;
+                document.getElementById('smCode').value = d.code || '';
+                document.getElementById('smName').value = d.name || '';
+                document.getElementById('smDesc').value = d.description || '';
+                openModal('specModal', '✏️ Sửa Chuyên khoa: ' + (d.code || id), id);
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function saveSpec() {
+            const id = document.getElementById('spEditId').value;
+            const body = { code: document.getElementById('smCode').value, name: document.getElementById('smName').value };
+            const desc = document.getElementById('smDesc').value; if (desc) body.description = desc;
+            try {
+                if (id) { await apiFetch(`${API}/specialties/${id}`, { method: 'PUT', body: JSON.stringify(body) }); toast('Cập nhật chuyên khoa thành công!', 'success') }
+                else { await apiFetch(`${API}/specialties`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo chuyên khoa thành công!', 'success') }
+                closeM('specModal'); document.getElementById('spEditId').value = ''; loadSpecs();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== SHARED: TOGGLE STATUS & SOFT DELETE ====================
+        async function toggleStatus(endpoint, id, currentStatus) {
+            const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            try {
+                await apiFetch(`${API}/${endpoint}/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: newStatus }) });
+                toast(`Chuyển trạng thái → ${newStatus}`, 'success');
+                if (endpoint === 'facilities') loadFacilities();
+                else if (endpoint === 'branches') loadBranches();
+                else if (endpoint === 'departments') loadDepts();
+            } catch (e) { toast(e.message, 'error') }
+        }
+        async function softDelete(endpoint, id) {
+            if (!confirm(`Xóa mềm ${id}?`)) return;
+            try {
+                await apiFetch(`${API}/${endpoint}/${id}`, { method: 'DELETE' });
+                toast('Xóa mềm thành công!', 'success');
+                if (endpoint === 'facilities') loadFacilities();
+                else if (endpoint === 'branches') {
+                    loadBranches();
+                    loadAllDropdowns();
+                }
+                else if (endpoint === 'departments') {
+                    loadDepts();
+                    loadAllDropdowns();
+                }
+                else if (endpoint === 'medical-rooms') loadRooms();
+                else if (endpoint === 'specialties') loadSpecs();
+            } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

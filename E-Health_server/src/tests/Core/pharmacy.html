@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💊 Danh mục Thuốc — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>💊 Danh mục Thuốc</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📁 Nhóm thuốc</div>
+        <div class="tab" onclick="switchTab(1)">➕ Tạo / ✏️ Sửa Nhóm</div>
+        <div class="tab" onclick="switchTab(2)">💊 Thuốc</div>
+        <div class="tab" onclick="switchTab(3)">➕ Tạo / ✏️ Sửa Thuốc</div>
+        <div class="tab" onclick="switchTab(4)">📥 Import / 📤 Export</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: DRUG CATEGORIES LIST -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📁 Danh sách Nhóm thuốc</h3>
+                <div class="toolbar">
+                    <input id="dcSearch" placeholder="🔍 Tìm tên/code..." style="flex:1">
+                    <input id="dcLimit" type="number" value="10" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadDC(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dcTable"></tbody>
+                </table>
+                <div class="pagination" id="dcPag"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CREATE / EDIT DRUG CATEGORY -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>➕ Tạo nhóm thuốc mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Code *</label><input id="dcCode" placeholder="ANTIBIOTIC"></div>
+                    <div class="form-group"><label>Tên *</label><input id="dcName" placeholder="Kháng sinh"></div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="dcDesc" placeholder="Thuốc kháng sinh..."></div>
+                <button class="btn btn-success" onclick="createDC()">💾 Tạo</button>
+                <div id="dcCreateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Chi tiết / Sửa / Xóa nhóm thuốc</h3>
+                <div class="toolbar">
+                    <select id="dcIdSelect" title="Chọn nhóm thuốc" style="flex:1">
+                        <option value="">-- Chọn nhóm thuốc --</option>
+                    </select>
+                    <button class="btn btn-info" onclick="getDC()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteDC()">🗑️ Xóa</button>
+                </div>
+                <div id="dcDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên mới</label><input id="dcuName"></div>
+                    <div class="form-group"><label>Mô tả mới</label><input id="dcuDesc"></div>
+                </div>
+                <button class="btn btn-success" onclick="updateDC()">💾 Lưu</button>
+                <div id="dcUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: DRUGS LIST -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>💊 Danh sách Thuốc</h3>
+                <div class="toolbar">
+                    <input id="drugSearch" placeholder="🔍 Tìm tên/code/hoạt chất..." style="flex:1">
+                    <select id="drugCatFilter" title="Lọc nhóm thuốc">
+                        <option value="">Tất cả nhóm</option>
+                    </select>
+                    <input id="drugLimit" type="number" value="10" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadDrugs(1)">Tải</button>
+                    <button class="btn btn-outline" onclick="loadActive()">💚 Chỉ Active</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã thuốc</th>
+                            <th>Tên thương mại</th>
+                            <th>Hoạt chất</th>
+                            <th>ĐVT</th>
+                            <th>Đường dùng</th>
+                            <th>Nhóm</th>
+                            <th>Kê đơn</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="drugTable"></tbody>
+                </table>
+                <div class="pagination" id="drugPag"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CREATE / EDIT DRUG -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>➕ Tạo thuốc mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Mã thuốc (drug_code) *</label><input id="drCode"
+                            placeholder="AMO500"></div>
+                    <div class="form-group"><label>Tên thương mại (brand_name) *</label><input id="drName"
+                            placeholder="Amoxicillin 500mg"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Hoạt chất (active_ingredients) *</label><input id="drIngredient"
+                            placeholder="Amoxicillin"></div>
+                    <div class="form-group"><label>Đơn vị cấp phát (dispensing_unit) *</label><input id="drUnit"
+                            placeholder="Viên"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Đường dùng</label><input id="drRoute" placeholder="Uống"></div>
+                    <div class="form-group"><label>Mã quốc gia</label><input id="drNdc" placeholder="VN-12345-67"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nhóm thuốc (category_id)</label>
+                        <select id="drCatId" title="Chọn nhóm thuốc">
+                            <option value="">-- Chọn nhóm --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Kê đơn bắt buộc?</label>
+                        <select id="drPrescription" title="Kê đơn">
+                            <option value="true">Có (Kê đơn)</option>
+                            <option value="false">Không (OTC)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="createDrug()">💾 Tạo thuốc</button>
+                <div id="drCreateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Chi tiết / Sửa / Toggle trạng thái</h3>
+                <div class="toolbar">
+                    <input id="drugId" placeholder="Drug ID (drugs_id)" style="flex:1">
+                    <button class="btn btn-info" onclick="getDrug()">🔍 Xem</button>
+                    <button class="btn btn-success" onclick="toggleDrug(true)">✅ Mở khóa</button>
+                    <button class="btn btn-danger" onclick="toggleDrug(false)">🚫 Vô hiệu hóa</button>
+                </div>
+                <div id="drugDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên thương mại mới</label><input id="druName"></div>
+                    <div class="form-group"><label>Hoạt chất</label><input id="druIngredient"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>ĐVT cấp phát</label><input id="druUnit"></div>
+                    <div class="form-group"><label>Đường dùng</label><input id="druRoute"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nhóm thuốc</label>
+                        <select id="druCatId" title="Đổi nhóm thuốc">
+                            <option value="">-- Không đổi --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Kê đơn</label>
+                        <select id="druPrescription" title="Kê đơn">
+                            <option value="">-- Không đổi --</option>
+                            <option value="true">Có</option>
+                            <option value="false">Không</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateDrug()">💾 Lưu</button>
+                <div id="druUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: IMPORT / EXPORT -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>📤 Export Nhóm thuốc</h3>
+                <button class="btn btn-primary" onclick="exportDC()">📤 Tải xuống Excel (Nhóm thuốc)</button>
+                <div id="exportDcDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📥 Import Nhóm thuốc</h3>
+                <div class="toolbar"><input id="dcImport" type="file" accept=".xlsx,.xls"><button
+                        class="btn btn-success" onclick="importDC()">📥 Import</button></div>
+                <div id="dcImportDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📤 Export Thuốc</h3>
+                <button class="btn btn-primary" onclick="exportDrugs()">📤 Tải xuống Excel (Thuốc)</button>
+                <div id="exportDrugDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📥 Import Thuốc</h3>
+                <div class="toolbar"><input id="drugImport" type="file" accept=".xlsx,.xls"><button
+                        class="btn btn-success" onclick="importDrugs()">📥 Import</button></div>
+                <div id="drugImportDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null, dcPage = 1, drugPage = 1;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function statusBadge(v) { const a = v === true || v === 'true' || v === 'ACTIVE'; return `<span class="badge ${a ? 'b-active' : 'b-inactive'}">${a ? 'Active' : 'Inactive'}</span>`; }
+        function prescBadge(v) { return v ? '<span class="badge b-inactive">Kê đơn</span>' : '<span class="badge b-active">OTC</span>'; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadDCDropdowns(); } };
+        async function handleLogin() {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Pharmacy', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); loadDCDropdowns();
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token đã tự động refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+        async function download(path, name) { try { const r = await fetch(`${API}${path}`, { headers: { 'Authorization': `Bearer ${token}` } }); if (!r.ok) throw new Error('Lỗi'); const b = await r.blob(); Object.assign(document.createElement('a'), { href: URL.createObjectURL(b), download: name }).click(); toast('Export thành công!', 'success'); } catch (e) { toast(e.message, 'error'); } }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+        function showImportResult(elId, data) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            if (data.success) {
+                const d = data.data || data;
+                el.innerHTML = `<div class="success-card"><div class="title">✅ Import thành công!</div>
+                    <div style="font-size:.83rem;color:#065f46">Thành công: <strong>${d.successCount || d.created || 0}</strong> | Cập nhật: <strong>${d.updatedCount || d.updated || 0}</strong> | Lỗi: <strong>${d.errorCount || d.errors?.length || 0}</strong></div></div>`;
+            } else { el.innerHTML = `<div style="padding:10px;background:#fee2e2;border-radius:8px;color:#991b1b;font-size:.83rem">❌ ${data.message || 'Import thất bại'}</div>`; }
+        }
+        function buildPagination(elId, cur, total, limit, fn) {
+            const el = document.getElementById(elId), tp = Math.ceil(total / limit) || 1;
+            let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (tp <= 7) { for (let i = 1; i <= tp; i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; }
+            else { h += `<button class="${cur === 1 ? 'active' : ''}" onclick="${fn}(1)">1</button>`; if (cur > 3) h += '<span>...</span>'; for (let i = Math.max(2, cur - 1); i <= Math.min(tp - 1, cur + 1); i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; if (cur < tp - 2) h += '<span>...</span>'; h += `<button class="${cur === tp ? 'active' : ''}" onclick="${fn}(${tp})">${tp}</button>`; }
+            h += `<button onclick="${fn}(${cur + 1})" ${cur >= tp ? 'disabled' : ''}>Sau →</button><span style="margin-left:8px">Tổng: ${total}</span>`;
+            el.innerHTML = h;
+        }
+
+        /** Load nhóm thuốc vào combo boxes */
+        async function loadDCDropdowns() {
+            try {
+                const r = await apiFetch(`${API}/pharmacy/categories?limit=100`);
+                const data = r.data || [];
+                const cats = Array.isArray(data) ? data : (data.categories || data.rows || []);
+                const selectors = ['dcIdSelect', 'drugCatFilter', 'drCatId', 'druCatId'];
+                selectors.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const isFilter = selId === 'drugCatFilter';
+                    const isUpdate = selId === 'druCatId';
+                    sel.innerHTML = isFilter ? '<option value="">Tất cả nhóm</option>' : (isUpdate ? '<option value="">-- Không đổi --</option>' : '<option value="">-- Chọn nhóm thuốc --</option>');
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.drug_categories_id || c.id;
+                        opt.textContent = `${c.name || '-'} (${c.code || '-'})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('DCat:', e.message); }
+        }
+
+        // ============ DRUG CATEGORIES ============
+        // DB fields: drug_categories_id, code, name, description
+        function fillDC(c) {
+            const id = c.drug_categories_id || c.id || '';
+            document.getElementById('dcIdSelect').value = id;
+            document.getElementById('dcuName').value = c.name || '';
+            document.getElementById('dcuDesc').value = c.description || '';
+        }
+        function viewDCRow(c) { fillDC(c); switchTab(1); getDC(); toast(`👁️ ${c.name || ''}`, 'info'); }
+        function editDCRow(c) { fillDC(c); switchTab(1); toast(`✏️ ${c.name || ''}`, 'info'); }
+
+        async function loadDC(page = 1) {
+            dcPage = page;
+            const p = new URLSearchParams();
+            const s = document.getElementById('dcSearch').value; if (s) p.set('search', s);
+            const limit = parseInt(document.getElementById('dcLimit').value) || 10;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/pharmacy/categories?${p}`);
+                // Response: { success, data: [...], total, page, limit, totalPages } or { success, data: { categories: [...], pagination: {...} } }
+                const raw = res.data;
+                const list = Array.isArray(raw) ? raw : (raw.categories || raw.rows || []);
+                const tb = document.getElementById('dcTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('dcPag').innerHTML = ''; return; }
+                list.forEach((c, i) => {
+                    const cj = JSON.stringify(c).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${c.code || ''}</strong></td>
+                        <td>${c.name || ''}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${c.description || '-'}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewDCRow(${cj})' title="Xem">👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editDCRow(${cj})' title="Sửa">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteDCById(${cj})' title="Xóa">🗑️</button>
+                        </div></td></tr>`;
+                });
+                const totalItems = res.total || raw.pagination?.total || list.length;
+                const tp = res.totalPages || Math.ceil(totalItems / limit);
+                buildPagination('dcPag', page, totalItems, limit, 'loadDC');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function createDC() {
+            const code = document.getElementById('dcCode').value, name = document.getElementById('dcName').value;
+            if (!code || !name) return toast('Nhập Code và Tên', 'error');
+            try {
+                const r = await apiFetch(`${API}/pharmacy/categories`, { method: 'POST', body: JSON.stringify({ code, name, description: document.getElementById('dcDesc').value }) });
+                showSuccess('dcCreateDisplay', 'Tạo nhóm thuốc thành công!', `Code: <strong>${code}</strong>, Tên: <strong>${name}</strong>`);
+                toast('Tạo thành công!', 'success'); loadDCDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getDC() {
+            const id = document.getElementById('dcIdSelect').value;
+            if (!id) return toast('Chọn nhóm thuốc', 'error');
+            try {
+                const r = await apiFetch(`${API}/pharmacy/categories/${id}`);
+                const d = r.data || {};
+                fillDC(d);
+                const el = document.getElementById('dcDetailInfo'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460">📁 ${d.name || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.drug_categories_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Code</div><div class="dg-value">${d.code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mô tả</div><div class="dg-value">${d.description || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Tạo lúc</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateDC() {
+            const id = document.getElementById('dcIdSelect').value;
+            if (!id) return toast('Chọn nhóm thuốc', 'error');
+            const b = {};
+            if (document.getElementById('dcuName').value) b.name = document.getElementById('dcuName').value;
+            if (document.getElementById('dcuDesc').value) b.description = document.getElementById('dcuDesc').value;
+            try {
+                await apiFetch(`${API}/pharmacy/categories/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('dcUpdateDisplay', 'Cập nhật thành công!', `Nhóm thuốc <strong>${id}</strong> đã được cập nhật`);
+                toast('OK!', 'success'); loadDCDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteDC() {
+            const id = document.getElementById('dcIdSelect').value;
+            if (!id) return toast('Chọn nhóm thuốc', 'error');
+            if (!confirm('Xóa nhóm thuốc này?')) return;
+            try { await apiFetch(`${API}/pharmacy/categories/${id}`, { method: 'DELETE' }); showSuccess('dcUpdateDisplay', 'Đã xóa!', `${id}`); toast('Đã xóa!', 'success'); loadDCDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteDCById(c) {
+            const id = c.drug_categories_id || c.id || '';
+            if (!id || !confirm(`Xóa "${c.name || id}"?`)) return;
+            try { await apiFetch(`${API}/pharmacy/categories/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadDC(dcPage); loadDCDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ DRUGS ============
+        // DB fields: drugs_id, drug_code, national_drug_code, brand_name, active_ingredients,
+        //            category_id, route_of_administration, dispensing_unit, is_prescription_only, is_active
+        function fillDrug(d) {
+            document.getElementById('drugId').value = d.drugs_id || d.id || '';
+            document.getElementById('druName').value = d.brand_name || '';
+            document.getElementById('druIngredient').value = d.active_ingredients || '';
+            document.getElementById('druUnit').value = d.dispensing_unit || '';
+            document.getElementById('druRoute').value = d.route_of_administration || '';
+        }
+        function viewDrugRow(d) { fillDrug(d); switchTab(3); getDrug(); toast(`👁️ ${d.brand_name || ''}`, 'info'); }
+        function editDrugRow(d) { fillDrug(d); switchTab(3); toast(`✏️ ${d.brand_name || ''}`, 'info'); }
+
+        async function loadDrugs(page = 1) {
+            drugPage = page;
+            const p = new URLSearchParams();
+            const s = document.getElementById('drugSearch').value; if (s) p.set('search', s);
+            const c = document.getElementById('drugCatFilter').value; if (c) p.set('categoryId', c);
+            const limit = parseInt(document.getElementById('drugLimit').value) || 10;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/pharmacy/drugs?${p}`);
+                // Response: { success, data: [...], total, page, limit, totalPages }
+                const raw = res.data;
+                const list = Array.isArray(raw) ? raw : (raw.drugs || raw.rows || []);
+                renderDrugTable(list, page, limit);
+                const totalItems = res.total || raw.total || list.length;
+                buildPagination('drugPag', page, totalItems, limit, 'loadDrugs');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function loadActive() {
+            try {
+                const res = await apiFetch(`${API}/pharmacy/drugs/active`);
+                const raw = res.data;
+                const list = Array.isArray(raw) ? raw : (raw.drugs || raw.rows || []);
+                renderDrugTable(list, 1, list.length || 99);
+                document.getElementById('drugPag').innerHTML = `<span>Tổng: ${list.length} thuốc active</span>`;
+                toast(`💚 ${list.length} thuốc đang hoạt động`, 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function renderDrugTable(list, page, limit) {
+            const tb = document.getElementById('drugTable'); tb.innerHTML = '';
+            if (!list.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">Không có dữ liệu</td></tr>'; return; }
+            list.forEach((d, i) => {
+                const dj = JSON.stringify(d).replace(/'/g, "&#39;");
+                tb.innerHTML += `<tr>
+                    <td>${(page - 1) * limit + i + 1}</td>
+                    <td><strong>${d.drug_code || ''}</strong></td>
+                    <td>${d.brand_name || ''}</td>
+                    <td style="font-size:.78rem">${d.active_ingredients || '-'}</td>
+                    <td>${d.dispensing_unit || '-'}</td>
+                    <td>${d.route_of_administration || '-'}</td>
+                    <td><span class="badge b-active">${d.category_name || d.category_id || '-'}</span></td>
+                    <td>${prescBadge(d.is_prescription_only)}</td>
+                    <td>${statusBadge(d.is_active)}</td>
+                    <td><div class="action-group">
+                        <button class="btn btn-sm btn-info" onclick='viewDrugRow(${dj})' title="Xem">👁️</button>
+                        <button class="btn btn-sm btn-outline" onclick='editDrugRow(${dj})' title="Sửa">✏️</button>
+                        <button class="btn btn-sm btn-warning" onclick='toggleDrugById(${dj})' title="Toggle">🔄</button>
+                    </div></td></tr>`;
+            });
+        }
+
+        async function createDrug() {
+            const drug_code = document.getElementById('drCode').value, brand_name = document.getElementById('drName').value;
+            const active_ingredients = document.getElementById('drIngredient').value, dispensing_unit = document.getElementById('drUnit').value;
+            if (!drug_code || !brand_name || !active_ingredients || !dispensing_unit) return toast('Nhập Mã, Tên, Hoạt chất, ĐVT', 'error');
+            const b = { drug_code, brand_name, active_ingredients, dispensing_unit };
+            const v = id => document.getElementById(id).value;
+            if (v('drRoute')) b.route_of_administration = v('drRoute');
+            if (v('drNdc')) b.national_drug_code = v('drNdc');
+            if (v('drCatId')) b.category_id = v('drCatId');
+            b.is_prescription_only = v('drPrescription') === 'true';
+            try {
+                await apiFetch(`${API}/pharmacy/drugs`, { method: 'POST', body: JSON.stringify(b) });
+                showSuccess('drCreateDisplay', 'Tạo thuốc thành công!', `<strong>${brand_name}</strong> (${drug_code})`);
+                toast('Tạo thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getDrug() {
+            const id = document.getElementById('drugId').value;
+            if (!id) return toast('Nhập Drug ID', 'error');
+            try {
+                const r = await apiFetch(`${API}/pharmacy/drugs/${id}`);
+                const d = r.data || {};
+                fillDrug(d);
+                const el = document.getElementById('drugDetailInfo'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460">💊 ${d.brand_name || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.drugs_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mã thuốc</div><div class="dg-value">${d.drug_code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mã quốc gia</div><div class="dg-value">${d.national_drug_code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Hoạt chất</div><div class="dg-value">${d.active_ingredients || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">ĐVT cấp phát</div><div class="dg-value">${d.dispensing_unit || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Đường dùng</div><div class="dg-value">${d.route_of_administration || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Nhóm</div><div class="dg-value"><span class="badge b-active">${d.category_name || d.category_id || '-'}</span></div></div>
+                        <div class="dg-item"><div class="dg-label">Kê đơn</div><div class="dg-value">${prescBadge(d.is_prescription_only)}</div></div>
+                        <div class="dg-item"><div class="dg-label">Trạng thái</div><div class="dg-value">${statusBadge(d.is_active)}</div></div>
+                        <div class="dg-item"><div class="dg-label">Tạo lúc</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateDrug() {
+            const id = document.getElementById('drugId').value;
+            if (!id) return toast('Nhập Drug ID', 'error');
+            const b = {};
+            if (document.getElementById('druName').value) b.brand_name = document.getElementById('druName').value;
+            if (document.getElementById('druIngredient').value) b.active_ingredients = document.getElementById('druIngredient').value;
+            if (document.getElementById('druUnit').value) b.dispensing_unit = document.getElementById('druUnit').value;
+            if (document.getElementById('druRoute').value) b.route_of_administration = document.getElementById('druRoute').value;
+            const catId = document.getElementById('druCatId').value; if (catId) b.category_id = catId;
+            const presc = document.getElementById('druPrescription').value; if (presc) b.is_prescription_only = presc === 'true';
+            try {
+                await apiFetch(`${API}/pharmacy/drugs/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('druUpdateDisplay', 'Cập nhật thành công!', `Thuốc <strong>${id}</strong> đã được cập nhật`);
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function toggleDrug(isActive) {
+            const id = document.getElementById('drugId').value;
+            if (!id) return toast('Nhập Drug ID', 'error');
+            try {
+                await apiFetch(`${API}/pharmacy/drugs/${id}/status`, { method: 'PATCH', body: JSON.stringify({ is_active: isActive }) });
+                showSuccess('druUpdateDisplay', isActive ? 'Đã mở khóa!' : 'Đã vô hiệu hóa!', `Thuốc <strong>${id}</strong>`);
+                toast(isActive ? '✅ Mở khóa thành công!' : '🚫 Vô hiệu hóa thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function toggleDrugById(d) {
+            const id = d.drugs_id || d.id || '';
+            if (!id) return;
+            const newState = !d.is_active;
+            try { await apiFetch(`${API}/pharmacy/drugs/${id}/status`, { method: 'PATCH', body: JSON.stringify({ is_active: newState }) }); toast(`🔄 ${d.brand_name || id}: ${newState ? 'Active' : 'Inactive'}`, 'success'); loadDrugs(drugPage); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ IMPORT / EXPORT ============
+        async function exportDC() { download('/pharmacy/categories/export', 'drug_categories.xlsx'); showSuccess('exportDcDisplay', 'Export thành công!', 'File drug_categories.xlsx'); }
+        async function exportDrugs() { download('/pharmacy/drugs/export', 'drugs.xlsx'); showSuccess('exportDrugDisplay', 'Export thành công!', 'File drugs.xlsx'); }
+
+        async function importDC() {
+            const f = document.getElementById('dcImport').files[0];
+            if (!f) return toast('Chọn file', 'error');
+            const fd = new FormData(); fd.append('file', f);
+            try { const r = await fetch(`${API}/pharmacy/categories/import`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd }); showImportResult('dcImportDisplay', await r.json()); toast('Import xong!', 'info'); loadDCDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function importDrugs() {
+            const f = document.getElementById('drugImport').files[0];
+            if (!f) return toast('Chọn file', 'error');
+            const fd = new FormData(); fd.append('file', f);
+            try { const r = await fetch(`${API}/pharmacy/drugs/import`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd }); showImportResult('drugImportDisplay', await r.json()); toast('Import xong!', 'info'); } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

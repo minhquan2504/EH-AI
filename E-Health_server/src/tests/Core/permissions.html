@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔑 Quyền, Menu, Module, API — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-get {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-post {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-put {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .b-patch {
+            background: #e0e7ff;
+            color: #3730a3
+        }
+
+        .b-delete {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🔑 Quyền, Menu, Module, API</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">🔑 Permissions</div>
+        <div class="tab" onclick="switchTab(1)">➕ Tạo / ✏️ Sửa Perm</div>
+        <div class="tab" onclick="switchTab(2)">📂 Menus</div>
+        <div class="tab" onclick="switchTab(3)">➕ Tạo / ✏️ Sửa Menu</div>
+        <div class="tab" onclick="switchTab(4)">📦 Modules</div>
+        <div class="tab" onclick="switchTab(5)">🌐 API Permissions</div>
+        <div class="tab" onclick="switchTab(6)">➕ Tạo / ✏️ Sửa API</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: PERMISSIONS LIST -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📋 Danh sách Quyền (Permissions)</h3>
+                <div class="toolbar">
+                    <input id="pSearch" placeholder="🔍 Tìm tên/code..." style="flex:1">
+                    <select id="pModuleFilter" title="Lọc theo module">
+                        <option value="">Tất cả Module</option>
+                    </select>
+                    <input id="pLimit" type="number" value="15" min="1" max="100" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadPerms()">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Module</th>
+                            <th>Mô tả</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="permTable"></tbody>
+                </table>
+                <div class="pagination" id="permPagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CREATE / EDIT PERMISSION -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>➕ Tạo Quyền mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Code *</label><input id="pcCode" placeholder="INVOICE_CREATE"></div>
+                    <div class="form-group"><label>Module *</label>
+                        <select id="pcModule" title="Chọn module">
+                            <option value="">-- Chọn module --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="pcDesc"
+                        placeholder="Quyền tạo hóa đơn thanh toán"></div>
+                <button class="btn btn-success" onclick="createPerm()">💾 Tạo quyền</button>
+                <div id="pcDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Chi tiết / Sửa / Xóa Quyền</h3>
+                <div class="toolbar">
+                    <input id="permId" placeholder="Permission ID hoặc Code" style="flex:1">
+                    <button class="btn btn-info" onclick="getPerm()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deletePerm()">🗑️ Xóa</button>
+                </div>
+                <div id="permDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Module mới</label>
+                        <select id="puModule" title="Chọn module mới">
+                            <option value="">-- Không đổi --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Mô tả mới</label><input id="puDesc"></div>
+                </div>
+                <button class="btn btn-success" onclick="updatePerm()">💾 Lưu thay đổi</button>
+                <div id="puDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MENUS LIST -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>📂 Danh sách Menus</h3>
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="loadMenus()">Tải danh sách</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>URL</th>
+                            <th>Icon</th>
+                            <th>Parent</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menuTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: CREATE / EDIT MENU -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>➕ Tạo Menu mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Code *</label><input id="mcCode" placeholder="DASHBOARD"></div>
+                    <div class="form-group"><label>Tên *</label><input id="mcName" placeholder="Trang chủ"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>URL</label><input id="mcUrl" placeholder="/dashboard"></div>
+                    <div class="form-group"><label>Icon</label><input id="mcIcon" placeholder="fas fa-home"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Parent (menu cha)</label>
+                        <select id="mcParent" title="Chọn menu cha">
+                            <option value="">-- Root (gốc) --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Thứ tự</label><input id="mcOrder" type="number" value="0"></div>
+                </div>
+                <button class="btn btn-success" onclick="createMenu()">💾 Tạo menu</button>
+                <div id="mcDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Sửa / Xóa Menu</h3>
+                <div class="toolbar">
+                    <select id="menuIdSelect" title="Chọn menu" style="flex:1">
+                        <option value="">-- Chọn menu --</option>
+                    </select>
+                    <button class="btn btn-info" onclick="getMenuDetail()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteMenu()">🗑️ Xóa</button>
+                </div>
+                <div id="menuDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên mới</label><input id="muName"></div>
+                    <div class="form-group"><label>URL mới</label><input id="muUrl"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Icon mới</label><input id="muIcon"></div>
+                    <div class="form-group"><label>Parent ID</label>
+                        <select id="muParent" title="Chọn menu cha mới">
+                            <option value="">-- Root (gốc) --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Thứ tự</label><input id="muOrder" type="number"></div>
+                <button class="btn btn-success" onclick="updateMenu()">💾 Lưu</button>
+                <div id="muDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MODULES -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>📦 Danh sách Modules</h3>
+                <button class="btn btn-primary" onclick="loadModules()">Tải danh sách Modules</button>
+                <div id="modDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>🔍 Permissions theo Module</h3>
+                <div class="toolbar">
+                    <select id="modName" title="Chọn module" style="flex:1">
+                        <option value="">-- Chọn module --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="getModulePerms()">Xem Permissions</button>
+                </div>
+                <div id="modPermDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: API PERMISSIONS LIST -->
+        <div class="panel" id="p5">
+            <div class="card">
+                <h3>🌐 Danh sách API Permissions</h3>
+                <div class="toolbar">
+                    <input id="apSearch" placeholder="🔍 Tìm path/tên..." style="flex:1">
+                    <select id="apModule" title="Lọc module">
+                        <option value="">Tất cả Module</option>
+                    </select>
+                    <select id="apMethod" title="Lọc method">
+                        <option value="">Tất cả Method</option>
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>PATCH</option>
+                        <option>DELETE</option>
+                    </select>
+                    <select id="apStatus" title="Lọc trạng thái">
+                        <option value="">Tất cả</option>
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                    </select>
+                    <input id="apLimit" type="number" value="15" min="1" max="100" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadApiPerms()">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Method</th>
+                            <th>Endpoint</th>
+                            <th>Module</th>
+                            <th>Mô tả</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apiPermTable"></tbody>
+                </table>
+                <div class="pagination" id="apiPermPagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 6: CREATE / EDIT API PERM -->
+        <div class="panel" id="p6">
+            <div class="card">
+                <h3>➕ Đăng ký API Permission mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Method *</label>
+                        <select id="apcMethod" title="Chọn method">
+                            <option>GET</option>
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>PATCH</option>
+                            <option>DELETE</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Endpoint *</label><input id="apcPath" placeholder="/api/users"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Module *</label>
+                        <select id="apcModule" title="Chọn module">
+                            <option value="">-- Chọn module --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Mô tả</label><input id="apcDesc"
+                            placeholder="Lấy danh sách người dùng"></div>
+                </div>
+                <button class="btn btn-success" onclick="createApiPerm()">💾 Đăng ký</button>
+                <div id="apcDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Sửa / Xóa API Permission</h3>
+                <div class="toolbar">
+                    <input id="apiPermId" placeholder="API Permission ID" style="flex:1">
+                    <button class="btn btn-info" onclick="getApiPermDetail()">🔍 Xem</button>
+                    <button class="btn btn-success" onclick="updateApiPerm()">💾 Cập nhật</button>
+                    <button class="btn btn-danger" onclick="deleteApiPerm()">🗑️ Xóa</button>
+                </div>
+                <div id="apiPermDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Method</label>
+                        <select id="apuMethod" title="Method mới">
+                            <option value="">-- Không đổi --</option>
+                            <option>GET</option>
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>PATCH</option>
+                            <option>DELETE</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Endpoint</label><input id="apuPath" placeholder="/api/..."></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Module</label>
+                        <select id="apuModule" title="Module mới">
+                            <option value="">-- Không đổi --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Mô tả</label><input id="apuDesc"></div>
+                </div>
+                <div class="form-group"><label>Status</label>
+                    <select id="apuStatus" title="Trạng thái">
+                        <option value="">-- Không đổi --</option>
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                    </select>
+                </div>
+                <div id="apuDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
+        let token = null, permPage = 1, apiPermPage = 1;
+        let allPermsCache = [], allApiPermsCache = [];
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function methodBadge(m) { const cls = { GET: 'b-get', POST: 'b-post', PUT: 'b-put', PATCH: 'b-patch', DELETE: 'b-delete' }; return `<span class="badge ${cls[m] || 'b-inactive'}">${m || '-'}</span>`; }
+        function statusBadge(s) { return `<span class="badge ${s === 'ACTIVE' ? 'b-active' : 'b-inactive'}">${s || '-'}</span>`; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadDropdowns(); } };
+        async function handleLogin() {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Permissions', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); loadDropdowns();
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token đã tự động refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn. Đăng nhập lại.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">Thời gian: ${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+        function buildPagination(elId, currentP, totalItems, limit, loadFn) {
+            const el = document.getElementById(elId);
+            const totalPages = Math.ceil(totalItems / limit) || 1;
+            let h = `<button onclick="${loadFn}(${currentP - 1})" ${currentP <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (totalPages <= 7) { for (let i = 1; i <= totalPages; i++) h += `<button class="${i === currentP ? 'active' : ''}" onclick="${loadFn}(${i})">${i}</button>`; }
+            else { h += `<button class="${currentP === 1 ? 'active' : ''}" onclick="${loadFn}(1)">1</button>`; if (currentP > 3) h += '<span>...</span>'; for (let i = Math.max(2, currentP - 1); i <= Math.min(totalPages - 1, currentP + 1); i++) h += `<button class="${i === currentP ? 'active' : ''}" onclick="${loadFn}(${i})">${i}</button>`; if (currentP < totalPages - 2) h += '<span>...</span>'; h += `<button class="${currentP === totalPages ? 'active' : ''}" onclick="${loadFn}(${totalPages})">${totalPages}</button>`; }
+            h += `<button onclick="${loadFn}(${currentP + 1})" ${currentP >= totalPages ? 'disabled' : ''}>Sau →</button>`;
+            h += `<span style="margin-left:8px">Tổng: ${totalItems}</span>`;
+            el.innerHTML = h;
+        }
+
+        /** Load tất cả dropdowns */
+        async function loadDropdowns() {
+            // Load modules cho combo boxes
+            try {
+                const r = await apiFetch(`${API}/modules`);
+                const mods = r.data || [];
+                const modList = Array.isArray(mods) ? mods : (mods.modules || []);
+                const modSelects = ['pModuleFilter', 'pcModule', 'puModule', 'apModule', 'apcModule', 'apuModule', 'modName'];
+                modSelects.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const isFilter = ['pModuleFilter', 'apModule'].includes(selId);
+                    const isUpdate = ['puModule', 'apuModule'].includes(selId);
+                    sel.innerHTML = isFilter ? '<option value="">Tất cả Module</option>' : (isUpdate ? '<option value="">-- Không đổi --</option>' : '<option value="">-- Chọn module --</option>');
+                    modList.forEach(m => {
+                        const val = m.module_name || m.name || m.code || m;
+                        const opt = document.createElement('option');
+                        opt.value = typeof val === 'string' ? val : JSON.stringify(val);
+                        opt.textContent = typeof val === 'string' ? val : (m.name || m.code || 'N/A');
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Modules:', e.message); }
+            // Load menus cho combo boxes
+            try {
+                const r = await apiFetch(`${API}/menus`);
+                const menus = r.data?.menus || r.data?.rows || (Array.isArray(r.data) ? r.data : []);
+                ['mcParent', 'muParent', 'menuIdSelect'].forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    const isSelect = selId === 'menuIdSelect';
+                    sel.innerHTML = isSelect ? '<option value="">-- Chọn menu --</option>' : '<option value="">-- Root (gốc) --</option>';
+                    menus.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.menus_id || m.menu_id || m.id;
+                        opt.textContent = `${m.name || m.code || '-'} (${m.code || m.menus_id || m.id})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Menus:', e.message); }
+        }
+
+        // ============ PERMISSIONS ============
+        function fillPerm(p) {
+            document.getElementById('permId').value = p.permissions_id || p.permission_id || p.id || p.code || '';
+            document.getElementById('puDesc').value = p.description || '';
+            const puMod = document.getElementById('puModule');
+            if (puMod) puMod.value = p.module || '';
+        }
+        function viewPerm(p) { fillPerm(p); switchTab(1); getPerm(); toast(`👁️ Xem: ${p.code || ''}`, 'info'); }
+        function editPerm(p) { fillPerm(p); switchTab(1); toast(`✏️ Sửa: ${p.code || ''}`, 'info'); }
+
+        async function fetchAllPerms() {
+            const p = new URLSearchParams();
+            const s = document.getElementById('pSearch').value; if (s) p.set('search', s);
+            const m = document.getElementById('pModuleFilter').value; if (m) p.set('module', m);
+            try {
+                const res = await apiFetch(`${API}/permissions?${p}`);
+                const data = res.data;
+                allPermsCache = data.items || data.permissions || data.rows || (Array.isArray(data) ? data : []);
+            } catch (e) { toast(e.message, 'error'); allPermsCache = []; }
+        }
+
+        async function loadPerms(page = 1, refetch = false) {
+            if (page === 1 || refetch || !allPermsCache.length) await fetchAllPerms();
+            permPage = page;
+            const limit = parseInt(document.getElementById('pLimit').value) || 15;
+            const totalItems = allPermsCache.length;
+            const totalPages = Math.ceil(totalItems / limit) || 1;
+            if (page > totalPages) page = totalPages;
+            const start = (page - 1) * limit;
+            const pageData = allPermsCache.slice(start, start + limit);
+            const tb = document.getElementById('permTable'); tb.innerHTML = '';
+            if (!pageData.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('permPagination').innerHTML = ''; return; }
+            pageData.forEach((p, i) => {
+                const pj = JSON.stringify(p).replace(/'/g, "&#39;");
+                tb.innerHTML += `<tr>
+                    <td>${start + i + 1}</td>
+                    <td><strong>${p.code || ''}</strong></td>
+                    <td>${p.name || '-'}</td>
+                    <td><span class="badge b-get">${p.module || '-'}</span></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${p.description || '-'}</td>
+                    <td><div class="action-group">
+                        <button class="btn btn-sm btn-info" onclick='viewPerm(${pj})' title="Xem">👁️</button>
+                        <button class="btn btn-sm btn-outline" onclick='editPerm(${pj})' title="Sửa">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick='deletePermById(${pj})' title="Xóa">🗑️</button>
+                    </div></td></tr>`;
+            });
+            buildPagination('permPagination', page, totalItems, limit, 'loadPerms');
+        }
+
+        async function createPerm() {
+            const code = document.getElementById('pcCode').value, mod = document.getElementById('pcModule').value;
+            if (!code || !mod) return toast('Nhập Code và Module', 'error');
+            try {
+                await apiFetch(`${API}/permissions`, { method: 'POST', body: JSON.stringify({ code, module: mod, description: document.getElementById('pcDesc').value }) });
+                showSuccess('pcDisplay', 'Tạo quyền thành công!', `Code: <strong>${code}</strong>, Module: <strong>${mod}</strong>`);
+                toast('Tạo quyền thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getPerm() {
+            const id = document.getElementById('permId').value;
+            if (!id) return toast('Nhập Permission ID/Code', 'error');
+            try {
+                const r = await apiFetch(`${API}/permissions/${id}`);
+                const d = r.data || {};
+                fillPerm(d);
+                const el = document.getElementById('permDetailInfo'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460">🔑 ${d.code || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.permissions_id || d.permission_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Module</div><div class="dg-value"><span class="badge b-get">${d.module || '-'}</span></div></div>
+                        <div class="dg-item"><div class="dg-label">Tên</div><div class="dg-value">${d.name || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mô tả</div><div class="dg-value">${d.description || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Tạo lúc</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Cập nhật</div><div class="dg-value">${d.updated_at ? new Date(d.updated_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updatePerm() {
+            const id = document.getElementById('permId').value;
+            if (!id) return toast('Nhập Permission ID', 'error');
+            const b = {};
+            const m = document.getElementById('puModule').value; if (m) b.module = m;
+            const d = document.getElementById('puDesc').value; if (d) b.description = d;
+            try {
+                await apiFetch(`${API}/permissions/${id}`, { method: 'PATCH', body: JSON.stringify(b) });
+                showSuccess('puDisplay', 'Cập nhật quyền thành công!', `Permission <strong>${id}</strong> đã được cập nhật`);
+                toast('Cập nhật thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deletePerm() {
+            const id = document.getElementById('permId').value;
+            if (!id) return toast('Nhập ID', 'error');
+            if (!confirm(`Xóa permission "${id}"?`)) return;
+            try {
+                await apiFetch(`${API}/permissions/${id}`, { method: 'DELETE' });
+                showSuccess('puDisplay', 'Đã xóa quyền!', `Permission <strong>${id}</strong> đã bị xóa`);
+                toast('Đã xóa!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deletePermById(p) {
+            const id = p.permissions_id || p.permission_id || p.id || '';
+            if (!id || !confirm(`Xóa permission "${p.code || id}"?`)) return;
+            try { await apiFetch(`${API}/permissions/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadPerms(permPage); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ MENUS ============
+        function fillMenu(m) {
+            const id = m.menus_id || m.menu_id || m.id || '';
+            document.getElementById('menuIdSelect').value = id;
+            document.getElementById('muName').value = m.name || '';
+            document.getElementById('muUrl').value = m.url || '';
+            document.getElementById('muIcon').value = m.icon || '';
+            document.getElementById('muParent').value = m.parent_id || '';
+            document.getElementById('muOrder').value = m.sort_order || 0;
+        }
+        function viewMenuRow(m) { fillMenu(m); switchTab(3); getMenuDetail(); toast(`👁️ ${m.name || ''}`, 'info'); }
+        function editMenuRow(m) { fillMenu(m); switchTab(3); toast(`✏️ ${m.name || ''}`, 'info'); }
+
+        async function loadMenus() {
+            try {
+                const res = await apiFetch(`${API}/menus`);
+                const data = res.data;
+                const list = data.menus || data.rows || (Array.isArray(data) ? data : []);
+                const tb = document.getElementById('menuTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; return; }
+                list.forEach((m, i) => {
+                    const mj = JSON.stringify(m).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${i + 1}</td>
+                        <td><strong>${m.code || ''}</strong></td>
+                        <td>${m.name || ''}</td>
+                        <td style="font-size:.78rem;font-family:monospace">${m.url || '-'}</td>
+                        <td>${m.icon || '-'}</td>
+                        <td style="font-size:.75rem">${m.parent_id || '-'}</td>
+                        <td>${m.sort_order ?? 0}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewMenuRow(${mj})'>👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editMenuRow(${mj})'>✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteMenuById(${mj})'>🗑️</button>
+                        </div></td></tr>`;
+                });
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function createMenu() {
+            const b = { code: document.getElementById('mcCode').value, name: document.getElementById('mcName').value, url: document.getElementById('mcUrl').value, icon: document.getElementById('mcIcon').value, sort_order: parseInt(document.getElementById('mcOrder').value) || 0 };
+            const p = document.getElementById('mcParent').value; if (p) b.parent_id = p;
+            if (!b.code || !b.name) return toast('Nhập Code và Tên', 'error');
+            try {
+                await apiFetch(`${API}/menus`, { method: 'POST', body: JSON.stringify(b) });
+                showSuccess('mcDisplay', 'Tạo menu thành công!', `Menu: <strong>${b.name}</strong> (${b.code})`);
+                toast('Tạo menu!', 'success'); loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getMenuDetail() {
+            const id = document.getElementById('menuIdSelect').value;
+            if (!id) return toast('Chọn menu', 'error');
+            try {
+                const r = await apiFetch(`${API}/menus/${id}`);
+                const d = r.data || {};
+                fillMenu(d);
+                const el = document.getElementById('menuDetailInfo'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460">📂 ${d.name || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.menus_id || d.menu_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Code</div><div class="dg-value">${d.code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">URL</div><div class="dg-value" style="font-family:monospace;font-size:.8rem">${d.url || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Icon</div><div class="dg-value">${d.icon || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Parent</div><div class="dg-value" style="font-size:.75rem">${d.parent_id || 'Root'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Thứ tự</div><div class="dg-value">${d.sort_order ?? 0}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateMenu() {
+            const id = document.getElementById('menuIdSelect').value;
+            if (!id) return toast('Chọn menu', 'error');
+            const b = {}, v = i => document.getElementById(i).value;
+            if (v('muName')) b.name = v('muName'); if (v('muUrl')) b.url = v('muUrl');
+            if (v('muIcon')) b.icon = v('muIcon'); if (v('muParent')) b.parent_id = v('muParent');
+            const o = v('muOrder'); if (o) b.sort_order = parseInt(o);
+            try {
+                await apiFetch(`${API}/menus/${id}`, { method: 'PATCH', body: JSON.stringify(b) });
+                showSuccess('muDisplay', 'Cập nhật menu thành công!', `Menu <strong>${id}</strong> đã được cập nhật`);
+                toast('OK!', 'success'); loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteMenu() {
+            const id = document.getElementById('menuIdSelect').value;
+            if (!id) return toast('Chọn menu', 'error');
+            if (!confirm('Xóa menu này?')) return;
+            try { await apiFetch(`${API}/menus/${id}`, { method: 'DELETE' }); showSuccess('muDisplay', 'Đã xóa menu!', `${id}`); toast('Đã xóa!', 'success'); loadDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteMenuById(m) {
+            const id = m.menus_id || m.menu_id || m.id || '';
+            if (!id || !confirm(`Xóa menu "${m.name || id}"?`)) return;
+            try { await apiFetch(`${API}/menus/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadMenus(); loadDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ MODULES ============
+        async function loadModules() {
+            try {
+                const r = await apiFetch(`${API}/modules`);
+                const mods = r.data || [];
+                const list = Array.isArray(mods) ? mods : (mods.modules || []);
+                const el = document.getElementById('modDisplay'); el.style.display = 'block';
+                if (!list.length) { el.innerHTML = '<div class="empty">Không có module nào</div>'; return; }
+                el.innerHTML = `<div style="margin-top:10px"><table>
+                    <thead><tr><th>#</th><th>Module</th><th>Actions</th></tr></thead>
+                    <tbody>${list.map((m, i) => {
+                    const name = typeof m === 'string' ? m : (m.module_name || m.name || m.code || JSON.stringify(m));
+                    return `<tr><td>${i + 1}</td><td><strong>${name}</strong></td><td><button class="btn btn-sm btn-info" onclick="viewModPerms('${name}')">🔍 Xem quyền</button></td></tr>`;
+                }).join('')}</tbody></table></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function viewModPerms(name) {
+            document.getElementById('modName').value = name;
+            getModulePerms();
+        }
+
+        async function getModulePerms() {
+            const n = document.getElementById('modName').value;
+            if (!n) return toast('Chọn module', 'error');
+            try {
+                const r = await apiFetch(`${API}/modules/${n}/permissions`);
+                const perms = r.data || [];
+                const list = Array.isArray(perms) ? perms : (perms.permissions || []);
+                const el = document.getElementById('modPermDisplay'); el.style.display = 'block';
+                if (!list.length) { el.innerHTML = `<div class="empty">Module "${n}" chưa có quyền nào</div>`; return; }
+                el.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#0f3460">📦 ${n} — ${list.length} quyền</div>
+                    <table><thead><tr><th>#</th><th>Code</th><th>Tên</th><th>Mô tả</th></tr></thead>
+                    <tbody>${list.map((p, i) => `<tr><td>${i + 1}</td><td><strong>${p.code || '-'}</strong></td><td>${p.name || '-'}</td><td>${p.description || '-'}</td></tr>`).join('')}</tbody></table>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ API PERMISSIONS ============
+        function fillApiPerm(a) {
+            document.getElementById('apiPermId').value = a.api_permissions_id || a.api_permission_id || a.id || '';
+            document.getElementById('apuMethod').value = a.method || '';
+            document.getElementById('apuPath').value = a.endpoint || a.path || '';
+            const apuMod = document.getElementById('apuModule'); if (apuMod) apuMod.value = a.module || '';
+            document.getElementById('apuDesc').value = a.description || '';
+            document.getElementById('apuStatus').value = a.status || '';
+        }
+        function viewApiRow(a) { fillApiPerm(a); switchTab(6); getApiPermDetail(); toast(`👁️ ${a.method} ${a.endpoint || a.path || ''}`, 'info'); }
+        function editApiRow(a) { fillApiPerm(a); switchTab(6); toast(`✏️ ${a.method} ${a.endpoint || a.path || ''}`, 'info'); }
+
+        async function fetchAllApiPerms() {
+            const p = new URLSearchParams();
+            const s = document.getElementById('apSearch').value; if (s) p.set('search', s);
+            const m = document.getElementById('apModule').value; if (m) p.set('module', m);
+            const mt = document.getElementById('apMethod').value; if (mt) p.set('method', mt);
+            const st = document.getElementById('apStatus').value; if (st) p.set('status', st);
+            try {
+                const res = await apiFetch(`${API}/api-permissions?${p}`);
+                const data = res.data;
+                allApiPermsCache = data.items || data.apiPermissions || data.rows || (Array.isArray(data) ? data : []);
+            } catch (e) { toast(e.message, 'error'); allApiPermsCache = []; }
+        }
+
+        async function loadApiPerms(page = 1, refetch = false) {
+            if (page === 1 || refetch || !allApiPermsCache.length) await fetchAllApiPerms();
+            apiPermPage = page;
+            const limit = parseInt(document.getElementById('apLimit').value) || 15;
+            const totalItems = allApiPermsCache.length;
+            const totalPages = Math.ceil(totalItems / limit) || 1;
+            if (page > totalPages) page = totalPages;
+            const start = (page - 1) * limit;
+            const pageData = allApiPermsCache.slice(start, start + limit);
+            const tb = document.getElementById('apiPermTable'); tb.innerHTML = '';
+            if (!pageData.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('apiPermPagination').innerHTML = ''; return; }
+            pageData.forEach((a, i) => {
+                const aj = JSON.stringify(a).replace(/'/g, "&#39;");
+                tb.innerHTML += `<tr>
+                    <td>${start + i + 1}</td>
+                    <td>${methodBadge(a.method)}</td>
+                    <td style="font-size:.78rem;font-family:monospace">${a.endpoint || a.path || '-'}</td>
+                    <td><span class="badge b-get">${a.module || '-'}</span></td>
+                    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${a.description || '-'}</td>
+                    <td>${statusBadge(a.status)}</td>
+                    <td><div class="action-group">
+                        <button class="btn btn-sm btn-info" onclick='viewApiRow(${aj})'>👁️</button>
+                        <button class="btn btn-sm btn-outline" onclick='editApiRow(${aj})'>✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick='deleteApiById(${aj})'>🗑️</button>
+                    </div></td></tr>`;
+            });
+            buildPagination('apiPermPagination', page, totalItems, limit, 'loadApiPerms');
+        }
+
+        async function createApiPerm() {
+            const method = document.getElementById('apcMethod').value, endpoint = document.getElementById('apcPath').value, mod = document.getElementById('apcModule').value;
+            if (!method || !endpoint) return toast('Nhập Method và Endpoint', 'error');
+            try {
+                await apiFetch(`${API}/api-permissions`, { method: 'POST', body: JSON.stringify({ method, endpoint, module: mod, description: document.getElementById('apcDesc').value }) });
+                showSuccess('apcDisplay', 'Đăng ký API thành công!', `${methodBadge(method)} <strong>${endpoint}</strong>`);
+                toast('Đăng ký thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getApiPermDetail() {
+            const id = document.getElementById('apiPermId').value;
+            if (!id) return toast('Nhập API Permission ID', 'error');
+            // We don't have a GET by ID, so just show the form values
+            toast('Dữ liệu đã fill vào form', 'info');
+        }
+
+        async function updateApiPerm() {
+            const id = document.getElementById('apiPermId').value;
+            if (!id) return toast('Nhập API Permission ID', 'error');
+            const b = {};
+            const m = document.getElementById('apuMethod').value; if (m) b.method = m;
+            const p = document.getElementById('apuPath').value; if (p) b.endpoint = p;
+            const mod = document.getElementById('apuModule').value; if (mod) b.module = mod;
+            const d = document.getElementById('apuDesc').value; if (d) b.description = d;
+            const s = document.getElementById('apuStatus').value; if (s) b.status = s;
+            try {
+                await apiFetch(`${API}/api-permissions/${id}`, { method: 'PATCH', body: JSON.stringify(b) });
+                showSuccess('apuDisplay', 'Cập nhật API thành công!', `API <strong>${id}</strong> đã được cập nhật`);
+                toast('Cập nhật thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteApiPerm() {
+            const id = document.getElementById('apiPermId').value;
+            if (!id) return toast('Nhập API Permission ID', 'error');
+            if (!confirm(`Xóa API Permission "${id}"?`)) return;
+            try { await apiFetch(`${API}/api-permissions/${id}`, { method: 'DELETE' }); showSuccess('apuDisplay', 'Đã xóa API!', `${id}`); toast('Đã xóa!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteApiById(a) {
+            const id = a.api_permissions_id || a.api_permission_id || a.id || '';
+            if (!id || !confirm(`Xóa "${a.method} ${a.endpoint || a.path}"?`)) return;
+            try { await apiFetch(`${API}/api-permissions/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadApiPerms(apiPermPage); } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

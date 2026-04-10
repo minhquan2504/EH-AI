@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍⚕️ Nhân sự & Ca trực — Test Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        /* CSS is kept identical to organization.html to ensure uniformity */
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem;
+            background: #fff;
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db;
+            color: #333;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        .tbl-wrap {
+            overflow-x: auto
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600;
+            display: inline-block
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .b-type {
+            background: #ede9fe;
+            color: #5b21b6
+        }
+
+        .b-maint {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 10px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px;
+            z-index: 9999;
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 10px
+        }
+
+        .pagination button {
+            min-width: 32px;
+            height: 32px
+        }
+
+        .page-info {
+            font-size: .8rem;
+            color: #64748b
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .45);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 20px
+        }
+
+        .modal-overlay.show {
+            display: flex
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1rem
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #94a3b8
+        }
+
+        .modal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 4px 12px;
+            font-size: .85rem
+        }
+
+        .detail-grid .label {
+            color: #64748b;
+            font-weight: 600
+        }
+
+        .detail-grid .value {
+            color: #1e293b;
+            word-break: break-all
+        }
+
+        /* ====== CALENDAR STYLES ====== */
+        .cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .cal-header h3 {
+            font-size: 1.05rem;
+            color: #1e293b;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .cal-nav {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cal-nav button {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .9rem;
+            transition: all .15s;
+        }
+
+        .cal-nav button:hover {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cal-day-name {
+            background: #0f3460;
+            color: #fff;
+            text-align: center;
+            padding: 8px 4px;
+            font-weight: 700;
+            font-size: .78rem;
+            text-transform: uppercase;
+        }
+
+        .cal-cell {
+            background: #fff;
+            min-height: 110px;
+            padding: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: background .15s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cal-cell:hover {
+            background: #f1f5f9;
+        }
+
+        .cal-cell.other-month {
+            background: #f8fafc;
+        }
+
+        .cal-cell.other-month .cal-date {
+            color: #94a3b8;
+        }
+
+        .cal-cell.today {
+            background: #eff6ff;
+            box-shadow: inset 0 0 0 2px #3b82f6;
+        }
+
+        .cal-date {
+            font-size: .78rem;
+            font-weight: 700;
+            color: #475569;
+            padding: 2px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cal-date .cal-add-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #fff;
+            border: none;
+            font-size: .9rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .cal-cell:hover .cal-add-btn {
+            opacity: 1;
+        }
+
+        .cal-events {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 2px;
+        }
+
+        .cal-chip {
+            font-size: .7rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: transform .1s, box-shadow .1s;
+        }
+
+        .cal-chip:hover {
+            transform: scale(1.03);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+        }
+
+        .cal-chip.morning {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .cal-chip.afternoon {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .cal-chip.night {
+            background: linear-gradient(135deg, #1e293b, #475569);
+        }
+
+        .cal-chip.leave {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+            text-decoration: line-through;
+        }
+
+        /* Schedule detail popup */
+        .sched-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sched-detail-overlay.open {
+            display: flex;
+        }
+
+        .sched-detail-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            min-width: 360px;
+            max-width: 480px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+            position: relative;
+        }
+
+        .sched-detail-box h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #0f3460;
+        }
+
+        .sched-detail-box .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .sched-detail-box .detail-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: .88rem;
+        }
+
+        .sched-detail-box .detail-label {
+            color: #64748b;
+            font-weight: 600;
+            min-width: 110px;
+        }
+
+        .sched-detail-box .detail-val {
+            color: #1e293b;
+        }
+
+        .sched-detail-box .action-bar {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* ====== STAFF PROFILE STYLES ====== */
+        .staff-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .staff-profile .sp-header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .staff-profile .sp-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .staff-profile .sp-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .staff-profile .sp-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f3460;
+        }
+
+        .staff-profile .sp-sub {
+            font-size: .82rem;
+            color: #64748b;
+        }
+
+        .sp-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+
+        .sp-section h4 {
+            font-size: .88rem;
+            color: #0f3460;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sp-section h4 button {
+            font-size: .75rem;
+        }
+
+        .sp-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .sp-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        .sp-tag .tag-del {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            opacity: .6;
+            font-size: .9rem;
+        }
+
+        .sp-tag .tag-del:hover {
+            opacity: 1;
+        }
+
+        .sp-tag.role {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .sp-tag.branch {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .sp-info-grid {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 4px 10px;
+            font-size: .84rem;
+        }
+
+        .sp-info-grid .lbl {
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .sp-info-grid .val {
+            color: #1e293b;
+        }
+
+        .sp-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .sp-inline-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .sp-inline-form label {
+            font-size: .78rem;
+            color: #64748b;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .sp-inline-form input,
+        .sp-inline-form select,
+        .sp-inline-form textarea {
+            font-size: .82rem;
+            padding: 5px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .sp-inline-form textarea {
+            min-height: 50px;
+        }
+
+        .sp-signature {
+            max-width: 180px;
+            max-height: 80px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>👨‍⚕️ Nhân sự & Ca trực</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3); margin-right: 10px;"
+                onclick="loadAllDropdowns()">🔄 Tải Dropdown Data</button>
+            <div class="auth-bar" id="authSection" style="display:inline-flex;">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">👥 Nhân sự</div>
+        <div class="tab" onclick="switchTab(1)">📅 Ca trực</div>
+        <div class="tab" onclick="switchTab(2)">📊 Lịch làm việc</div>
+        <div class="tab" onclick="switchTab(3)">🔄 Đổi ca</div>
+        <div class="tab" onclick="switchTab(4)">🏖 Nghỉ phép</div>
+        <div class="tab" onclick="switchTab(5)">📜 Chứng chỉ</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+
+        <!-- ========== STAFF ========== -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>👥 Danh sách Nhân sự Y tế</h3>
+                <div class="toolbar">
+                    <input id="f0Search" placeholder="🔍 Tìm tên, email, SĐT..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadStaff()">
+                    <select id="f0Role" title="Role" onchange="loadStaff()">
+                        <option value="">-- Tất cả Role --</option>
+                        <option value="DOCTOR">Bác sĩ</option>
+                        <option value="NURSE">Y tá / Điều dưỡng</option>
+                        <option value="PHARMACIST">Dược sĩ</option>
+                        <option value="STAFF">Nhân viên</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                    <select id="f0Status" title="Status" onchange="loadStaff()">
+                        <option value="">-- Status --</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="BANNED">Banned</option>
+                    </select>
+                    <select id="f0Branch" class="branch-select" onchange="loadStaff()"></select>
+                    <button class="btn btn-primary" onclick="loadStaff()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('staffModal', 'Khởi tạo Nhân sự', null)">➕ Thêm
+                        NS</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã NV</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Chi nhánh</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f0Body">
+                            <tr>
+                                <td colspan="7" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f0Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== SHIFTS ========== -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>📅 Danh mục Ca trực</h3>
+                <div class="toolbar">
+                    <input id="f1Search" placeholder="🔍 Tìm mã, tên ca..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadShifts()">
+                    <select id="f1Status" title="Status" onchange="loadShifts()">
+                        <option value="">-- Status --</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadShifts()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('shiftModal', 'Thêm Ca trực', null)">➕ Thêm
+                        Ca</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã Ca</th>
+                                <th>Tên Ca</th>
+                                <th>Giờ Bắt đầu</th>
+                                <th>Giờ Kết thúc</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f1Body">
+                            <tr>
+                                <td colspan="6" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f1Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== STAFF SCHEDULES (CALENDAR VIEW) ========== -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <div class="cal-header">
+                    <div class="cal-nav">
+                        <select id="f2Branch" class="branch-select" title="Branch" onchange="renderCalendar()">
+                            <option value="">-- Tất cả chi nhánh --</option>
+                        </select>
+                        <select id="f2StaffFilter" title="Staff" onchange="renderCalendar()">
+                            <option value="">-- Tất cả NV --</option>
+                        </select>
+                    </div>
+                    <div class="cal-nav">
+                        <button onclick="calNav(-1)">◀ Trước</button>
+                        <h3 id="calTitle">Tháng 3 / 2026</h3>
+                        <button onclick="calNav(1)">Sau ▶</button>
+                    </div>
+                    <div class="cal-nav">
+                        <button onclick="calToday()">Hôm nay</button>
+                        <button class="btn btn-success"
+                            onclick="openModal('scheduleModal', 'Phân lịch làm việc', null)">➕ Phân công</button>
+                    </div>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+            </div>
+        </div>
+
+        <!-- ========== SHIFT SWAPS ========== -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>🔄 Yêu cầu đổi ca & Chuyển nhượng</h3>
+                <div class="toolbar">
+                    <input id="f3Staff" placeholder="🔍 Staff ID..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadSwaps()">
+                    <select id="f3Status" title="Status" onchange="loadSwaps()">
+                        <option value="">-- Tất cả --</option>
+                        <option value="PENDING">Chờ xử lý</option>
+                        <option value="APPROVED">Đã duyệt</option>
+                        <option value="REJECTED">Từ chối</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadSwaps()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('swapModal', 'Tạo yêu cầu Đổi ca', null)">➕ Xin
+                        đổi ca</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã YC</th>
+                                <th>NV Yêu cầu</th>
+                                <th>Ca Gốc</th>
+                                <th>Ca Muốn Nhận</th>
+                                <th>NV Thay Thế</th>
+                                <th>Lý do</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f3Body">
+                            <tr>
+                                <td colspan="8" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f3Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== LEAVES ========== -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>🏖 Đơn xin phép / Nghỉ ốm</h3>
+                <div class="toolbar">
+                    <input id="f4Staff" placeholder="🔍 Staff ID..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadLeaves()">
+                    <select id="f4Status" title="Status" onchange="loadLeaves()">
+                        <option value="">-- Tất cả --</option>
+                        <option value="PENDING">Chờ xử lý</option>
+                        <option value="APPROVED">Đã duyệt</option>
+                        <option value="REJECTED">Từ chối</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadLeaves()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('leaveModal', 'Nộp đơn Nghỉ phép', null)">➕ Xin
+                        nghỉ</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã Đơn</th>
+                                <th>Nhân viên</th>
+                                <th>Loại phép</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                                <th>Lý do</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f4Body">
+                            <tr>
+                                <td colspan="8" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f4Pag"></div>
+            </div>
+        </div>
+
+        <!-- ========== LICENSES ========== -->
+        <div class="panel" id="p5">
+            <div class="card">
+                <h3>📜 Quản lý Chứng chỉ / Giấy phép</h3>
+                <div class="toolbar">
+                    <input id="f5Search" placeholder="🔍 Tên GPHN..." style="flex:1"
+                        onkeyup="if(event.key==='Enter')loadLicenses()">
+                    <select id="f5Status" title="Status" onchange="loadLicenses()">
+                        <option value="">-- Tình trạng --</option>
+                        <option value="30">Sắp hết hạn (30 ngày)</option>
+                        <option value="-1">Đã hết hạn</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadLicenses()">Tải</button>
+                    <button class="btn btn-success" onclick="openModal('licenseModal', 'Thêm Chứng chỉ', null)">➕ Cấp
+                        mới GP</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Số GP</th>
+                                <th>Tên NV</th>
+                                <th>Loại GP</th>
+                                <th>Cơ quan cấp</th>
+                                <th>Ngày cấp</th>
+                                <th>Ngày hết hạn</th>
+                                <th>Tình trạng</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f5Body">
+                            <tr>
+                                <td colspan="8" class="empty">Nhấn "Tải"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="f5Pag"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ====== DETAIL MODAL ====== -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="detailTitle">Chi tiết</h3><button class="modal-close"
+                    onclick="closeM('detailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="detailBody"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('detailModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== STAFF MODAL ====== -->
+    <div class="modal-overlay" id="staffModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="staffModalTitle">Thêm Nhân sự</h3><button class="modal-close"
+                    onclick="closeM('staffModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="stEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Họ tên *</label><input id="stName" placeholder="Lê Văn A"></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="stEmail"
+                            placeholder="a.levan@ehealth.com"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>SĐT</label><input id="stPhone" placeholder="0987654321"></div>
+                    <div class="form-group"><label>Mật khẩu (Tạo mới) *</label><input type="password" id="stPass"
+                            placeholder="...Tự tạo trống..."></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Chi nhánh *</label><select id="stBranch" class="branch-select"
+                            onchange="filterDeptSelect(this.value, 'stDept')">
+                            <option value="">-- Chọn CN --</option>
+                        </select></div>
+                    <div class="form-group"><label>Khoa</label><select id="stDept" class="dept-select">
+                            <option value="">-- Khoa --</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Chức vụ</label><input id="stRoleTitle"
+                            placeholder="VD: Bác sĩ Trưởng khoa, Nhân viên..."></div>
+                    <div class="form-group"><label>Vai trò chính (Role) *</label>
+                        <select id="stRole">
+                            <option value="DOCTOR">👨‍⚕️ Bác sĩ (DOCTOR)</option>
+                            <option value="NURSE">👩‍⚕️ Y Tá (NURSE)</option>
+                            <option value="PHARMACIST">💊 Dược sĩ (PHARMACIST)</option>
+                            <option value="STAFF">💼 Hành chính (STAFF)</option>
+                            <option value="ADMIN">🛡️ Admin (ADMIN)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('staffModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveStaff()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SHIFT MODAL ====== -->
+    <div class="modal-overlay" id="shiftModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="shiftModalTitle">Tạo Ca trực</h3><button class="modal-close"
+                    onclick="closeM('shiftModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="shEditId">
+                <div class="form-row">
+                    <div class="form-group"><label>Mã (Code) *</label><input id="shCode" placeholder="MORNING"></div>
+                    <div class="form-group"><label>Tên Ca *</label><input id="shName" placeholder="Ca Sáng"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Bắt đầu (HH:mm:ss) *</label><input type="time" id="shStart" step="1">
+                    </div>
+                    <div class="form-group"><label>Kết thúc (HH:mm:ss) *</label><input type="time" id="shEnd" step="1">
+                    </div>
+                </div>
+                <div class="form-group"><label>Ghi chú</label><input id="shDesc" placeholder="..."></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('shiftModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveShift()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SCHEDULE MODAL ====== -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="scheduleModalTitle">Phân công Lịch</h3><button class="modal-close"
+                    onclick="closeM('scheduleModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label>Nhân viên *</label><select id="scStaff">
+                            <option value="">-- Chọn chi nhánh trước --</option>
+                        </select></div>
+                    <div class="form-group"><label>Ca thực hiện *</label><select id="scShift"
+                            class="shift-select"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Từ ngày *</label><input type="date" id="scStart"></div>
+                    <div class="form-group"><label>Đến ngày</label><input type="date" id="scEnd"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Chi nhánh</label><select id="scBranch" class="branch-select"
+                            onchange="onScBranchChange(this.value)"></select></div>
+                    <div class="form-group"><label>Phòng khám</label><select id="scRoom">
+                            <option value="">-- Chọn chi nhánh trước --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('scheduleModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveSchedule()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SWAP MODAL ====== -->
+    <div class="modal-overlay" id="swapModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="swapModalTitle">Đổi ca</h3><button class="modal-close"
+                    onclick="closeM('swapModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label>Lịch của bạn (ID) *</label><input id="swFrom"></div>
+                    <div class="form-group"><label>Lịch muốn nhận (ID) *</label><input id="swTo"></div>
+                </div>
+                <div class="form-group"><label>Lý do</label><input id="swReason"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('swapModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveSwap()">Đệ trình</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== LEAVE MODAL ====== -->
+    <div class="modal-overlay" id="leaveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="leaveModalTitle">Xin Nghỉ phép</h3><button class="modal-close"
+                    onclick="closeM('leaveModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label>Nhân viên ID *</label><input id="lvStaff"></div>
+                    <div class="form-group"><label>Loại nghỉ *</label>
+                        <select id="lvType">
+                            <option value="ANNUAL">Phép năm</option>
+                            <option value="SICK">Ốm</option>
+                            <option value="PERSONAL">Việc riêng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Từ *</label><input type="date" id="lvStart"></div>
+                    <div class="form-group"><label>Đến *</label><input type="date" id="lvEnd"></div>
+                </div>
+                <div class="form-group"><label>Lý do *</label><textarea id="lvReason"></textarea></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('leaveModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveLeave()">Nộp đơn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== LICENSE MODAL ====== -->
+    <div class="modal-overlay" id="licenseModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="licenseModalTitle">Cấp Chứng Chỉ</h3><button class="modal-close"
+                    onclick="closeM('licenseModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group"><label>Staff ID *</label><input id="lcStaff"></div>
+                    <div class="form-group"><label>Loại *</label>
+                        <select id="lcType">
+                            <option value="MEDICAL_LICENSE">GPHN Bác sĩ</option>
+                            <option value="NURSING_LICENSE">GPHN Điều dưỡng</option>
+                            <option value="OTHER">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Số GP *</label><input id="lcNum"></div>
+                    <div class="form-group"><label>Nơi cấp</label><input id="lcIssuer"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Ngày cấp</label><input type="date" id="lcIssueDate"></div>
+                    <div class="form-group"><label>Hết hạn</label><input type="date" id="lcExpiryDate"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeM('licenseModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveLicense()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SCHEDULE DETAIL OVERLAY ====== -->
+    <div class="sched-detail-overlay" id="schedDetailOverlay"
+        onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="sched-detail-box"></div>
+    </div>
+
+    <script>
+        const API = 'hhttp://localhost:3000/api', TABS = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'];
+        let token = null, pages = { f0: 1, f1: 1, f2: 1, f3: 1, f4: 1, f5: 1 };
+        let cached = { branches: [], depts: [], shifts: [] };
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); window[`loadTab${i}`]?.(); }
+
+        window.onload = () => {
+            const a = getAuth();
+            if (a?.accessToken) {
+                token = a.accessToken; showLoggedIn(a.user);
+                loadAllDropdowns().then(() => loadStaff());
+            }
+        };
+
+        async function handleLogin() {
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Staff Test', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); toast('Đăng nhập thành công!', 'success');
+                loadAllDropdowns().then(() => loadStaff());
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info'); document.querySelectorAll('tbody').forEach(b => b.innerHTML = '<tr><td colspan="10" class="empty">Yêu cầu đăng nhập</td></tr>'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token'); }
+            const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+            return d;
+        }
+
+        function sBadge(s) {
+            if (s === 'ACTIVE' || s === 'APPROVED') return `<span class="badge b-active">${s}</span>`;
+            if (s === 'PENDING') return `<span class="badge b-maint">${s}</span>`;
+            if (s === 'COMPLETED') return `<span class="badge b-type">${s}</span>`;
+            return `<span class="badge b-inactive">${s || '—'}</span>`;
+        }
+
+        function closeM(id) { document.getElementById(id).classList.remove('show'); }
+        function openModal(id, title, editId) {
+            document.getElementById(id + 'Title').textContent = title;
+            if (id === 'staffModal') { document.getElementById('stEditId').value = editId || ''; if (!editId) { document.getElementById('stName').value = ''; document.getElementById('stEmail').value = ''; document.getElementById('stPhone').value = ''; document.getElementById('stPass').value = ''; } }
+            if (id === 'shiftModal') { document.getElementById('shEditId').value = editId || ''; if (!editId) { document.getElementById('shCode').value = ''; document.getElementById('shName').value = ''; document.getElementById('shStart').value = ''; document.getElementById('shEnd').value = ''; document.getElementById('shDesc').value = ''; } }
+            document.getElementById(id).classList.add('show');
+        }
+
+        function paginate(el, pg, loadFn, key) {
+            if (!pg || !pg.totalPages || pg.totalPages <= 1) { el.innerHTML = ''; return }
+            el.innerHTML = `<button class="btn btn-outline btn-sm" onclick="pages.${key}=${pages[key] - 1};${loadFn}()" ${pages[key] <= 1 ? 'disabled' : ''}>◀</button>
+                <span class="page-info">Trang ${pages[key]} / ${pg.totalPages}</span>
+                <button class="btn btn-outline btn-sm" onclick="pages.${key}=${pages[key] + 1};${loadFn}()" ${pages[key] >= pg.totalPages ? 'disabled' : ''}>▶</button>`;
+        }
+
+        async function loadAllDropdowns() {
+            try {
+                const [bRes, dRes, sRes] = await Promise.all([
+                    apiFetch(`${API}/branches/dropdown`),
+                    apiFetch(`${API}/departments?limit=1000`),
+                    apiFetch(`${API}/shifts?limit=500&status=ACTIVE`)
+                    // Rooms can be loaded dynamically, or we fetch them when branch changes
+                ]);
+                cached.branches = bRes.data || [];
+                cached.depts = dRes.data.items || []; // Department api response format? `data.items` if paginated, `data` if dropdown.
+                cached.shifts = Array.isArray(sRes.data) ? sRes.data : (sRes.data?.items || []);
+
+                let bOpts = '<option value="">-- Chọn Chi nhánh --</option>' + cached.branches.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+                document.querySelectorAll('.branch-select').forEach(el => el.innerHTML = bOpts);
+
+                let sOpts = '<option value="">-- Chọn Ca --</option>' + cached.shifts.map(s => `<option value="${s.shifts_id}">${s.name} (${s.start_time.substring(0, 5)} - ${s.end_time.substring(0, 5)})</option>`).join('');
+                document.querySelectorAll('.shift-select').forEach(el => el.innerHTML = sOpts);
+
+                toast('Đã tải bộ cache danh mục', 'success');
+            } catch (e) {
+                console.error("Lỗi nạp danh mục:", e);
+                toast('Lỗi nạp cache danh mục', 'error');
+            }
+        }
+
+        function filterDeptSelect(branchId, deptSelectId) {
+            const el = document.getElementById(deptSelectId);
+            if (!el) return;
+            if (!branchId) { el.innerHTML = '<option value="">-- Chọn Khoa --</option>'; return; }
+            let arr = cached.depts.filter(d => d.branch_id === branchId); // if data has branch_id
+            el.innerHTML = '<option value="">-- Chọn Khoa --</option>' + arr.map(d => `<option value="${d.departments_id}">${d.name}</option>`).join('');
+        }
+
+        async function filterRoomSelect(branchId, roomSelectId) {
+            const el = document.getElementById(roomSelectId);
+            if (!el) return;
+            if (!branchId) { el.innerHTML = '<option value="">-- Chọn chi nhánh trước --</option>'; return; }
+            try {
+                const r = await apiFetch(`${API}/medical-rooms?branch_id=${branchId}&limit=500`);
+                const arr = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                el.innerHTML = '<option value="">-- Bất kỳ Phòng --</option>' + arr.map(rm => `<option value="${rm.medical_rooms_id}">${rm.name}</option>`).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function loadStaffByBranch(branchId, staffSelectId) {
+            const el = document.getElementById(staffSelectId);
+            if (!el) return;
+            if (!branchId) { el.innerHTML = '<option value="">-- Chọn chi nhánh trước --</option>'; return; }
+            try {
+                const r = await apiFetch(`${API}/staff?branch_id=${branchId}&limit=500&status=ACTIVE`);
+                const arr = r.data?.items || [];
+                el.innerHTML = '<option value="">-- Chọn Nhân viên --</option>' + arr.map(s => `<option value="${s.users_id}">${s.full_name} (${s.email || s.users_id.split('_').pop()})</option>`).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function onScBranchChange(branchId) {
+            await Promise.all([
+                loadStaffByBranch(branchId, 'scStaff'),
+                filterRoomSelect(branchId, 'scRoom')
+            ]);
+        }
+
+        // TABS Map
+        window.loadTab0 = loadStaff;
+        window.loadTab1 = loadShifts;
+        window.loadTab2 = loadSchedules;
+        window.loadTab3 = loadSwaps;
+        window.loadTab4 = loadLeaves;
+        window.loadTab5 = loadLicenses;
+
+        // ================= 0. STAFF =================
+        async function loadStaff() {
+            const p = new URLSearchParams({ page: pages.f0, limit: 10 });
+            if (document.getElementById('f0Search').value) p.set('search', document.getElementById('f0Search').value);
+            if (document.getElementById('f0Role').value) p.set('role', document.getElementById('f0Role').value);
+            if (document.getElementById('f0Status').value) p.set('status', document.getElementById('f0Status').value);
+            if (document.getElementById('f0Branch').value) p.set('branch_id', document.getElementById('f0Branch').value);
+
+            try {
+                const r = await apiFetch(`${API}/staff?${p}`);
+                const b = document.getElementById('f0Body');
+                if (!r.data.items || r.data.items.length === 0) { b.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('f0Pag').innerHTML = ''; return; }
+
+                b.innerHTML = r.data.items.map(s => {
+                    let branchName = s.facility_name || '—';
+                    let roles = s.roles?.join(', ') || '—';
+                    return `<tr>
+                        <td><strong>${s.users_id ? s.users_id.split('_').pop() + '...' : '—'}</strong></td>
+                        <td>${s.full_name} <br> <small style="color:#64748b">${s.phone || ''}</small></td>
+                        <td>${s.email}</td>
+                        <td>${roles}</td>
+                        <td>${branchName}</td>
+                        <td>${sBadge(s.status)}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="showStaffDetail('${s.users_id}')">👁️ Xem</button>
+                            <button class="btn btn-outline btn-sm" onclick="editStaff('${s.users_id}', '${encodeURIComponent(JSON.stringify(s))}')">✏️ Sửa</button>
+                            ${s.status === 'ACTIVE' ? `<button class="btn btn-outline btn-sm" style="color:red" onclick="toggleStaffStatus('${s.users_id}', 'INACTIVE')">Khóa</button>` : `<button class="btn btn-outline btn-sm" style="color:green" onclick="toggleStaffStatus('${s.users_id}', 'ACTIVE')">Mở</button>`}
+                        </td>
+                    </tr>`;
+                }).join('');
+                paginate(document.getElementById('f0Pag'), r.data.pagination, 'loadStaff', 'f0');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function showStaffDetail(id) {
+            try {
+                const r = await apiFetch(`${API}/staff/${id}`);
+                const d = r.data;
+                document.getElementById('detailTitle').textContent = `Hồ sơ: ${d.full_name}`;
+
+                const genderMap = { MALE: 'Nam', FEMALE: 'Nữ', OTHER: 'Khác' };
+                const avatarHtml = d.avatar_url ? `<img src="${d.avatar_url}">` : '👤';
+
+                // Doctor info section
+                let doctorHtml = '';
+                if (d.doctors_id || (d.roles && d.roles.includes('DOCTOR'))) {
+                    doctorHtml = `
+                    <div class="sp-section">
+                        <h4>🩺 Chuyên môn Bác sĩ <button class="btn btn-outline btn-sm" onclick="toggleDoctorForm('${id}')">✏️ Cập nhật</button></h4>
+                        <div class="sp-info-grid">
+                            <div class="lbl">Chuyên khoa</div><div class="val">${d.specialty_name || '—'}</div>
+                            <div class="lbl">Học hàm/Vị</div><div class="val">${d.doctor_title || '—'}</div>
+                            <div class="lbl">Phí khám</div><div class="val">${d.consultation_fee ? Number(d.consultation_fee).toLocaleString('vi') + ' VNĐ' : '—'}</div>
+                            <div class="lbl">Tiểu sử</div><div class="val">${d.biography || '—'}</div>
+                        </div>
+                        <div id="doctorFormArea" style="display:none"></div>
+                    </div>`;
+                }
+
+                // Signature section
+                let sigHtml = d.signature_url
+                    ? `<img src="${d.signature_url}" class="sp-signature" alt="Chữ ký">`
+                    : '<em style="color:#94a3b8">Chưa có chữ ký</em>';
+
+                // Roles
+                let rolesHtml = (d.roles || []).map(r => `<span class="sp-tag role">${r} <button class="tag-del" onclick="removeStaffRole('${id}','${r}')" title="Thu hồi">✕</button></span>`).join('');
+
+                // Facilities / Branches
+                let branchHtml = (d.facilities || []).map(f => `<span class="sp-tag branch">${f.facility_name} → ${f.branch_name}${f.department_name ? ' / ' + f.department_name : ''} <button class="tag-del" onclick="removeStaffBranch('${id}','${f.branch_id}')" title="Xóa">✕</button></span>`).join('');
+
+                const html = `<div class="staff-profile">
+                    <div class="sp-header">
+                        <div class="sp-avatar">${avatarHtml}</div>
+                        <div>
+                            <div class="sp-name">${d.full_name}</div>
+                            <div class="sp-sub">${d.email} · ${d.phone || 'N/A'} · ${sBadge(d.status)}</div>
+                        </div>
+                    </div>
+
+                    <div class="sp-section">
+                        <h4>📋 Thông tin cá nhân</h4>
+                        <div class="sp-info-grid">
+                            <div class="lbl">Mã NV</div><div class="val">${d.users_id}</div>
+                            <div class="lbl">Ngày sinh</div><div class="val">${d.dob ? new Date(d.dob).toLocaleDateString('vi') : '—'}</div>
+                            <div class="lbl">Giới tính</div><div class="val">${genderMap[d.gender] || '—'}</div>
+                            <div class="lbl">CCCD</div><div class="val">${d.identity_card_number || '—'}</div>
+                            <div class="lbl">Địa chỉ</div><div class="val">${d.address || '—'}</div>
+                        </div>
+                    </div>
+
+                    ${doctorHtml}
+
+                    <div class="sp-section">
+                        <h4>✍️ Chữ ký số <button class="btn btn-outline btn-sm" onclick="document.getElementById('sigFileInput').click()">📤 Upload</button></h4>
+                        ${sigHtml}
+                        <input type="file" id="sigFileInput" accept="image/*" style="display:none" onchange="uploadSignature('${id}', this)">
+                    </div>
+
+                    <div class="sp-section">
+                        <h4>🛡️ Vai trò <button class="btn btn-outline btn-sm" onclick="toggleAddRole('${id}')">➕ Thêm</button></h4>
+                        <div class="sp-tags">${rolesHtml || '<em style="color:#94a3b8">Chưa gán</em>'}</div>
+                        <div id="addRoleArea" style="display:none"></div>
+                    </div>
+
+                    <div class="sp-section">
+                        <h4>🏥 Chi nhánh <button class="btn btn-outline btn-sm" onclick="toggleAddBranch('${id}')">➕ Gán</button></h4>
+                        <div class="sp-tags">${branchHtml || '<em style="color:#94a3b8">Chưa gán</em>'}</div>
+                        <div id="addBranchArea" style="display:none"></div>
+                    </div>
+                </div>`;
+
+                document.getElementById('detailBody').innerHTML = html;
+                document.getElementById('detailModal').classList.add('show');
+                window._currentStaffId = id;
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // -- Doctor Info --
+        async function toggleDoctorForm(staffId) {
+            const area = document.getElementById('doctorFormArea');
+            if (area.style.display !== 'none') { area.style.display = 'none'; return; }
+            area.style.display = 'block';
+            area.innerHTML = '<em>Đang tải chuyên khoa...</em>';
+            let specOpts = '<option value="">-- Chọn chuyên khoa --</option>';
+            try {
+                const r = await apiFetch(`${API}/specialties?limit=100`);
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                specOpts += items.map(s => `<option value="${s.specialties_id}">${s.name}</option>`).join('');
+            } catch (e) { toast('Không tải được danh sách chuyên khoa', 'error'); }
+            area.innerHTML = `<div class="sp-inline-form">
+                <label>Chuyên khoa</label><select id="diSpecialty">${specOpts}</select>
+                <label>Học hàm/Vị</label><input id="diTitle" placeholder="ThS. BS. CKII">
+                <label>Phí khám (VNĐ)</label><input type="number" id="diFee" placeholder="500000">
+                <label>Tiểu sử</label><textarea id="diBio" placeholder="Mô tả kinh nghiệm..."></textarea>
+                <button class="btn btn-success btn-sm" onclick="saveDoctorInfo('${staffId}')">💾 Lưu</button>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('doctorFormArea').style.display='none'">Hủy</button>
+            </div>`;
+        }
+
+        async function saveDoctorInfo(staffId) {
+            const body = {
+                specialty_id: document.getElementById('diSpecialty').value,
+                title: document.getElementById('diTitle').value,
+                consultation_fee: Number(document.getElementById('diFee').value) || undefined,
+                biography: document.getElementById('diBio').value || undefined
+            };
+            if (!body.specialty_id) { toast('Vui lòng nhập Chuyên khoa ID', 'error'); return; }
+            try {
+                await apiFetch(`${API}/staff/${staffId}/doctor-info`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Cập nhật chuyên môn Bác sĩ thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // -- Signature Upload --
+        async function uploadSignature(staffId, inputEl) {
+            if (!inputEl.files.length) return;
+            const fd = new FormData();
+            fd.append('file', inputEl.files[0]);
+            try {
+                const resp = await fetch(`${API}/staff/${staffId}/signature`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: fd
+                });
+                const json = await resp.json();
+                if (!resp.ok) throw new Error(json.message || 'Upload thất bại');
+                toast('Upload chữ ký thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // -- Role Management --
+        function toggleAddRole(staffId) {
+            const area = document.getElementById('addRoleArea');
+            if (area.style.display !== 'none') { area.style.display = 'none'; return; }
+            area.style.display = 'block';
+            area.innerHTML = `<div class="sp-inline-form">
+                <select id="newRoleCode">
+                    <option value="DOCTOR">👨‍⚕️ DOCTOR</option>
+                    <option value="NURSE">👩‍⚕️ NURSE</option>
+                    <option value="PHARMACIST">💊 PHARMACIST</option>
+                    <option value="STAFF">💼 STAFF</option>
+                    <option value="ADMIN">🛡️ ADMIN</option>
+                </select>
+                <button class="btn btn-success btn-sm" onclick="addStaffRole('${staffId}')">Gán</button>
+            </div>`;
+        }
+
+        async function addStaffRole(staffId) {
+            const role = document.getElementById('newRoleCode').value;
+            try {
+                await apiFetch(`${API}/staff/${staffId}/roles`, { method: 'POST', body: JSON.stringify({ role }) });
+                toast('Gán vai trò thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function removeStaffRole(staffId, roleCode) {
+            if (!confirm(`Thu hồi vai trò ${roleCode}?`)) return;
+            try {
+                await apiFetch(`${API}/staff/${staffId}/roles/${roleCode}`, { method: 'DELETE' });
+                toast('Thu hồi vai trò thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // -- Branch Management --
+        function toggleAddBranch(staffId) {
+            const area = document.getElementById('addBranchArea');
+            if (area.style.display !== 'none') { area.style.display = 'none'; return; }
+            area.style.display = 'block';
+            let brOpts = cached.branches.map(b => `<option value="${b.branches_id}">${b.name}</option>`).join('');
+            area.innerHTML = `<div class="sp-inline-form">
+                <label>Chi nhánh</label>
+                <select id="newBranchId" onchange="filterDeptSelect(this.value, 'newDeptId')">
+                    <option value="">-- Chọn --</option>${brOpts}
+                </select>
+                <label>Khoa</label>
+                <select id="newDeptId" class="dept-select"><option value="">-- Tùy chọn --</option></select>
+                <label>Chức vụ</label>
+                <input id="newRoleTitle" placeholder="VD: Trưởng khoa">
+                <button class="btn btn-success btn-sm" onclick="addStaffBranch('${staffId}')">Gán</button>
+            </div>`;
+        }
+
+        async function addStaffBranch(staffId) {
+            const branchId = document.getElementById('newBranchId').value;
+            if (!branchId) { toast('Chọn chi nhánh', 'error'); return; }
+            const body = {
+                branchId,
+                departmentId: document.getElementById('newDeptId').value || undefined,
+                roleTitle: document.getElementById('newRoleTitle').value || undefined
+            };
+            try {
+                await apiFetch(`${API}/staff/${staffId}/branches`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Gán chi nhánh thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function removeStaffBranch(staffId, branchId) {
+            if (!confirm('Xóa nhân sự khỏi chi nhánh này?')) return;
+            try {
+                await apiFetch(`${API}/staff/${staffId}/branches/${branchId}`, {
+                    method: 'DELETE',
+                    body: JSON.stringify({ reason: 'Điều chuyển công tác' })
+                });
+                toast('Xóa chi nhánh thành công!', 'success');
+                showStaffDetail(staffId);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function editStaff(id, enc) {
+            const data = JSON.parse(decodeURIComponent(enc));
+            openModal('staffModal', 'Cập nhật Nhân sự', id);
+            document.getElementById('stName').value = data.full_name;
+            document.getElementById('stEmail').value = data.email;
+            document.getElementById('stEmail').disabled = true; // cannot edit email
+            document.getElementById('stPhone').value = data.phone_number || '';
+            document.getElementById('stPass').placeholder = "Bỏ trống để giữ nguyên";
+        }
+
+        async function saveStaff() {
+            const id = document.getElementById('stEditId').value;
+            const body = {
+                full_name: document.getElementById('stName').value,
+                phone_number: document.getElementById('stPhone').value,
+                branch_id: document.getElementById('stBranch').value || undefined,
+                department_id: document.getElementById('stDept').value || undefined,
+                role_title: document.getElementById('stRoleTitle').value || undefined
+            };
+            try {
+                if (id) {
+                    await apiFetch(`${API}/staff/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                    toast('Cập nhật nhân sự thành công!', 'success');
+                } else {
+                    body.email = document.getElementById('stEmail').value;
+                    body.roles = [document.getElementById('stRole').value];
+                    let p = document.getElementById('stPass').value;
+                    if (p) body.password = p;
+                    await apiFetch(`${API}/staff`, { method: 'POST', body: JSON.stringify(body) });
+                    toast('Thêm Nhân sự thành công!', 'success');
+                }
+                closeM('staffModal');
+                loadStaff();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function toggleStaffStatus(id, s) {
+            if (!confirm(`Bạn chắc chắn muốn đổi sang ${s}?`)) return;
+            try {
+                await apiFetch(`${API}/staff/${id}/status`, { method: 'PUT', body: JSON.stringify({ status: s }) });
+                toast('Thay đổi trạng thái thành công', 'success');
+                loadStaff();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ================= 1. SHIFTS =================
+        async function loadShifts() {
+            const p = new URLSearchParams({ page: pages.f1, limit: 10 });
+            if (document.getElementById('f1Search').value) p.set('search', document.getElementById('f1Search').value);
+            if (document.getElementById('f1Status').value) p.set('status', document.getElementById('f1Status').value);
+
+            try {
+                const r = await apiFetch(`${API}/shifts?${p}`);
+                const b = document.getElementById('f1Body');
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                if (!items || items.length === 0) { b.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('f1Pag').innerHTML = ''; return; }
+
+                b.innerHTML = items.map(s => {
+                    return `<tr>
+                        <td><strong>${s.code || (s.shifts_id ? s.shifts_id.split('_').pop() : '—')}</strong></td>
+                        <td>${s.name} <br> <small style="color:#64748b">${s.description || ''}</small></td>
+                        <td>${s.start_time}</td>
+                        <td>${s.end_time}</td>
+                        <td>${sBadge(s.status)}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="editShift('${s.shifts_id}', '${s.code || ''}', '${s.name}', '${s.start_time}', '${s.end_time}', '${s.description || ''}')">✏️ Sửa</button>
+                            <button class="btn btn-outline btn-sm" style="color:red" onclick="delShift('${s.shifts_id}')">🗑️ Xóa</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                document.getElementById('f1Pag').innerHTML = '';
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function editShift(id, c, n, st, en, d) {
+            openModal('shiftModal', 'Sửa Ca trực', id);
+            document.getElementById('shCode').value = c;
+            document.getElementById('shCode').disabled = true;
+            document.getElementById('shName').value = n;
+            document.getElementById('shStart').value = st;
+            document.getElementById('shEnd').value = en;
+            document.getElementById('shDesc').value = d;
+        }
+
+        async function saveShift() {
+            const id = document.getElementById('shEditId').value;
+            const body = {
+                name: document.getElementById('shName').value,
+                start_time: document.getElementById('shStart').value + (document.getElementById('shStart').value.length === 5 ? ":00" : ""),
+                end_time: document.getElementById('shEnd').value + (document.getElementById('shEnd').value.length === 5 ? ":00" : ""),
+                description: document.getElementById('shDesc').value
+            };
+            try {
+                if (id) {
+                    await apiFetch(`${API}/shifts/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                    toast('Sửa Ca trực thành công', 'success');
+                } else {
+                    body.code = document.getElementById('shCode').value;
+                    await apiFetch(`${API}/shifts`, { method: 'POST', body: JSON.stringify(body) });
+                    toast('Thêm Ca trực thành công', 'success');
+                }
+                closeM('shiftModal');
+                loadAllDropdowns();
+                loadShifts();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function delShift(id) {
+            if (!confirm('Xác nhận xóa ca làm việc này?')) return;
+            try {
+                await apiFetch(`${API}/shifts/${id}`, { method: 'DELETE' });
+                toast('Xóa thành công', 'success'); loadShifts();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ================= 2. SCHEDULES (CALENDAR) =================
+        let calYear, calMonth; // 0-indexed month
+        (function initCal() { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); })();
+
+        function calNav(dir) { calMonth += dir; if (calMonth < 0) { calMonth = 11; calYear--; } if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+        function calToday() { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); renderCalendar(); }
+
+        async function loadSchedules() { await renderCalendar(); }
+
+        async function renderCalendar() {
+            const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+            const DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            document.getElementById('calTitle').textContent = `${MONTHS[calMonth]} / ${calYear}`;
+
+            // Fetch schedule data for the visible month range
+            const firstDay = new Date(calYear, calMonth, 1);
+            const lastDay = new Date(calYear, calMonth + 1, 0);
+            const p = new URLSearchParams();
+            const branchId = document.getElementById('f2Branch').value;
+            const staffId = document.getElementById('f2StaffFilter').value;
+            if (branchId) p.set('branch_id', branchId);
+            if (staffId) p.set('user_id', staffId);
+
+            let items = [];
+            try {
+                const r = await apiFetch(`${API}/staff-schedules?${p}`);
+                items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+            } catch (e) { toast(e.message, 'error'); }
+
+            // Group by date
+            const byDate = {};
+            items.forEach(s => {
+                const d = (s.working_date || '').split('T')[0];
+                if (!d) return;
+                if (!byDate[d]) byDate[d] = [];
+                byDate[d].push(s);
+            });
+
+            // Build calendar grid
+            const grid = document.getElementById('calGrid');
+            let html = DAYS.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+            // Calculate grid start (Sunday-based)
+            const startDow = firstDay.getDay(); // 0=Sun
+            const daysInMonth = lastDay.getDate();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // Previous month padding
+            const prevMonth = new Date(calYear, calMonth, 0);
+            for (let i = startDow - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                html += `<div class="cal-cell other-month"><div class="cal-date">${day}</div></div>`;
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isToday = dateStr === todayStr;
+                const entries = byDate[dateStr] || [];
+
+                let chipsHtml = entries.map(s => {
+                    const shiftName = s.shift_name || cached.shifts.find(x => x.shifts_id === s.shift_id)?.name || 'Ca';
+                    const startH = parseInt((s.start_time || '08').substring(0, 2));
+                    let cls = 'cal-chip';
+                    if (s.is_leave) cls += ' leave';
+                    else if (startH < 12) cls += ' morning';
+                    else if (startH < 18) cls += ' afternoon';
+                    else cls += ' night';
+                    const label = `${(s.start_time || '').substring(0, 5)} ${s.full_name || 'NV'}`;
+                    return `<div class="${cls}" onclick="event.stopPropagation(); showSchedDetail(${JSON.stringify(s).replace(/"/g, '&quot;')})" title="${shiftName} - ${s.full_name || ''}">${label}</div>`;
+                }).join('');
+
+                html += `<div class="cal-cell${isToday ? ' today' : ''}" onclick="addSchedOnDate('${dateStr}')">
+                    <div class="cal-date">
+                        <span>${d}</span>
+                        <button class="cal-add-btn" onclick="event.stopPropagation(); addSchedOnDate('${dateStr}')" title="Phân công ngày ${dateStr}">+</button>
+                    </div>
+                    <div class="cal-events">${chipsHtml}</div>
+                </div>`;
+            }
+
+            // Next month padding
+            const totalCells = startDow + daysInMonth;
+            const remaining = (7 - totalCells % 7) % 7;
+            for (let i = 1; i <= remaining; i++) {
+                html += `<div class="cal-cell other-month"><div class="cal-date">${i}</div></div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function addSchedOnDate(dateStr) {
+            openModal('scheduleModal', 'Phân lịch làm việc', null);
+            setTimeout(() => { document.getElementById('scStart').value = dateStr; }, 50);
+        }
+
+        function showSchedDetail(s) {
+            const shiftName = s.shift_name || cached.shifts.find(x => x.shifts_id === s.shift_id)?.name || '—';
+            const overlay = document.getElementById('schedDetailOverlay');
+            overlay.querySelector('.sched-detail-box').innerHTML = `
+                <button class="close-btn" onclick="document.getElementById('schedDetailOverlay').classList.remove('open')">&times;</button>
+                <h3>📋 Chi tiết Lịch phân công</h3>
+                <div class="detail-row"><span class="detail-label">📅 Ngày:</span><span class="detail-val"><strong>${(s.working_date || '').split('T')[0]}</strong></span></div>
+                <div class="detail-row"><span class="detail-label">👤 Nhân viên:</span><span class="detail-val">${s.full_name || s.user_id || '—'}</span></div>
+                <div class="detail-row"><span class="detail-label">⏰ Ca:</span><span class="detail-val">${shiftName}</span></div>
+                <div class="detail-row"><span class="detail-label">🕒 Giờ:</span><span class="detail-val">${(s.start_time || '').substring(0, 5)} - ${(s.end_time || '').substring(0, 5)}</span></div>
+                <div class="detail-row"><span class="detail-label">🏥 Phòng:</span><span class="detail-val">${s.room_name || 'N/A'}</span></div>
+                <div class="detail-row"><span class="detail-label">📋 Trạng thái:</span><span class="detail-val">${sBadge(s.status)}</span></div>
+                ${s.is_leave ? '<div class="detail-row"><span class="detail-label">📝 Nghỉ phép:</span><span class="detail-val">🔵 Có - ' + (s.leave_reason || '') + '</span></div>' : ''}
+                <div class="action-bar">
+                    ${s.status === 'ACTIVE' ? `<button class="btn btn-warning btn-sm" onclick="suspendSchedule('${s.staff_schedules_id}'); document.getElementById('schedDetailOverlay').classList.remove('open');">⏸️ Tạm ngưng</button>` : ''}
+                    ${s.status === 'SUSPENDED' ? `<button class="btn btn-success btn-sm" onclick="resumeSchedule('${s.staff_schedules_id}'); document.getElementById('schedDetailOverlay').classList.remove('open');">▶️ Kích hoạt</button>` : ''}
+                    <button class="btn btn-outline btn-sm" style="color:red" onclick="delSchedule('${s.staff_schedules_id}'); document.getElementById('schedDetailOverlay').classList.remove('open');">🗑️ Xóa</button>
+                    <button class="btn btn-outline btn-sm" onclick="document.getElementById('schedDetailOverlay').classList.remove('open')">Đóng</button>
+                </div>
+            `;
+            overlay.classList.add('open');
+        }
+
+
+        async function suspendSchedule(id) { try { await apiFetch(`${API}/staff-schedules/${id}/suspend`, { method: 'PATCH' }); toast('Tạm ngưng thành công', 'success'); loadSchedules(); } catch (e) { toast(e.message, 'error'); } }
+        async function resumeSchedule(id) { try { await apiFetch(`${API}/staff-schedules/${id}/resume`, { method: 'PATCH' }); toast('Mở lại thành công', 'success'); loadSchedules(); } catch (e) { toast(e.message, 'error'); } }
+        async function delSchedule(id) { if (!confirm('Xóa lịch?')) return; try { await apiFetch(`${API}/staff-schedules/${id}`, { method: 'DELETE' }); toast('Xóa thành công', 'success'); loadSchedules(); } catch (e) { toast(e.message, 'error'); } }
+
+        async function saveSchedule() {
+            const body = {
+                user_id: document.getElementById('scStaff').value,
+                shift_id: document.getElementById('scShift').value,
+                working_date: document.getElementById('scStart').value,
+                medical_room_id: document.getElementById('scRoom').value || undefined
+            };
+            try {
+                if (!body.user_id || !body.shift_id || !body.working_date) { toast('Vui lòng điền đầy đủ: Nhân viên, Ca, Ngày làm việc', 'error'); return; }
+                await apiFetch(`${API}/staff-schedules`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Phân lịch thành công!', 'success');
+                closeM('scheduleModal');
+                loadSchedules();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ================= 3. SWAPS =================
+        async function loadSwaps() {
+            const p = new URLSearchParams();
+            if (document.getElementById('f3Status').value) p.set('status', document.getElementById('f3Status').value);
+
+            try {
+                const r = await apiFetch(`${API}/shift-swaps?${p}`);
+                const b = document.getElementById('f3Body');
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                if (!items || items.length === 0) { b.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('f3Pag').innerHTML = ''; return; }
+
+                b.innerHTML = items.map(s => {
+                    const reqInfo = `${s.requester_shift_name || '—'}<br><small style="color:#64748b">${s.requester_working_date || ''} ${(s.requester_start_time || '').substring(0, 5)}-${(s.requester_end_time || '').substring(0, 5)}</small>`;
+                    const tgtInfo = `${s.target_shift_name || '—'}<br><small style="color:#64748b">${s.target_working_date || ''} ${(s.target_start_time || '').substring(0, 5)}-${(s.target_end_time || '').substring(0, 5)}</small>`;
+                    return `<tr>
+                        <td><strong>${s.swap_id ? s.swap_id.split('_').pop() + '...' : '—'}</strong></td>
+                        <td>${s.requester_name || '—'}</td>
+                        <td>${reqInfo}</td>
+                        <td>${tgtInfo}</td>
+                        <td>${s.target_name || '—'}</td>
+                        <td>${s.reason || ''}</td>
+                        <td>${sBadge(s.status)}</td>
+                        <td>
+                            ${s.status === 'PENDING' ? `
+                            <button class="btn btn-success btn-sm" onclick="approveSwap('${s.swap_id}')">Duyệt</button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectSwap('${s.swap_id}')">Từ chối</button>
+                            ` : ''}
+                        </td>
+                    </tr>`;
+                }).join('');
+                document.getElementById('f3Pag').innerHTML = '';
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function approveSwap(id) { try { await apiFetch(`${API}/shift-swaps/${id}/approve`, { method: 'PATCH', body: JSON.stringify({}) }); toast('Đã duyệt', 'success'); loadSwaps(); } catch (e) { toast(e.message, 'error'); } }
+        async function rejectSwap(id) {
+            const note = prompt('Lý do từ chối:');
+            if (!note) return;
+            try { await apiFetch(`${API}/shift-swaps/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ approver_note: note }) }); toast('Đã từ chối', 'success'); loadSwaps(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function saveSwap() {
+            const body = {
+                requester_schedule_id: document.getElementById('swFrom').value,
+                target_schedule_id: document.getElementById('swTo').value,
+                reason: document.getElementById('swReason').value
+            };
+            try {
+                if (!body.requester_schedule_id || !body.target_schedule_id || !body.reason) { toast('Vui lòng điền đầy đủ thông tin', 'error'); return; }
+                await apiFetch(`${API}/shift-swaps`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Gửi yêu cầu thành công!', 'success');
+                closeM('swapModal');
+                loadSwaps();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ================= 4. LEAVES =================
+        async function loadLeaves() {
+            const p = new URLSearchParams();
+            if (document.getElementById('f4Staff').value) p.set('user_id', document.getElementById('f4Staff').value);
+            if (document.getElementById('f4Status').value) p.set('status', document.getElementById('f4Status').value);
+
+            try {
+                const r = await apiFetch(`${API}/leaves?${p}`);
+                const b = document.getElementById('f4Body');
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                if (!items || items.length === 0) { b.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('f4Pag').innerHTML = ''; return; }
+
+                b.innerHTML = items.map(s => {
+                    const leaveId = s.leave_requests_id;
+                    return `<tr>
+                        <td><strong>${leaveId ? leaveId.split('_').pop() + '...' : '—'}</strong></td>
+                        <td>${s.full_name || (s.user_id ? s.user_id.split('_').pop() + '...' : '—')}</td>
+                        <td><span class="badge b-type">Nghỉ phép</span></td>
+                        <td>${s.start_date ? s.start_date.split('T')[0] : '—'}</td>
+                        <td>${s.end_date ? s.end_date.split('T')[0] : '—'}</td>
+                        <td>${s.reason || ''}</td>
+                        <td>${sBadge(s.status)}</td>
+                        <td>
+                            ${s.status === 'PENDING' ? `
+                            <button class="btn btn-success btn-sm" onclick="approveLeave('${leaveId}')">Duyệt</button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectLeave('${leaveId}')">Từ chối</button>
+                            <button class="btn btn-outline btn-sm" style="color:red" onclick="deleteLeave('${leaveId}')">🗑️</button>
+                            ` : ''}
+                        </td>
+                    </tr>`;
+                }).join('');
+                document.getElementById('f4Pag').innerHTML = '';
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function approveLeave(id) { try { await apiFetch(`${API}/leaves/${id}/approve`, { method: 'PATCH', body: JSON.stringify({}) }); toast('Đã duyệt', 'success'); loadLeaves(); } catch (e) { toast(e.message, 'error'); } }
+        async function rejectLeave(id) {
+            const note = prompt('Lý do từ chối:');
+            if (!note) return;
+            try { await apiFetch(`${API}/leaves/${id}/reject`, { method: 'PATCH', body: JSON.stringify({ approver_note: note }) }); toast('Đã từ chối', 'success'); loadLeaves(); } catch (e) { toast(e.message, 'error'); }
+        }
+        async function deleteLeave(id) { if (!confirm('Hủy đơn?')) return; try { await apiFetch(`${API}/leaves/${id}`, { method: 'DELETE' }); toast('Đã hủy', 'success'); loadLeaves(); } catch (e) { toast(e.message, 'error'); } }
+
+        async function saveLeave() {
+            const body = {
+                start_date: document.getElementById('lvStart').value,
+                end_date: document.getElementById('lvEnd').value,
+                reason: document.getElementById('lvReason').value
+            };
+            try {
+                if (!body.start_date || !body.end_date || !body.reason) { toast('Vui lòng điền đầy đủ thông tin', 'error'); return; }
+                await apiFetch(`${API}/leaves`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Xin nghỉ phép thành công!', 'success');
+                closeM('leaveModal');
+                loadLeaves();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ================= 5. LICENSES =================
+        async function loadLicenses() {
+            const p = new URLSearchParams({ page: pages.f5, limit: 10 });
+            if (document.getElementById('f5Search').value) p.set('search', document.getElementById('f5Search').value);
+            if (document.getElementById('f5Status').value) {
+                if (document.getElementById('f5Status').value === '-1') p.set('status', 'EXPIRED');
+                if (document.getElementById('f5Status').value === '30') p.set('expiring_in_days', '30');
+            }
+
+            try {
+                const r = await apiFetch(`${API}/licenses?${p}`);
+                const b = document.getElementById('f5Body');
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                if (!items || items.length === 0) { b.innerHTML = '<tr><td colspan="8" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('f5Pag').innerHTML = ''; return; }
+
+                b.innerHTML = items.map(s => {
+                    let diffDays = 999;
+                    if (s.expiry_date) diffDays = Math.ceil((new Date(s.expiry_date) - new Date()) / (1000 * 60 * 60 * 24));
+                    let statusStr = '';
+                    if (s.expiry_date && diffDays < 0) statusStr = `<span class="badge b-inactive">Hết hạn</span>`;
+                    else if (s.expiry_date && diffDays <= 30) statusStr = `<span class="badge b-maint">Sắp hết (${diffDays} ngày)</span>`;
+                    else statusStr = `<span class="badge b-active">Hiệu lực</span>`;
+
+                    return `<tr>
+                        <td><strong>${s.license_number}</strong></td>
+                        <td>${s.full_name || (s.user_id ? s.user_id.split('_').pop() : '—')}</td>
+                        <td>${s.license_type}</td>
+                        <td>${s.issued_by || '—'}</td>
+                        <td>${s.issue_date ? s.issue_date.split('T')[0] : '—'}</td>
+                        <td>${s.expiry_date ? s.expiry_date.split('T')[0] : '—'}</td>
+                        <td>${statusStr}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" style="color:red" onclick="if(confirm('Thu hồi / Xóa chứng chỉ này?')) apiFetch('${API}/licenses/${s.licenses_id}',{method:'DELETE'}).then(()=>{loadLicenses();})">🗑️</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+                document.getElementById('f5Pag').innerHTML = '';
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function saveLicense() {
+            const staff_id = document.getElementById('lcStaff').value;
+            const body = {
+                license_type: document.getElementById('lcType').value,
+                license_number: document.getElementById('lcNum').value,
+                issued_by: document.getElementById('lcIssuer').value || undefined,
+                issue_date: document.getElementById('lcIssueDate').value || undefined,
+                expiry_date: document.getElementById('lcExpiryDate').value || undefined
+            };
+            try {
+                if (!staff_id) throw new Error("Vui lòng nhập định danh Staff ID");
+                if (!body.license_type || !body.license_number || !body.issue_date) throw new Error("Vui lòng điền đầy đủ: Loại, Số GP, Ngày cấp");
+                await apiFetch(`${API}/staff/${staff_id}/licenses`, { method: 'POST', body: JSON.stringify(body) });
+                toast('Cấp chứng chỉ thành công!', 'success');
+                closeM('licenseModal');
+                loadLicenses();
+            } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

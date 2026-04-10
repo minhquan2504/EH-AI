@@ -1,0 +1,174 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
+
+export default function ForgotPasswordPage() {
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSent, setIsSent] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setIsLoading(true);
+
+        try {
+            // Giả lập gọi API
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            setIsSent(true);
+        } catch {
+            setError("Không thể gửi email. Vui lòng thử lại.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex relative overflow-hidden bg-gradient-to-br from-[#0a1628] via-[#0f2744] to-[#1a3a5c]">
+            {/* Background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#3C81C6]/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#60a5fa]/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+            </div>
+
+            {/* Content */}
+            <div className="w-full flex items-center justify-center p-4 relative z-10">
+                <div className="w-full max-w-md">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3 mb-8 justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#3C81C6] to-[#60a5fa] flex items-center justify-center shadow-lg shadow-[#3C81C6]/25">
+                            <span className="material-symbols-outlined text-white" style={{ fontSize: "28px" }}>
+                                local_hospital
+                            </span>
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">EHealth</h1>
+                            <p className="text-[#60a5fa]/80 text-sm font-medium">Nền tảng Y tế Số</p>
+                        </div>
+                    </div>
+
+                    {/* Card */}
+                    <div className="bg-white/[0.07] backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/[0.1] shadow-2xl shadow-black/20">
+                        {!isSent ? (
+                            <>
+                                {/* Header */}
+                                <div className="text-center mb-6">
+                                    <div className="w-16 h-16 mx-auto rounded-full bg-[#3C81C6]/20 flex items-center justify-center mb-4">
+                                        <span className="material-symbols-outlined text-[#60a5fa]" style={{ fontSize: "32px" }}>
+                                            lock_reset
+                                        </span>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-white mb-1">Quên mật khẩu</h2>
+                                    <p className="text-[#94a3b8] text-sm">
+                                        Nhập email đã đăng ký để nhận mã xác thực
+                                    </p>
+                                </div>
+
+                                {/* Error */}
+                                {error && (
+                                    <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-red-400" style={{ fontSize: "18px" }}>error</span>
+                                        <p className="text-red-400 text-sm">{error}</p>
+                                    </div>
+                                )}
+
+                                {/* Form */}
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-[#94a3b8] text-xs font-semibold uppercase tracking-wider mb-1.5">
+                                            Địa chỉ email
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#64748b]" style={{ fontSize: "20px" }}>
+                                                mail
+                                            </span>
+                                            <input
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="you@ehealth.vn"
+                                                className="w-full pl-11 pr-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/50 focus:border-[#3C81C6]/50 transition-all text-sm"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="w-full py-3 bg-gradient-to-r from-[#3C81C6] to-[#2563eb] hover:from-[#2a6da8] hover:to-[#1d4ed8] text-white rounded-xl font-semibold text-sm transition-all duration-300 shadow-lg shadow-[#3C81C6]/25 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                </svg>
+                                                <span>Đang gửi...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Gửi mã xác thực</span>
+                                                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>send</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            </>
+                        ) : (
+                            /* Success state */
+                            <div className="text-center py-4">
+                                <div className="w-16 h-16 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                                    <span className="material-symbols-outlined text-green-400" style={{ fontSize: "32px" }}>
+                                        mark_email_read
+                                    </span>
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Đã gửi email!</h3>
+                                <p className="text-[#94a3b8] text-sm mb-6">
+                                    Chúng tôi đã gửi mã xác thực OTP đến <br />
+                                    <span className="text-[#60a5fa] font-medium">{email}</span>
+                                </p>
+                                <button
+                                    onClick={() => router.push(ROUTES.PUBLIC.OTP + `?email=${encodeURIComponent(email)}`)}
+                                    className="w-full py-3 bg-gradient-to-r from-[#3C81C6] to-[#2563eb] text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#3C81C6]/25"
+                                >
+                                    <span>Nhập mã OTP</span>
+                                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
+                                </button>
+                                <button
+                                    onClick={() => setIsSent(false)}
+                                    className="w-full mt-3 py-2.5 text-[#94a3b8] text-sm hover:text-white transition-colors"
+                                >
+                                    Gửi lại mã
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Back to login */}
+                        <div className="mt-5 pt-4 border-t border-white/[0.06] text-center">
+                            <button
+                                onClick={() => router.push(ROUTES.PUBLIC.LOGIN)}
+                                className="text-[#94a3b8] text-sm hover:text-white transition-colors inline-flex items-center gap-1.5"
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_back</span>
+                                Quay lại đăng nhập
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="text-center mt-4">
+                        <p className="text-[#475569] text-xs">
+                            © 2025 EHealth. Hệ thống Y tế Số — PTH Group
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

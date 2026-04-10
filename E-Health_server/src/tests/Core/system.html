@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Cấu hình Hệ thống — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-mod {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .b-warn {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px
+        }
+
+        .config-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px
+        }
+
+        .config-item .cl {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .config-item .cv {
+            font-weight: 700;
+            font-size: .92rem;
+            color: #1e293b
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>⚙️ Cấu hình Hệ thống</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">🔒 Bảo mật</div>
+        <div class="tab" onclick="switchTab(1)">🌐 i18n</div>
+        <div class="tab" onclick="switchTab(2)">🎨 Giao diện</div>
+        <div class="tab" onclick="switchTab(3)">📋 Tham số HT</div>
+        <div class="tab" onclick="switchTab(4)">🔐 Quyền Config</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: SECURITY SETTINGS -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>🔒 Cấu hình Bảo mật</h3>
+                <div class="toolbar"><button class="btn btn-primary" onclick="loadSecurity()">🔄 Tải cấu hình</button>
+                </div>
+                <div id="secDisplay" style="display:none"></div>
+                <div class="form-row" style="margin-top:12px">
+                    <div class="form-group"><label>Max Login Attempts (3–20)</label><input id="secAttempts"
+                            type="number" min="3" max="20"></div>
+                    <div class="form-group"><label>Lock Duration (phút, 5–1440)</label><input id="secLockout"
+                            type="number" min="5" max="1440"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Password Min Length (8–32)</label><input id="secPwdLen" type="number"
+                            min="8" max="32"></div>
+                    <div class="form-group"><label>Session Duration (ngày, 1–365)</label><input id="secSession"
+                            type="number" min="1" max="365"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Access Token Expiry (phút, 5–1440)</label><input id="secAccess"
+                            type="number" min="5" max="1440"></div>
+                    <div class="form-group"><label>Refresh Token Expiry (ngày, 1–365)</label><input id="secRefresh"
+                            type="number" min="1" max="365"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Require Email Verification</label>
+                        <select id="secEmailVerify" title="Email verify">
+                            <option value="">-- Không đổi --</option>
+                            <option value="true">Có</option>
+                            <option value="false">Không</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Require 2FA Roles (JSON array)</label><input id="sec2fa"
+                            placeholder='["ADMIN"]'></div>
+                </div>
+                <button class="btn btn-success" onclick="updateSecurity()">💾 Lưu</button>
+                <div id="secUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: I18N -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>🌐 Cấu hình Ngôn ngữ</h3>
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="loadI18n()">🔄 Tải cấu hình</button>
+                    <button class="btn btn-outline" onclick="loadI18nSupported()">📋 Ngôn ngữ có sẵn</button>
+                </div>
+                <div id="i18nDisplay" style="display:none"></div>
+                <div id="i18nSupportedDisplay" style="display:none;margin-top:10px"></div>
+                <div class="form-row" style="margin-top:12px">
+                    <div class="form-group"><label>Ngôn ngữ mặc định</label>
+                        <select id="i18nDefault" title="Ngôn ngữ mặc định">
+                            <option value="vi">🇻🇳 Tiếng Việt</option>
+                            <option value="en">🇺🇸 English</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="ko">🇰🇷 한국어</option>
+                            <option value="ja">🇯🇵 日本語</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Ngôn ngữ kích hoạt (JSON array)</label><input id="i18nSupported"
+                            placeholder='["vi","en"]'></div>
+                </div>
+                <button class="btn btn-success" onclick="updateI18n()">💾 Lưu</button>
+                <div id="i18nUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: UI SETTINGS -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>🎨 Cấu hình Giao diện</h3>
+                <div class="toolbar"><button class="btn btn-primary" onclick="loadUi()">🔄 Tải cấu hình</button></div>
+                <div id="uiDisplay" style="display:none"></div>
+                <div class="form-row" style="margin-top:12px">
+                    <div class="form-group"><label>Theme</label>
+                        <select id="uiTheme" title="Theme">
+                            <option value="">-- Không đổi --</option>
+                            <option value="light">☀️ Light</option>
+                            <option value="dark">🌙 Dark</option>
+                            <option value="system">💻 System</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Primary Color (hex)</label><input id="uiColor" placeholder="#1677FF">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Font</label>
+                        <select id="uiFont" title="Font">
+                            <option value="">-- Không đổi --</option>
+                            <option>Inter</option>
+                            <option>Roboto</option>
+                            <option>Open Sans</option>
+                            <option>Noto Sans</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Date Format</label>
+                        <select id="uiDateFmt" title="Date format">
+                            <option value="">-- Không đổi --</option>
+                            <option>DD/MM/YYYY</option>
+                            <option>MM/DD/YYYY</option>
+                            <option>YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Timezone</label><input id="uiTz" placeholder="Asia/Ho_Chi_Minh">
+                    </div>
+                    <div class="form-group"><label>Time Format</label>
+                        <select id="uiTimeFmt" title="Time format">
+                            <option value="">-- Không đổi --</option>
+                            <option value="24h">24h</option>
+                            <option value="12h">12h</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateUi()">💾 Lưu</button>
+                <div id="uiUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SYSTEM PARAMS -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>📋 Tham số Hệ thống</h3>
+                <div class="toolbar">
+                    <input id="paramSearch" placeholder="🔍 Tìm key..." style="flex:1">
+                    <select id="paramModule" title="Lọc module">
+                        <option value="">Tất cả module</option>
+                    </select>
+                    <input id="paramLimit" type="number" value="15" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadParams(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Key</th>
+                            <th>Value</th>
+                            <th>Module</th>
+                            <th>Protected</th>
+                            <th>Mô tả</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paramTable"></tbody>
+                </table>
+                <div class="pagination" id="paramPag"></div>
+            </div>
+            <div class="card">
+                <h3>➕ Tạo / ✏️ Sửa tham số</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Setting Key *</label><input id="spKey" placeholder="MY_CUSTOM_PARAM">
+                    </div>
+                    <div class="form-group"><label>Module</label><input id="spModule" placeholder="GENERAL"></div>
+                </div>
+                <div class="form-group"><label>Value (JSON) *</label><input id="spValue"
+                        placeholder='{"value": "custom_value"}'></div>
+                <div class="form-group"><label>Mô tả</label><input id="spDesc" placeholder="Tham số tuỳ chỉnh"></div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="createParam()">💾 Tạo mới</button>
+                    <button class="btn btn-warning" onclick="updateParam()">💾 Cập nhật</button>
+                    <button class="btn btn-danger" onclick="deleteParam()">🗑️ Xóa</button>
+                    <button class="btn btn-info" onclick="getParam()">🔍 Xem chi tiết</button>
+                </div>
+                <div id="paramDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: CONFIG PERMISSIONS -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>🔐 Quyền chỉnh sửa cấu hình</h3>
+                <div class="toolbar"><button class="btn btn-primary" onclick="loadConfigPerms()">🔄 Tải</button></div>
+                <div id="cpDisplay" style="display:none"></div>
+                <div class="form-group" style="margin-top:12px">
+                    <label>Cập nhật (JSON)</label>
+                    <textarea id="cpBody" rows="6"
+                        placeholder='{"permissions":{"ADMIN":["GENERAL","APPOINTMENT","SECURITY","I18N","UI","WORKING_HOURS"],"DOCTOR":["APPOINTMENT"]}}'></textarea>
+                </div>
+                <button class="btn btn-success" onclick="updateConfigPerms()">💾 Cập nhật</button>
+                <div id="cpUpdateDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function v(id) { return document.getElementById(id).value; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); } };
+        async function handleLogin() {
+            const e = v('loginEmail'), p = v('loginPassword');
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'System', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+        function buildPagination(elId, cur, total, limit, fn) {
+            const el = document.getElementById(elId), tp = Math.ceil(total / limit) || 1;
+            let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (tp <= 7) { for (let i = 1; i <= tp; i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; }
+            else { h += `<button class="${cur === 1 ? 'active' : ''}" onclick="${fn}(1)">1</button>`; if (cur > 3) h += '<span>...</span>'; for (let i = Math.max(2, cur - 1); i <= Math.min(tp - 1, cur + 1); i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; if (cur < tp - 2) h += '<span>...</span>'; h += `<button class="${cur === tp ? 'active' : ''}" onclick="${fn}(${tp})">${tp}</button>`; }
+            h += `<button onclick="${fn}(${cur + 1})" ${cur >= tp ? 'disabled' : ''}>Sau →</button><span style="margin-left:8px">Tổng: ${total}</span>`;
+            el.innerHTML = h;
+        }
+
+        // ============ SECURITY SETTINGS (GET /api/system/security-settings) ============
+        async function loadSecurity() {
+            try {
+                const r = await apiFetch(`${API}/system/security-settings`);
+                const d = r.data || {};
+                // Fill form
+                document.getElementById('secAttempts').value = d.max_login_attempts ?? '';
+                document.getElementById('secLockout').value = d.lock_duration_minutes ?? '';
+                document.getElementById('secPwdLen').value = d.password_min_length ?? '';
+                document.getElementById('secSession').value = d.session_duration_days ?? '';
+                document.getElementById('secAccess').value = d.access_token_expiry_minutes ?? '';
+                document.getElementById('secRefresh').value = d.refresh_token_expiry_days ?? '';
+                document.getElementById('secEmailVerify').value = d.require_email_verification !== undefined ? String(d.require_email_verification) : '';
+                document.getElementById('sec2fa').value = d.require_2fa_roles ? JSON.stringify(d.require_2fa_roles) : '[]';
+                // Show card
+                const el = document.getElementById('secDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460">🔒 Bảo mật hiện tại</div>
+                    <div class="config-grid">
+                        <div class="config-item"><div class="cl">Max Login Attempts</div><div class="cv">${d.max_login_attempts ?? '-'}</div></div>
+                        <div class="config-item"><div class="cl">Lock Duration</div><div class="cv">${d.lock_duration_minutes ?? '-'} phút</div></div>
+                        <div class="config-item"><div class="cl">Password Min Length</div><div class="cv">${d.password_min_length ?? '-'} ký tự</div></div>
+                        <div class="config-item"><div class="cl">Session Duration</div><div class="cv">${d.session_duration_days ?? '-'} ngày</div></div>
+                        <div class="config-item"><div class="cl">Access Token Expiry</div><div class="cv">${d.access_token_expiry_minutes ?? '-'} phút</div></div>
+                        <div class="config-item"><div class="cl">Refresh Token Expiry</div><div class="cv">${d.refresh_token_expiry_days ?? '-'} ngày</div></div>
+                        <div class="config-item"><div class="cl">Email Verification</div><div class="cv">${d.require_email_verification ? '<span class="badge b-active">Bắt buộc</span>' : '<span class="badge b-inactive">Không</span>'}</div></div>
+                        <div class="config-item"><div class="cl">2FA Roles</div><div class="cv">${(d.require_2fa_roles || []).length ? d.require_2fa_roles.map(r => `<span class="badge b-mod">${r}</span> `).join('') : '<span class="badge b-inactive">Không</span>'}</div></div>
+                    </div></div>`;
+                toast('Đã tải cấu hình bảo mật', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateSecurity() {
+            const b = {};
+            const n = (id) => { const val = v(id); return val ? parseInt(val) : undefined; };
+            const a = n('secAttempts'); if (a) b.max_login_attempts = a;
+            const l = n('secLockout'); if (l) b.lock_duration_minutes = l;
+            const p = n('secPwdLen'); if (p) b.password_min_length = p;
+            const s = n('secSession'); if (s) b.session_duration_days = s;
+            const at = n('secAccess'); if (at) b.access_token_expiry_minutes = at;
+            const rt = n('secRefresh'); if (rt) b.refresh_token_expiry_days = rt;
+            const ev = v('secEmailVerify'); if (ev) b.require_email_verification = ev === 'true';
+            const tfa = v('sec2fa'); if (tfa) { try { b.require_2fa_roles = JSON.parse(tfa); } catch { } }
+            try {
+                await apiFetch(`${API}/system/security-settings`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('secUpdateDisplay', 'Cập nhật bảo mật thành công!', Object.keys(b).map(k => `<strong>${k}</strong>: ${JSON.stringify(b[k])}`).join(', '));
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ I18N (GET /api/system/i18n) ============
+        async function loadI18n() {
+            try {
+                const r = await apiFetch(`${API}/system/i18n`);
+                const d = r.data || {};
+                document.getElementById('i18nDefault').value = d.default_language || 'vi';
+                document.getElementById('i18nSupported').value = JSON.stringify(d.supported_languages || []);
+                const el = document.getElementById('i18nDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460">🌐 Cấu hình ngôn ngữ</div>
+                    <div class="config-grid">
+                        <div class="config-item"><div class="cl">Ngôn ngữ mặc định</div><div class="cv"><span class="badge b-active">${d.default_language || 'vi'}</span></div></div>
+                        <div class="config-item"><div class="cl">Ngôn ngữ kích hoạt</div><div class="cv">${(d.supported_languages || []).map(l => `<span class="badge b-mod">${l}</span> `).join('')}</div></div>
+                    </div></div>`;
+                toast('Đã tải cấu hình i18n', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function loadI18nSupported() {
+            try {
+                const r = await apiFetch(`${API}/system/i18n/supported`);
+                const list = r.data || [];
+                const el = document.getElementById('i18nSupportedDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card"><div style="font-weight:700;color:#0f3460;margin-bottom:8px">📋 Ngôn ngữ có sẵn</div>
+                    <table><thead><tr><th>Flag</th><th>Code</th><th>Tên</th><th>Active</th></tr></thead><tbody>
+                    ${list.map(l => `<tr><td>${l.flag || ''}</td><td><strong>${l.code}</strong></td><td>${l.name}</td><td>${l.is_active ? '<span class="badge b-active">Active</span>' : '<span class="badge b-inactive">Off</span>'}</td></tr>`).join('')}
+                    </tbody></table></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateI18n() {
+            const b = {};
+            const def = v('i18nDefault'); if (def) b.default_language = def;
+            const sup = v('i18nSupported'); if (sup) { try { b.supported_languages = JSON.parse(sup); } catch { toast('JSON không hợp lệ', 'error'); return; } }
+            try {
+                await apiFetch(`${API}/system/i18n`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('i18nUpdateDisplay', 'Cập nhật i18n thành công!', `Default: <strong>${b.default_language || '-'}</strong>, Supported: <strong>${JSON.stringify(b.supported_languages || [])}</strong>`);
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ UI SETTINGS (GET /api/system/ui-settings) ============
+        async function loadUi() {
+            try {
+                const r = await apiFetch(`${API}/system/ui-settings`);
+                const d = r.data || {};
+                document.getElementById('uiTheme').value = d.theme || '';
+                document.getElementById('uiColor').value = d.primary_color || '';
+                document.getElementById('uiFont').value = d.font_family || '';
+                document.getElementById('uiDateFmt').value = d.date_format || '';
+                document.getElementById('uiTz').value = d.timezone || '';
+                document.getElementById('uiTimeFmt').value = d.time_format || '';
+                const el = document.getElementById('uiDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460">🎨 Giao diện hiện tại</div>
+                    <div class="config-grid">
+                        <div class="config-item"><div class="cl">Theme</div><div class="cv">${d.theme === 'dark' ? '🌙 Dark' : d.theme === 'system' ? '💻 System' : '☀️ Light'}</div></div>
+                        <div class="config-item"><div class="cl">Primary Color</div><div class="cv"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${d.primary_color || '#000'};vertical-align:middle;margin-right:6px"></span>${d.primary_color || '-'}</div></div>
+                        <div class="config-item"><div class="cl">Font Family</div><div class="cv">${d.font_family || '-'}</div></div>
+                        <div class="config-item"><div class="cl">Date Format</div><div class="cv">${d.date_format || '-'}</div></div>
+                        <div class="config-item"><div class="cl">Timezone</div><div class="cv">${d.timezone || '-'}</div></div>
+                        <div class="config-item"><div class="cl">Time Format</div><div class="cv">${d.time_format || '-'}</div></div>
+                    </div></div>`;
+                toast('Đã tải UI settings', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateUi() {
+            const b = {};
+            const fields = { uiTheme: 'theme', uiColor: 'primary_color', uiFont: 'font_family', uiDateFmt: 'date_format', uiTz: 'timezone', uiTimeFmt: 'time_format' };
+            Object.entries(fields).forEach(([elId, key]) => { const val = v(elId); if (val) b[key] = val; });
+            try {
+                await apiFetch(`${API}/system/ui-settings`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('uiUpdateDisplay', 'Cập nhật giao diện thành công!', Object.entries(b).map(([k, v]) => `<strong>${k}</strong>: ${v}`).join(', '));
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ SYSTEM PARAMS (GET /api/system/settings) ============
+        async function loadModulesDropdown() {
+            try {
+                const r = await apiFetch(`${API}/system/settings/modules`);
+                const list = r.data || [];
+                const sel = document.getElementById('paramModule');
+                sel.innerHTML = '<option value="">Tất cả module</option>';
+                list.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.textContent = m; sel.appendChild(opt); });
+            } catch (e) { console.warn(e.message); }
+        }
+
+        async function loadParams(page = 1) {
+            await loadModulesDropdown();
+            const p = new URLSearchParams();
+            const s = v('paramSearch'); if (s) p.set('search', s);
+            const m = v('paramModule'); if (m) p.set('module', m);
+            const limit = parseInt(v('paramLimit')) || 15;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/system/settings?${p}`);
+                const list = res.data || [];
+                const tb = document.getElementById('paramTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('paramPag').innerHTML = ''; return; }
+                list.forEach((s, i) => {
+                    const valStr = typeof s.setting_value === 'object' ? JSON.stringify(s.setting_value) : String(s.setting_value);
+                    const shortVal = valStr.length > 40 ? valStr.substring(0, 40) + '...' : valStr;
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${s.setting_key || ''}</strong></td>
+                        <td style="font-size:.78rem;font-family:monospace;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${valStr.replace(/"/g, '&quot;')}">${shortVal}</td>
+                        <td><span class="badge b-mod">${s.module || '-'}</span></td>
+                        <td>${s.is_protected ? '<span class="badge b-warn">🔒 Protected</span>' : '<span class="badge b-inactive">Custom</span>'}</td>
+                        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${s.description || '-'}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick="selectParam('${s.setting_key}')" title="Chọn">📋</button>
+                            ${!s.is_protected ? `<button class="btn btn-sm btn-danger" onclick="deleteParamByKey('${s.setting_key}')" title="Xóa">🗑️</button>` : ''}
+                        </div></td></tr>`;
+                });
+                const totalItems = res.total || list.length;
+                buildPagination('paramPag', page, totalItems, limit, 'loadParams');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function selectParam(key) {
+            document.getElementById('spKey').value = key;
+            getParam();
+            toast(`📋 Chọn: ${key}`, 'info');
+        }
+
+        async function getParam() {
+            const key = v('spKey');
+            if (!key) return toast('Nhập key', 'error');
+            try {
+                const r = await apiFetch(`${API}/system/settings/${key}`);
+                const d = r.data || {};
+                document.getElementById('spValue').value = JSON.stringify(d.setting_value || {});
+                document.getElementById('spModule').value = d.module || '';
+                document.getElementById('spDesc').value = d.description || '';
+                const el = document.getElementById('paramDisplay'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1rem;font-weight:700;color:#0f3460">📋 ${d.setting_key || key}</div>
+                    <div class="config-grid">
+                        <div class="config-item"><div class="cl">Key</div><div class="cv">${d.setting_key || '-'}</div></div>
+                        <div class="config-item"><div class="cl">Module</div><div class="cv"><span class="badge b-mod">${d.module || '-'}</span></div></div>
+                        <div class="config-item"><div class="cl">Protected</div><div class="cv">${d.is_protected ? '<span class="badge b-warn">🔒 Có</span>' : '<span class="badge b-inactive">Không</span>'}</div></div>
+                        <div class="config-item"><div class="cl">Updated</div><div class="cv">${d.updated_at ? new Date(d.updated_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div>
+                    <div style="margin-top:8px"><div class="cl">Value</div><pre style="background:#1e293b;color:#e2e8f0;padding:10px;border-radius:6px;font-size:.78rem;overflow-x:auto">${JSON.stringify(d.setting_value, null, 2)}</pre></div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function createParam() {
+            const key = v('spKey'), val = v('spValue');
+            if (!key || !val) return toast('Nhập key và value', 'error');
+            let setting_value; try { setting_value = JSON.parse(val); } catch { toast('Value JSON không hợp lệ', 'error'); return; }
+            const b = { setting_key: key, setting_value };
+            const mod = v('spModule'); if (mod) b.module = mod;
+            const desc = v('spDesc'); if (desc) b.description = desc;
+            try {
+                await apiFetch(`${API}/system/settings`, { method: 'POST', body: JSON.stringify(b) });
+                showSuccess('paramDisplay', 'Tạo tham số thành công!', `Key: <strong>${key}</strong>`);
+                toast('Tạo thành công!', 'success'); loadParams(1);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateParam() {
+            const key = v('spKey'), val = v('spValue');
+            if (!key || !val) return toast('Nhập key và value', 'error');
+            let setting_value; try { setting_value = JSON.parse(val); } catch { toast('Value JSON không hợp lệ', 'error'); return; }
+            const b = { setting_value };
+            const desc = v('spDesc'); if (desc) b.description = desc;
+            try {
+                await apiFetch(`${API}/system/settings/${key}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('paramDisplay', 'Cập nhật thành công!', `Key: <strong>${key}</strong>`);
+                toast('OK!', 'success'); loadParams(1);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteParam() {
+            const key = v('spKey');
+            if (!key) return toast('Nhập key', 'error');
+            if (!confirm(`Xóa tham số "${key}"?`)) return;
+            try {
+                await apiFetch(`${API}/system/settings/${key}`, { method: 'DELETE' });
+                showSuccess('paramDisplay', 'Đã xóa!', `Key: <strong>${key}</strong>`);
+                toast('Đã xóa!', 'success'); loadParams(1);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteParamByKey(key) {
+            if (!confirm(`Xóa "${key}"?`)) return;
+            try { await apiFetch(`${API}/system/settings/${key}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadParams(1); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ CONFIG PERMISSIONS ============
+        async function loadConfigPerms() {
+            try {
+                const r = await apiFetch(`${API}/system/config-permissions`);
+                const d = r.data || {};
+                document.getElementById('cpBody').value = JSON.stringify({ permissions: d }, null, 2);
+                const el = document.getElementById('cpDisplay'); el.style.display = 'block';
+                let html = '<div class="detail-card"><div style="font-size:1rem;font-weight:700;color:#0f3460;margin-bottom:10px">🔐 Quyền chỉnh sửa cấu hình</div>';
+                Object.entries(d).forEach(([role, modules]) => {
+                    html += `<div style="margin-bottom:8px"><strong>${role}</strong>: ${Array.isArray(modules) ? modules.map(m => `<span class="badge b-mod">${m}</span> `).join('') : '<span class="badge b-inactive">Không có</span>'}</div>`;
+                });
+                html += '</div>';
+                el.innerHTML = html;
+                toast('Đã tải phân quyền', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateConfigPerms() {
+            const raw = v('cpBody');
+            if (!raw) return toast('Nhập JSON', 'error');
+            let body; try { body = JSON.parse(raw); } catch { toast('JSON không hợp lệ', 'error'); return; }
+            try {
+                await apiFetch(`${API}/system/config-permissions`, { method: 'PUT', body: JSON.stringify(body) });
+                showSuccess('cpUpdateDisplay', 'Cập nhật quyền thành công!', 'Phân quyền đã được cập nhật');
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

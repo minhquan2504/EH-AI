@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ E-Health — Core System Test Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        .header h1 {
+            font-size: 1.3rem
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .85rem
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-info {
+            color: #a8d8ea;
+            font-size: .85rem
+        }
+
+        .main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0f3460;
+            color: #0f3460
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            border-left: 4px solid #0f3460;
+            transition: transform .15s, box-shadow .15s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .1)
+        }
+
+        .card h3 {
+            font-size: .95rem;
+            margin-bottom: 6px
+        }
+
+        .card p {
+            font-size: .8rem;
+            color: #666;
+            line-height: 1.4
+        }
+
+        .card .badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 2px 10px;
+            background: #e8f4f8;
+            color: #0f3460;
+            font-size: .72rem;
+            border-radius: 20px;
+            font-weight: 600
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 10px 18px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .85rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .token-box {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05)
+        }
+
+        .token-box h3 {
+            font-size: .95rem;
+            margin-bottom: 8px;
+            color: #0f3460
+        }
+
+        .token-box pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: .78rem;
+            max-height: 80px;
+            overflow: auto;
+            word-break: break-all;
+            white-space: pre-wrap
+        }
+
+        .token-box .actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: .78rem;
+            font-weight: 600
+        }
+
+        .btn-copy {
+            background: #e8f4f8;
+            color: #0f3460
+        }
+
+        .btn-refresh {
+            background: #fef3c7;
+            color: #92400e
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🛡️ E-Health — Core System Test Hub</h1>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-info" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+        <!-- TOKEN INFO -->
+        <div class="token-box" id="tokenBox" style="display:none">
+            <h3>🔑 Token hiện tại</h3>
+            <pre id="tokenDisplay">—</pre>
+            <div class="actions">
+                <button class="btn-sm btn-copy" onclick="copyToken()">📋 Copy Token</button>
+                <button class="btn-sm btn-refresh" onclick="refreshToken()">🔄 Refresh Token</button>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="section-title">👥 Quản lý Người dùng & Phân quyền</div>
+        <div class="grid">
+            <a class="card" href="users.html">
+                <h3>👥 Quản lý Người dùng</h3>
+                <p>CRUD, khóa/mở, đổi trạng thái, reset MK, gán role, import/export Excel.</p>
+                <span class="badge">26 APIs</span>
+            </a>
+            <a class="card" href="roles.html">
+                <h3>🛡️ Vai trò (Roles)</h3>
+                <p>CRUD Role, quản lý Role-Permissions, Role-Menus, Role-API Permissions.</p>
+                <span class="badge">16 APIs — 4 tabs</span>
+            </a>
+            <a class="card" href="permissions.html">
+                <h3>🔑 Quyền, Menu, Module, API</h3>
+                <p>Quản lý Permissions, Menus, Modules, API Permissions.</p>
+                <span class="badge">15 APIs — 4 tabs</span>
+            </a>
+        </div>
+
+        <div class="section-title">📋 Dữ liệu nền & Danh mục</div>
+        <div class="grid">
+            <a class="card" href="master-data.html">
+                <h3>📋 Danh mục nền (Master Data)</h3>
+                <p>Categories, Items, Import/Export Excel.</p>
+                <span class="badge">14 APIs — 2 tabs</span>
+            </a>
+            <a class="card" href="pharmacy.html">
+                <h3>💊 Danh mục Thuốc (Pharmacy)</h3>
+                <p>Drug Categories, Drugs, Import/Export, Toggle status.</p>
+                <span class="badge">15 APIs — 2 tabs</span>
+            </a>
+        </div>
+
+        <div class="section-title">⚙️ Cấu hình & Hệ thống</div>
+        <div class="grid">
+            <a class="card" href="system.html">
+                <h3>⚙️ Cấu hình Hệ thống</h3>
+                <p>Facility, giờ làm việc, slot, business rules, security, i18n, UI, params.</p>
+                <span class="badge">26 APIs — 5 tabs</span>
+            </a>
+            <a class="card" href="notifications.html">
+                <h3>🔔 Thông báo</h3>
+                <p>Categories, Templates, Role Config, Broadcast, Inbox.</p>
+                <span class="badge">15 APIs — 5 tabs</span>
+            </a>
+            <a class="card" href="audit-logs.html">
+                <h3>📜 Nhật ký (Audit Logs)</h3>
+                <p>Tra cứu, xem chi tiết, Export Excel.</p>
+                <span class="badge">3 APIs</span>
+            </a>
+        </div>
+
+        <div class="section-title">👤 Tài khoản cá nhân</div>
+        <div class="grid">
+            <a class="card" href="profile.html">
+                <h3>👤 Hồ sơ cá nhân</h3>
+                <p>Xem/sửa profile, đổi mật khẩu, sessions, cài đặt.</p>
+                <span class="badge">7 APIs — 3 tabs</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`; t.textContent = msg;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        }
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+
+        window.onload = () => {
+            const auth = getAuth();
+            if (auth?.accessToken) { token = auth.accessToken; showLoggedIn(auth.user); }
+        };
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            try {
+                const res = await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pw, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Core Hub', userAgent: navigator.userAgent } })
+                });
+                const r = await res.json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({
+                    accessToken: r.data.accessToken,
+                    refreshToken: r.data.refreshToken,
+                    user: r.data.user
+                }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function handleLogout() {
+            token = null; localStorage.removeItem('ehealth_auth');
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+            document.getElementById('tokenBox').style.display = 'none';
+            toast('Đã đăng xuất', 'info');
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('currentUser').textContent = `👤 ${user?.name || user?.full_name || 'User'} (${user?.role || ''})`;
+            document.getElementById('tokenBox').style.display = 'block';
+            document.getElementById('tokenDisplay').textContent = token;
+        }
+
+        function copyToken() {
+            navigator.clipboard.writeText(token).then(() => toast('Đã copy token!', 'success'));
+        }
+
+        async function refreshToken() {
+            const auth = getAuth();
+            if (!auth?.refreshToken) return toast('Không có refresh token', 'error');
+            try {
+                const r = await (await fetch(`${API}/auth/refresh-token`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken: auth.refreshToken })
+                })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                auth.accessToken = r.data.accessToken;
+                if (r.data.refreshToken) auth.refreshToken = r.data.refreshToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify(auth));
+                document.getElementById('tokenDisplay').textContent = token;
+                toast('Token đã refresh!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

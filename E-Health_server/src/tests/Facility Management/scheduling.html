@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏰ Lịch hoạt động & Khung giờ — Test Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .tbl-wrap {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-open {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-closed {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .b-active {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 200;
+            justify-content: center;
+            align-items: center
+        }
+
+        .modal-overlay.show {
+            display: flex
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .2)
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid #e2e8f0
+        }
+
+        .modal-header h3 {
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #64748b
+        }
+
+        .modal-body {
+            padding: 16px 18px
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 12px 18px;
+            border-top: 1px solid #e2e8f0
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>⏰ Lịch hoạt động & Khung giờ khám</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">🕐 Giờ hoạt động</div>
+        <div class="tab" onclick="switchTab(1)">🚫 Ngày đóng cửa</div>
+        <div class="tab" onclick="switchTab(2)">🎉 Ngày lễ</div>
+        <div class="tab" onclick="switchTab(3)">📊 Trạng thái Cơ sở</div>
+        <div class="tab" onclick="switchTab(4)">🗓 Khung giờ khám</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+
+        <!-- ========== 0. OPERATING HOURS ========== -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>🕐 Giờ hoạt động (Operating Hours)</h3>
+                <div class="toolbar">
+                    <select id="oh_facId" style="max-width:220px" title="Chọn cơ sở">
+                        <option value="">-- Chọn cơ sở --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadOpHours()">Tải dữ liệu</button>
+                    <button class="btn btn-success" onclick="openOhModal()">➕ Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cơ sở</th>
+                                <th>Thứ</th>
+                                <th>Mở cửa</th>
+                                <th>Đóng cửa</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ohBody">
+                            <tr>
+                                <td colspan="7" class="empty">Chọn cơ sở → Tải dữ liệu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 1. CLOSED DAYS ========== -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>🚫 Ngày đóng cửa (Closed Days)</h3>
+                <div class="toolbar">
+                    <select id="cd_facId" style="max-width:220px" title="Chọn cơ sở">
+                        <option value="">-- Chọn cơ sở --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadClosedDays()">Tải dữ liệu</button>
+                    <button class="btn btn-success" onclick="openCdModal()">➕ Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cơ sở</th>
+                                <th>Thứ</th>
+                                <th>Tên</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cdBody">
+                            <tr>
+                                <td colspan="7" class="empty">Chọn cơ sở → Tải dữ liệu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 2. HOLIDAYS ========== -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>🎉 Ngày lễ (Holidays)</h3>
+                <div class="toolbar">
+                    <select id="hol_facId" style="max-width:220px" title="Chọn cơ sở">
+                        <option value="">-- Tất cả --</option>
+                    </select>
+                    <input type="number" id="hol_year" placeholder="Năm" value="2026" style="max-width:80px">
+                    <button class="btn btn-primary" onclick="loadHolidays()">Tải dữ liệu</button>
+                    <button class="btn btn-success" onclick="openHolModal()">➕ Thêm</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ngày</th>
+                                <th>Tên</th>
+                                <th>Đóng cửa?</th>
+                                <th>Giờ đặc biệt</th>
+                                <th>Lặp lại?</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holBody">
+                            <tr>
+                                <td colspan="7" class="empty">Nhấn "Tải dữ liệu"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 3. FACILITY STATUS ========== -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>📊 Kiểm tra trạng thái Cơ sở (Mở / Đóng hôm nay)</h3>
+                <div class="toolbar">
+                    <select id="fs_facId" style="max-width:220px" title="Chọn cơ sở">
+                        <option value="">-- Chọn cơ sở --</option>
+                    </select>
+                    <input type="date" id="fs_date" title="Ngày cần kiểm tra">
+                    <button class="btn btn-primary" onclick="checkFacStatus()">Kiểm tra</button>
+                </div>
+                <div id="fsResult" class="empty">Nhập facility_id + ngày → Kiểm tra</div>
+            </div>
+            <div class="card">
+                <h3>📅 Lịch tháng (Monthly Calendar)</h3>
+                <div class="toolbar">
+                    <select id="cal_facId" style="max-width:220px" title="Chọn cơ sở">
+                        <option value="">-- Chọn cơ sở --</option>
+                    </select>
+                    <input type="number" id="cal_year" value="2026" style="max-width:80px" title="Năm">
+                    <input type="number" id="cal_month" value="3" min="1" max="12" style="max-width:60px" title="Tháng">
+                    <button class="btn btn-primary" onclick="loadCalendar()">Xem lịch</button>
+                </div>
+                <div id="calResult" class="empty">Nhập thông tin → Xem lịch</div>
+            </div>
+        </div>
+
+        <!-- ========== 4. APPOINTMENT SLOTS ========== -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>🗓 Khung giờ khám bệnh (Appointment Slots)</h3>
+                <div class="toolbar">
+                    <select id="as_shiftId" style="max-width:220px" title="Chọn ca">
+                        <option value="">-- Tất cả ca --</option>
+                    </select>
+                    <select id="as_active" title="Trạng thái">
+                        <option value="">Tất cả</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadSlots()">Tải</button>
+                    <button class="btn btn-success" onclick="openSlotModal()">➕ Tạo Slot</button>
+                </div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ca (shift)</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th>Active</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="asBody">
+                            <tr>
+                                <td colspan="6" class="empty">Nhấn "Tải dữ liệu"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ====== OPERATING HOUR MODAL ====== -->
+    <div class="modal-overlay" id="ohModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="ohModalTitle">Thêm giờ hoạt động</h3><button class="modal-close"
+                    onclick="closeM('ohModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="oh_editId">
+                <div class="form-group"><label>Cơ sở *</label><select id="oh_mFac" class="fac-select">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Thứ trong tuần *</label>
+                    <select id="oh_mDay">
+                        <option value="0">Chủ nhật</option>
+                        <option value="1" selected>Thứ 2</option>
+                        <option value="2">Thứ 3</option>
+                        <option value="3">Thứ 4</option>
+                        <option value="4">Thứ 5</option>
+                        <option value="5">Thứ 6</option>
+                        <option value="6">Thứ 7</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giờ mở cửa</label><input type="time" id="oh_mOpen" value="07:30">
+                    </div>
+                    <div class="form-group"><label>Giờ đóng cửa</label><input type="time" id="oh_mClose" value="17:00">
+                    </div>
+                </div>
+                <div class="form-group"><label>Đóng cửa?</label>
+                    <select id="oh_mClosed">
+                        <option value="false">Không (Mở cửa)</option>
+                        <option value="true">Có (Đóng cửa)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>branch_id (tuỳ chọn)</label><input id="oh_mBranch"
+                        placeholder="Để trống = áp dụng toàn cơ sở"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('ohModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveOpHour()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== CLOSED DAY MODAL ====== -->
+    <div class="modal-overlay" id="cdModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Đăng ký ngày đóng cửa</h3><button class="modal-close" onclick="closeM('cdModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Cơ sở *</label><select id="cd_mFac" class="fac-select">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Thứ trong tuần *</label>
+                    <select id="cd_mDay">
+                        <option value="0">Chủ nhật</option>
+                        <option value="1" selected>Thứ 2</option>
+                        <option value="2">Thứ 3</option>
+                        <option value="3">Thứ 4</option>
+                        <option value="4">Thứ 5</option>
+                        <option value="5">Thứ 6</option>
+                        <option value="6">Thứ 7</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Tên / Lý do *</label><input id="cd_mTitle"
+                        placeholder="Nghỉ buổi sáng Chủ nhật"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giờ bắt đầu *</label><input type="time" id="cd_mStart" value="00:00">
+                    </div>
+                    <div class="form-group"><label>Giờ kết thúc *</label><input type="time" id="cd_mEnd" value="23:59">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('cdModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveClosedDay()">💾 Tạo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== HOLIDAY MODAL ====== -->
+    <div class="modal-overlay" id="holModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="holModalTitle">Thêm ngày lễ</h3><button class="modal-close"
+                    onclick="closeM('holModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hol_editId">
+                <div class="form-group"><label>Cơ sở *</label><select id="hol_mFac" class="fac-select">
+                        <option value="">-- Chọn --</option>
+                    </select></div>
+                <div class="form-group"><label>Ngày lễ * (holiday_date)</label><input type="date" id="hol_mDate"></div>
+                <div class="form-group"><label>Tên ngày lễ * (title)</label><input id="hol_mTitle"
+                        placeholder="Quốc khánh 2/9"></div>
+                <div class="form-group"><label>Đóng cửa?</label>
+                    <select id="hol_mClosed">
+                        <option value="true">Đóng cửa hoàn toàn</option>
+                        <option value="false">Mở giờ đặc biệt</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giờ mở đặc biệt</label><input type="time" id="hol_mSpecOpen"
+                            placeholder="08:00"></div>
+                    <div class="form-group"><label>Giờ đóng đặc biệt</label><input type="time" id="hol_mSpecClose"
+                            placeholder="11:00"></div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="hol_mDesc" placeholder="Ghi chú"></div>
+                <div class="form-group"><label>Lặp lại hàng năm?</label>
+                    <select id="hol_mRecur">
+                        <option value="false">Không</option>
+                        <option value="true">Có</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('holModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveHoliday()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SLOT MODAL ====== -->
+    <div class="modal-overlay" id="slotModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="slotModalTitle">Tạo Slot khám</h3><button class="modal-close"
+                    onclick="closeM('slotModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="slot_editId">
+                <div class="form-group"><label>Ca làm việc *</label><select id="slot_mShift" class="shift-select">
+                        <option value="">-- Chọn ca --</option>
+                    </select></div>
+                <div class="form-group"><label>interval_minutes (bulk generate)</label><input type="number"
+                        id="slot_mInterval" placeholder="15 (để trống nếu tạo đơn lẻ)"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Giờ bắt đầu</label><input type="time" id="slot_mStart" value="08:00"
+                            step="1"></div>
+                    <div class="form-group"><label>Giờ kết thúc</label><input type="time" id="slot_mEnd" value="08:15"
+                            step="1"></div>
+                </div>
+                <div class="form-group"><label>Active</label>
+                    <select id="slot_mActive">
+                        <option value="true">Có</option>
+                        <option value="false">Không</option>
+                    </select>
+                </div>
+                <p style="font-size:.78rem;color:#94a3b8;margin-top:6px">💡 Nếu nhập interval_minutes → Hệ thống tự chia
+                    ca thành các slot. Nếu không → dùng start_time + end_time.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeM('slotModal')">Hủy</button>
+                <button class="btn btn-success" onclick="saveSlot()">💾 Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api', TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null;
+        const DAYS = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000) }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)) }
+        function closeM(id) { document.getElementById(id).classList.remove('show') }
+        function openM(id) { document.getElementById(id).classList.add('show') }
+        function resultBox(id, data) { const el = document.getElementById(id); el.innerHTML = `<pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:.82rem;max-height:400px;overflow-y:auto;white-space:pre-wrap">${JSON.stringify(data, null, 2)}</pre>` }
+
+        let cached = { facilities: [], shifts: [] };
+
+        async function loadDropdowns() {
+            if (!token) return;
+            try {
+                const [fRes, sRes] = await Promise.all([
+                    apiFetch(`${API}/facilities/dropdown`),
+                    apiFetch(`${API}/shifts?limit=50`)
+                ]);
+                cached.facilities = Array.isArray(fRes.data) ? fRes.data : (fRes.data?.items || []);
+                cached.shifts = Array.isArray(sRes.data) ? sRes.data : (sRes.data?.items || []);
+                // Populate all facility selects
+                const facOpts = '<option value="">-- Chọn cơ sở --</option>' + cached.facilities.map(f => `<option value="${f.facilities_id}">${f.name}</option>`).join('');
+                document.querySelectorAll('#oh_facId,#cd_facId,#fs_facId,#cal_facId').forEach(s => s.innerHTML = facOpts);
+                document.getElementById('hol_facId').innerHTML = '<option value="">-- Tất cả --</option>' + cached.facilities.map(f => `<option value="${f.facilities_id}">${f.name}</option>`).join('');
+                document.querySelectorAll('.fac-select').forEach(s => s.innerHTML = facOpts);
+                // Populate all shift selects
+                const shiftOpts = '<option value="">-- Tất cả ca --</option>' + cached.shifts.map(s => `<option value="${s.shifts_id}">${s.name} (${s.start_time?.substring(0, 5)}-${s.end_time?.substring(0, 5)})</option>`).join('');
+                document.getElementById('as_shiftId').innerHTML = shiftOpts;
+                document.querySelectorAll('.shift-select').forEach(s => s.innerHTML = '<option value="">-- Chọn ca --</option>' + cached.shifts.map(sh => `<option value="${sh.shifts_id}">${sh.name} (${sh.start_time?.substring(0, 5)}-${sh.end_time?.substring(0, 5)})</option>`).join(''));
+            } catch (e) { console.warn('Load dropdowns failed:', e.message) }
+        }
+
+        window.onload = async () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); await loadDropdowns() } }
+        async function handleLogin() { try { const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Schedule Test', userAgent: navigator.userAgent } }) })).json(); if (!r.success) throw new Error(r.message); token = r.data.accessToken; localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user })); showLoggedIn(r.data.user); await loadDropdowns(); toast('Đăng nhập thành công!', 'success') } catch (e) { toast(e.message, 'error') } }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất', 'info') }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || ''} (${u?.role || ''})` }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token') } const r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d }
+
+        // ==================== 0. OPERATING HOURS ====================
+        async function loadOpHours() {
+            const f = document.getElementById('oh_facId').value;
+            if (!f) { toast('Chọn cơ sở', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/operating-hours?facility_id=${f}`);
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                const b = document.getElementById('ohBody');
+                if (!items.length) { b.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return }
+                b.innerHTML = items.map(h => `<tr>
+                    <td><small>${h.operation_hours_id || '—'}</small></td>
+                    <td>${h.facility_name || h.facility_id || '—'}</td>
+                    <td>${DAYS[h.day_of_week] ?? h.day_of_week}</td>
+                    <td>${h.open_time || '—'}</td>
+                    <td>${h.close_time || '—'}</td>
+                    <td>${h.is_closed ? '<span class="badge b-closed">Đóng</span>' : '<span class="badge b-open">Mở</span>'}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="editOpHour('${h.operation_hours_id}','${h.open_time || ''}','${h.close_time || ''}',${h.is_closed || false},'${h.facility_id || ''}',${h.day_of_week})">✏️</button>
+                        <button class="btn btn-outline btn-sm" style="color:red" onclick="delOpHour('${h.operation_hours_id}')">🗑️</button>
+                    </td>
+                </tr>`).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function openOhModal() {
+            document.getElementById('oh_editId').value = '';
+            document.getElementById('oh_mFac').value = document.getElementById('oh_facId').value || '';
+            document.getElementById('oh_mDay').value = '1';
+            document.getElementById('oh_mOpen').value = '07:30';
+            document.getElementById('oh_mClose').value = '17:00';
+            document.getElementById('oh_mClosed').value = 'false';
+            document.getElementById('oh_mBranch').value = '';
+            document.getElementById('ohModalTitle').textContent = 'Thêm giờ hoạt động';
+            openM('ohModal');
+        }
+
+        function editOpHour(id, open, close, isClosed, facId, dow) {
+            document.getElementById('oh_editId').value = id;
+            document.getElementById('oh_mFac').value = facId;
+            document.getElementById('oh_mDay').value = dow;
+            document.getElementById('oh_mOpen').value = open ? open.substring(0, 5) : '';
+            document.getElementById('oh_mClose').value = close ? close.substring(0, 5) : '';
+            document.getElementById('oh_mClosed').value = isClosed ? 'true' : 'false';
+            document.getElementById('ohModalTitle').textContent = 'Cập nhật giờ hoạt động';
+            openM('ohModal');
+        }
+
+        async function saveOpHour() {
+            const id = document.getElementById('oh_editId').value;
+            try {
+                if (id) {
+                    const body = { open_time: document.getElementById('oh_mOpen').value + ':00', close_time: document.getElementById('oh_mClose').value + ':00', is_closed: document.getElementById('oh_mClosed').value === 'true' };
+                    await apiFetch(`${API}/operating-hours/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                    toast('Cập nhật thành công!', 'success');
+                } else {
+                    const body = { facility_id: document.getElementById('oh_mFac').value, day_of_week: parseInt(document.getElementById('oh_mDay').value), open_time: document.getElementById('oh_mOpen').value + ':00', close_time: document.getElementById('oh_mClose').value + ':00', is_closed: document.getElementById('oh_mClosed').value === 'true' };
+                    const br = document.getElementById('oh_mBranch').value; if (br) body.branch_id = br;
+                    await apiFetch(`${API}/operating-hours`, { method: 'POST', body: JSON.stringify(body) });
+                    toast('Tạo giờ hoạt động thành công!', 'success');
+                }
+                closeM('ohModal'); loadOpHours();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function delOpHour(id) {
+            if (!confirm('Xóa giờ hoạt động này?')) return;
+            try { await apiFetch(`${API}/operating-hours/${id}`, { method: 'DELETE' }); toast('Xóa thành công!', 'success'); loadOpHours(); } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 1. CLOSED DAYS ====================
+        async function loadClosedDays() {
+            const f = document.getElementById('cd_facId').value;
+            if (!f) { toast('Chọn cơ sở', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/closed-days?facility_id=${f}`);
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                const b = document.getElementById('cdBody');
+                if (!items.length) { b.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return }
+                b.innerHTML = items.map(c => `<tr>
+                    <td><small>${c.closed_day_id || '—'}</small></td>
+                    <td>${c.facility_name || c.facility_id || '—'}</td>
+                    <td>${DAYS[c.day_of_week] ?? c.day_of_week}</td>
+                    <td>${c.title || '—'}</td>
+                    <td>${c.start_time || '—'}</td>
+                    <td>${c.end_time || '—'}</td>
+                    <td><button class="btn btn-outline btn-sm" style="color:red" onclick="delClosedDay('${c.closed_day_id}')">🗑️ Xóa</button></td>
+                </tr>`).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function openCdModal() {
+            document.getElementById('cd_mFac').value = document.getElementById('cd_facId').value || '';
+            document.getElementById('cd_mDay').value = '0';
+            document.getElementById('cd_mTitle').value = '';
+            document.getElementById('cd_mStart').value = '00:00';
+            document.getElementById('cd_mEnd').value = '23:59';
+            openM('cdModal');
+        }
+
+        async function saveClosedDay() {
+            const body = { facility_id: document.getElementById('cd_mFac').value, day_of_week: parseInt(document.getElementById('cd_mDay').value), title: document.getElementById('cd_mTitle').value, start_time: document.getElementById('cd_mStart').value + ':00', end_time: document.getElementById('cd_mEnd').value + ':00' };
+            try { await apiFetch(`${API}/closed-days`, { method: 'POST', body: JSON.stringify(body) }); toast('Tạo ngày đóng cửa thành công!', 'success'); closeM('cdModal'); loadClosedDays(); } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function delClosedDay(id) {
+            if (!confirm('Xóa ngày đóng cửa này?')) return;
+            try { await apiFetch(`${API}/closed-days/${id}`, { method: 'DELETE' }); toast('Xóa thành công!', 'success'); loadClosedDays(); } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 2. HOLIDAYS ====================
+        async function loadHolidays() {
+            const p = new URLSearchParams();
+            const f = document.getElementById('hol_facId').value; if (f) p.set('facility_id', f);
+            const y = document.getElementById('hol_year').value; if (y) p.set('year', y);
+            try {
+                const r = await apiFetch(`${API}/holidays?${p}`);
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                const b = document.getElementById('holBody');
+                if (!items.length) { b.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return }
+                b.innerHTML = items.map(h => {
+                    const specTime = (!h.is_closed && h.special_open_time) ? `${h.special_open_time} - ${h.special_close_time}` : '—';
+                    return `<tr>
+                        <td><small>${h.holiday_id || '—'}</small></td>
+                        <td>${h.holiday_date || '—'}</td>
+                        <td>${h.title || '—'}</td>
+                        <td>${h.is_closed ? '<span class="badge b-closed">Đóng</span>' : '<span class="badge b-open">Mở ĐB</span>'}</td>
+                        <td>${specTime}</td>
+                        <td>${h.is_recurring ? '🔄 Có' : 'Không'}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="editHoliday('${h.holiday_id}')">✏️</button>
+                            <button class="btn btn-outline btn-sm" style="color:red" onclick="delHoliday('${h.holiday_id}')">🗑️</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function openHolModal() {
+            document.getElementById('hol_editId').value = '';
+            document.getElementById('hol_mFac').value = document.getElementById('hol_facId').value || '';
+            document.getElementById('hol_mDate').value = '';
+            document.getElementById('hol_mTitle').value = '';
+            document.getElementById('hol_mClosed').value = 'true';
+            document.getElementById('hol_mSpecOpen').value = '';
+            document.getElementById('hol_mSpecClose').value = '';
+            document.getElementById('hol_mDesc').value = '';
+            document.getElementById('hol_mRecur').value = 'false';
+            document.getElementById('holModalTitle').textContent = 'Thêm ngày lễ';
+            openM('holModal');
+        }
+
+        async function editHoliday(id) {
+            try {
+                const r = await apiFetch(`${API}/holidays/${id}`);
+                const h = r.data;
+                document.getElementById('hol_editId').value = id;
+                document.getElementById('hol_mFac').value = h.facility_id || '';
+                document.getElementById('hol_mDate').value = h.holiday_date ? h.holiday_date.substring(0, 10) : '';
+                document.getElementById('hol_mTitle').value = h.title || '';
+                document.getElementById('hol_mClosed').value = h.is_closed ? 'true' : 'false';
+                document.getElementById('hol_mSpecOpen').value = h.special_open_time ? h.special_open_time.substring(0, 5) : '';
+                document.getElementById('hol_mSpecClose').value = h.special_close_time ? h.special_close_time.substring(0, 5) : '';
+                document.getElementById('hol_mDesc').value = h.description || '';
+                document.getElementById('hol_mRecur').value = h.is_recurring ? 'true' : 'false';
+                document.getElementById('holModalTitle').textContent = 'Cập nhật ngày lễ';
+                openM('holModal');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function saveHoliday() {
+            const id = document.getElementById('hol_editId').value;
+            try {
+                if (id) {
+                    const body = {
+                        title: document.getElementById('hol_mTitle').value,
+                        is_closed: document.getElementById('hol_mClosed').value === 'true',
+                        description: document.getElementById('hol_mDesc').value || undefined,
+                        is_recurring: document.getElementById('hol_mRecur').value === 'true'
+                    };
+                    if (!body.is_closed) {
+                        body.special_open_time = document.getElementById('hol_mSpecOpen').value;
+                        body.special_close_time = document.getElementById('hol_mSpecClose').value;
+                    }
+                    await apiFetch(`${API}/holidays/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                    toast('Cập nhật ngày lễ thành công!', 'success');
+                } else {
+                    const body = {
+                        facility_id: document.getElementById('hol_mFac').value,
+                        holiday_date: document.getElementById('hol_mDate').value,
+                        title: document.getElementById('hol_mTitle').value,
+                        is_closed: document.getElementById('hol_mClosed').value === 'true',
+                        description: document.getElementById('hol_mDesc').value || undefined,
+                        is_recurring: document.getElementById('hol_mRecur').value === 'true'
+                    };
+                    if (!body.is_closed) {
+                        body.special_open_time = document.getElementById('hol_mSpecOpen').value;
+                        body.special_close_time = document.getElementById('hol_mSpecClose').value;
+                    }
+                    await apiFetch(`${API}/holidays`, { method: 'POST', body: JSON.stringify(body) });
+                    toast('Thêm ngày lễ thành công!', 'success');
+                }
+                closeM('holModal'); loadHolidays();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function delHoliday(id) {
+            if (!confirm('Xóa ngày lễ này?')) return;
+            try { await apiFetch(`${API}/holidays/${id}`, { method: 'DELETE' }); toast('Xóa thành công!', 'success'); loadHolidays(); } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 3. FACILITY STATUS ====================
+        function renderStatusCard(data) {
+            const d = data.data || data;
+            const statusColor = d.is_open ? '#10b981' : '#ef4444';
+            const statusText = d.is_open ? '🟢 MỞ CỬA' : '🔴 ĐÓNG CỬA';
+            return `<div style="background:${d.is_open ? '#f0fdf4' : '#fef2f2'};border:2px solid ${statusColor};border-radius:12px;padding:20px;text-align:center">
+                <div style="font-size:1.3rem;font-weight:700;color:${statusColor};margin-bottom:8px">${statusText}</div>
+                <div style="font-size:.9rem;color:#475569;margin-bottom:4px">📅 ${d.date || 'Hôm nay'} · ${d.day_name || DAYS[d.day_of_week] || ''}</div>
+                ${d.open_time ? `<div style="font-size:.85rem;color:#64748b">🕐 ${d.open_time} — ${d.close_time}</div>` : ''}
+                ${d.reason ? `<div style="margin-top:6px;font-size:.82rem;color:#94a3b8">📝 ${d.reason}: ${d.note || ''}</div>` : ''}
+            </div>`;
+        }
+
+        async function checkFacStatus() {
+            const f = document.getElementById('fs_facId').value;
+            const d = document.getElementById('fs_date').value;
+            if (!f) { toast('Chọn cơ sở', 'error'); return }
+            try {
+                let r;
+                if (d) { r = await apiFetch(`${API}/facility-status/date/${d}?facility_id=${f}`) }
+                else { r = await apiFetch(`${API}/facility-status/today?facility_id=${f}`) }
+                document.getElementById('fsResult').innerHTML = renderStatusCard(r);
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function loadCalendar() {
+            const f = document.getElementById('cal_facId').value;
+            const y = document.getElementById('cal_year').value;
+            const m = document.getElementById('cal_month').value;
+            if (!f) { toast('Chọn cơ sở', 'error'); return }
+            try {
+                const r = await apiFetch(`${API}/facility-status/calendar?facility_id=${f}&year=${y}&month=${m}`);
+                const days = Array.isArray(r.data) ? r.data : (r.data?.days || []);
+                if (!days.length) { document.getElementById('calResult').innerHTML = '<div class="empty">Không có dữ liệu</div>'; return }
+                let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:.78rem">';
+                html += DAYS.map(d => `<div style="text-align:center;font-weight:700;color:#475569;padding:4px">${d}</div>`).join('');
+                const firstDay = new Date(days[0].date).getDay();
+                for (let i = 0; i < firstDay; i++) html += '<div></div>';
+                days.forEach(d => {
+                    const bg = d.is_open ? '#d1fae5' : '#fee2e2';
+                    const day = new Date(d.date).getDate();
+                    html += `<div style="background:${bg};border-radius:6px;padding:6px;text-align:center;cursor:help" title="${d.date}: ${d.is_open ? 'Mở' : 'Đóng'} ${d.reason || ''}">
+                        <strong>${day}</strong>
+                        ${d.open_time ? `<br><span style="font-size:.68rem;color:#64748b">${d.open_time?.substring(0, 5)}-${d.close_time?.substring(0, 5)}</span>` : ''}
+                    </div>`;
+                });
+                html += '</div>';
+                document.getElementById('calResult').innerHTML = html;
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        // ==================== 4. APPOINTMENT SLOTS ====================
+        async function loadSlots() {
+            const p = new URLSearchParams();
+            const s = document.getElementById('as_shiftId').value; if (s) p.set('shift_id', s);
+            const a = document.getElementById('as_active').value; if (a) p.set('is_active', a);
+            try {
+                const r = await apiFetch(`${API}/slots?${p}`);
+                const items = Array.isArray(r.data) ? r.data : (r.data?.items || []);
+                const b = document.getElementById('asBody');
+                if (!items.length) { b.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; return }
+                b.innerHTML = items.map(s => `<tr>
+                    <td><small>${s.slot_id || '—'}</small></td>
+                    <td>${s.shift_id || '—'}</td>
+                    <td>${s.start_time || '—'}</td>
+                    <td>${s.end_time || '—'}</td>
+                    <td>${s.is_active ? '<span class="badge b-active">Active</span>' : '<span class="badge b-closed">Inactive</span>'}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="editSlot('${s.slot_id}','${s.shift_id || ''}','${s.start_time || ''}','${s.end_time || ''}',${s.is_active})">✏️</button>
+                        <button class="btn btn-outline btn-sm" style="color:red" onclick="delSlot('${s.slot_id}')">🗑️</button>
+                    </td>
+                </tr>`).join('');
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        function openSlotModal() {
+            document.getElementById('slot_editId').value = '';
+            document.getElementById('slot_mShift').value = document.getElementById('as_shiftId').value || '';
+            document.getElementById('slot_mInterval').value = '';
+            document.getElementById('slot_mStart').value = '08:00';
+            document.getElementById('slot_mEnd').value = '08:15';
+            document.getElementById('slot_mActive').value = 'true';
+            document.getElementById('slotModalTitle').textContent = 'Tạo Slot khám';
+            document.getElementById('slot_mInterval').disabled = false;
+            openM('slotModal');
+        }
+
+        function editSlot(id, shiftId, start, end, isActive) {
+            document.getElementById('slot_editId').value = id;
+            document.getElementById('slot_mShift').value = shiftId;
+            document.getElementById('slot_mInterval').value = '';
+            document.getElementById('slot_mInterval').disabled = true;
+            document.getElementById('slot_mStart').value = start ? start.substring(0, 5) : '';
+            document.getElementById('slot_mEnd').value = end ? end.substring(0, 5) : '';
+            document.getElementById('slot_mActive').value = isActive ? 'true' : 'false';
+            document.getElementById('slotModalTitle').textContent = 'Cập nhật Slot';
+            openM('slotModal');
+        }
+
+        async function saveSlot() {
+            const id = document.getElementById('slot_editId').value;
+            try {
+                if (id) {
+                    const body = {
+                        shift_id: document.getElementById('slot_mShift').value,
+                        start_time: document.getElementById('slot_mStart').value,
+                        end_time: document.getElementById('slot_mEnd').value,
+                        is_active: document.getElementById('slot_mActive').value === 'true'
+                    };
+                    await apiFetch(`${API}/slots/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+                    toast('Cập nhật slot thành công!', 'success');
+                } else {
+                    const body = { shift_id: document.getElementById('slot_mShift').value };
+                    const iv = document.getElementById('slot_mInterval').value;
+                    if (iv) { body.interval_minutes = parseInt(iv) } else { body.start_time = document.getElementById('slot_mStart').value; body.end_time = document.getElementById('slot_mEnd').value }
+                    await apiFetch(`${API}/slots`, { method: 'POST', body: JSON.stringify(body) });
+                    toast('Tạo slot thành công!', 'success');
+                }
+                closeM('slotModal'); loadSlots();
+            } catch (e) { toast(e.message, 'error') }
+        }
+
+        async function delSlot(id) {
+            if (!confirm('Vô hiệu hóa Slot này?')) return;
+            try { await apiFetch(`${API}/slots/${id}`, { method: 'DELETE' }); toast('Vô hiệu hóa thành công!', 'success'); loadSlots(); } catch (e) { toast(e.message, 'error') }
+        }
+    </script>
+</body>
+
+</html>

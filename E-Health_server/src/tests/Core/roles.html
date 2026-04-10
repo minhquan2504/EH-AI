@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Vai trò & Phân quyền — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .b-system {
+            background: #dbeafe;
+            color: #1e40af
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: .82rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .perm-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e8f4f8;
+            border: 1px solid #b8d8e8;
+            border-radius: 20px;
+            padding: 4px 12px 4px 14px;
+            font-size: .78rem;
+            margin: 3px
+        }
+
+        .perm-badge button {
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            font-size: .65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>🛡️ Vai trò & Phân quyền</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📋 Danh sách Roles</div>
+        <div class="tab" onclick="switchTab(1)">➕ Tạo Role</div>
+        <div class="tab" onclick="switchTab(2)">✏️ Chi tiết / Sửa</div>
+        <div class="tab" onclick="switchTab(3)">🔑 Role-Permissions</div>
+        <div class="tab" onclick="switchTab(4)">📂 Role-Menus</div>
+        <div class="tab" onclick="switchTab(5)">🌐 Role-API Perms</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: LIST -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📋 Danh sách Vai trò</h3>
+                <div class="toolbar">
+                    <input id="rSearch" placeholder="🔍 Tìm tên, code..." style="flex:1">
+                    <select id="rStatus" title="Lọc theo trạng thái">
+                        <option value="">Tất cả</option>
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                    </select>
+                    <input id="rLimit" type="number" value="10" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadRoles()">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th>Hệ thống</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roleTable"></tbody>
+                </table>
+                <div class="pagination" id="rolePagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CREATE -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>➕ Tạo Vai trò mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Code *</label><input id="cCode" placeholder="CUSTOMER_CARE"></div>
+                    <div class="form-group"><label>Tên *</label><input id="cName" placeholder="Chăm sóc khách hàng">
+                    </div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="cDesc" placeholder="Nhân sự hỗ trợ bệnh nhân...">
+                </div>
+                <button class="btn btn-success" onclick="createRole()">💾 Tạo vai trò</button>
+                <div id="createDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: DETAIL / EDIT -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>✏️ Chi tiết / Sửa / Xóa Vai trò</h3>
+                <div class="toolbar">
+                    <select id="roleIdSelect" title="Chọn role" style="flex:1">
+                        <option value="">-- Chọn role --</option>
+                    </select>
+                    <button class="btn btn-info" onclick="getRole()">🔍 Xem chi tiết</button>
+                    <button class="btn btn-danger" onclick="deleteRole()">🗑️ Xóa</button>
+                </div>
+                <div id="detailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên mới</label><input id="uName"></div>
+                    <div class="form-group"><label>Mô tả mới</label><input id="uDesc"></div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="updateRole()">💾 Lưu thay đổi</button>
+                    <select id="uStatus" title="Chọn trạng thái">
+                        <option>ACTIVE</option>
+                        <option>INACTIVE</option>
+                    </select>
+                    <button class="btn btn-warning" onclick="toggleStatus()">🔄 Đổi Status</button>
+                </div>
+                <div id="editDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: PERMISSIONS -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>🔑 Permissions của Role</h3>
+                <div class="toolbar">
+                    <select id="rpRoleId" title="Chọn role" style="flex:1">
+                        <option value="">-- Chọn role --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="getRolePerms()">Xem quyền</button>
+                </div>
+                <div id="rpDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>Gán / Thay thế / Xóa Permissions</h3>
+                <div class="form-group"><label>Permission codes (phân cách dấu phẩy, cho Replace ALL)</label><input
+                        id="rpIds" placeholder="PATIENT_VIEW, PATIENT_UPDATE, ROLE_VIEW"></div>
+                <div class="form-group"><label>Permission code (gán 1 quyền)</label><input id="rpSingle"
+                        placeholder="PATIENT_VIEW"></div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="addPerm()">➕ Gán 1 quyền</button>
+                    <button class="btn btn-warning" onclick="replacePerm()">🔄 Replace ALL</button>
+                </div>
+                <div class="toolbar">
+                    <input id="rpRemove" placeholder="Permission code để xóa" style="flex:1">
+                    <button class="btn btn-danger" onclick="removePerm()">🗑️ Xóa quyền</button>
+                </div>
+                <div id="rpResDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MENUS -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>📂 Menus của Role</h3>
+                <div class="toolbar">
+                    <select id="rmRoleId" title="Chọn role" style="flex:1">
+                        <option value="">-- Chọn role --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="getRoleMenus()">Xem menus</button>
+                </div>
+                <div id="rmDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>Gán / Xóa Menu</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Menu ID (gán)</label><input id="rmAdd" placeholder="MEN_..."></div>
+                    <div class="form-group"><label>Menu ID (xóa)</label><input id="rmRemove" placeholder="MEN_...">
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="addMenu()">➕ Gán</button>
+                    <button class="btn btn-danger" onclick="removeMenu()">🗑️ Xóa</button>
+                </div>
+                <div id="rmResDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: API PERMS -->
+        <div class="panel" id="p5">
+            <div class="card">
+                <h3>🌐 API Permissions của Role</h3>
+                <div class="toolbar">
+                    <select id="raRoleId" title="Chọn role" style="flex:1">
+                        <option value="">-- Chọn role --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="getRoleApiPerms()">Xem API Perms</button>
+                </div>
+                <div id="raDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>Gán / Xóa API Permission</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>API ID (gán)</label><input id="raAdd" placeholder="API_..."></div>
+                    <div class="form-group"><label>API ID (xóa)</label><input id="raRemove" placeholder="API_..."></div>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-success" onclick="addApiPerm()">➕ Gán</button>
+                    <button class="btn btn-danger" onclick="removeApiPerm()">🗑️ Xóa</button>
+                </div>
+                <div id="raResDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4', 'p5'];
+        let token = null, currentPage = 1;
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function statusBadge(s) { return `<span class="badge ${s === 'ACTIVE' ? 'b-active' : 'b-inactive'}">${s || '-'}</span>`; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadRoleDropdowns(); } };
+        async function handleLogin() {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Roles Page', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); loadRoleDropdowns();
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+
+        async function tryRefreshToken() {
+            const a = getAuth(); if (!a?.refreshToken) return false;
+            try {
+                const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json();
+                if (!r.success) return false;
+                token = r.data.accessToken; a.accessToken = r.data.accessToken;
+                if (r.data.refreshToken) a.refreshToken = r.data.refreshToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify(a));
+                toast('🔄 Token đã tự động refresh!', 'info'); return true;
+            } catch { return false; }
+        }
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập', 'error'); throw new Error('No token'); }
+            let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            if (r.status === 401) {
+                const ok = await tryRefreshToken();
+                if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); }
+                else { handleLogout(); throw new Error('Phiên hết hạn. Đăng nhập lại.'); }
+            }
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+            return d;
+        }
+
+        /** Load danh sách role vào tất cả combo box */
+        async function loadRoleDropdowns() {
+            try {
+                const r = await apiFetch(`${API}/roles`);
+                const roles = r.data?.items || r.data || [];
+                const selectors = ['roleIdSelect', 'rpRoleId', 'rmRoleId', 'raRoleId'];
+                selectors.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    sel.innerHTML = '<option value="">-- Chọn role --</option>';
+                    roles.forEach(role => {
+                        const opt = document.createElement('option');
+                        opt.value = role.roles_id || role.role_id || role.id;
+                        opt.textContent = `${role.name} (${role.code})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Không load được roles:', e.message); }
+        }
+
+        /** Fill form khi chọn role */
+        function fillRole(role) {
+            const id = role.roles_id || role.role_id || role.id || '';
+            // Set all dropdown values
+            ['roleIdSelect', 'rpRoleId', 'rmRoleId', 'raRoleId'].forEach(selId => {
+                const sel = document.getElementById(selId);
+                if (sel) sel.value = id;
+            });
+            document.getElementById('uName').value = role.name || '';
+            document.getElementById('uDesc').value = role.description || '';
+            document.getElementById('uStatus').value = role.status || 'ACTIVE';
+        }
+
+        /** Xem chi tiết → tab 2, fill form */
+        function viewRole(role) {
+            fillRole(role);
+            switchTab(2);
+            getRole();
+            toast(`👁️ Xem: ${role.name || ''}`, 'info');
+        }
+
+        /** Sửa → tab 2 */
+        function editRole(role) {
+            fillRole(role);
+            switchTab(2);
+            toast(`✏️ Sửa: ${role.name || ''}`, 'info');
+        }
+
+        /** Xóa trực tiếp */
+        async function deleteRoleById(role) {
+            const id = role.roles_id || role.role_id || role.id || '';
+            if (!id) return toast('Không tìm thấy ID', 'error');
+            if (!confirm(`Xác nhận xóa role: ${role.name || id}?`)) return;
+            try {
+                await apiFetch(`${API}/roles/${id}`, { method: 'DELETE' });
+                toast('Đã xóa role!', 'success');
+                loadRoles(currentPage);
+                loadRoleDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 0: LIST ============
+        async function loadRoles(page = 1) {
+            currentPage = page;
+            const p = new URLSearchParams();
+            const s = document.getElementById('rSearch').value; if (s) p.set('search', s);
+            const st = document.getElementById('rStatus').value; if (st) p.set('status', st);
+            p.set('page', page);
+            p.set('limit', document.getElementById('rLimit').value || 10);
+            try {
+                const res = await apiFetch(`${API}/roles?${p}`);
+                const data = res.data;
+                const list = data.items || data.roles || data.rows || (Array.isArray(data) ? data : []);
+                const tb = document.getElementById('roleTable');
+                tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; return; }
+                const limit = parseInt(document.getElementById('rLimit').value) || 10;
+                list.forEach((r, i) => {
+                    const id = r.roles_id || r.role_id || r.id || '';
+                    const rj = JSON.stringify(r).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${r.code || ''}</strong></td>
+                        <td>${r.name || ''}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${r.description || '-'}</td>
+                        <td>${r.is_system ? '<span class="badge b-system">Hệ thống</span>' : '-'}</td>
+                        <td>${statusBadge(r.status)}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewRole(${rj})' title="Xem">👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editRole(${rj})' title="Sửa">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteRoleById(${rj})' title="Xóa">🗑️</button>
+                        </div></td>
+                    </tr>`;
+                });
+                // Pagination
+                const pg = document.getElementById('rolePagination');
+                const totalItems = data.total || data.pagination?.total || list.length;
+                const totalPages = data.totalPages || data.total_pages || data.pagination?.totalPages || Math.ceil(totalItems / limit);
+                let pgHtml = '';
+                pgHtml += `<button onclick="loadRoles(${page - 1})" ${page <= 1 ? 'disabled' : ''}>← Trước</button>`;
+                if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pgHtml += `<button class="${i === page ? 'active' : ''}" onclick="loadRoles(${i})">${i}</button>`;
+                } else {
+                    pgHtml += `<button class="${page === 1 ? 'active' : ''}" onclick="loadRoles(1)">1</button>`;
+                    if (page > 3) pgHtml += '<span>...</span>';
+                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pgHtml += `<button class="${i === page ? 'active' : ''}" onclick="loadRoles(${i})">${i}</button>`;
+                    if (page < totalPages - 2) pgHtml += '<span>...</span>';
+                    pgHtml += `<button class="${page === totalPages ? 'active' : ''}" onclick="loadRoles(${totalPages})">${totalPages}</button>`;
+                }
+                pgHtml += `<button onclick="loadRoles(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>Sau →</button>`;
+                pgHtml += `<span style="margin-left:8px;color:#64748b">Tổng: ${totalItems}</span>`;
+                pg.innerHTML = pgHtml;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 1: CREATE ============
+        async function createRole() {
+            const code = document.getElementById('cCode').value, name = document.getElementById('cName').value;
+            if (!code || !name) return toast('Nhập code và tên', 'error');
+            try {
+                const r = await apiFetch(`${API}/roles`, { method: 'POST', body: JSON.stringify({ code, name, description: document.getElementById('cDesc').value }) });
+                const el = document.getElementById('createDisplay');
+                el.style.display = 'block';
+                el.innerHTML = `<div class="success-card">
+                    <div class="title">✅ Tạo vai trò thành công!</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.83rem">
+                        <div><span style="color:#64748b">Code:</span> <strong>${code}</strong></div>
+                        <div><span style="color:#64748b">Tên:</span> <strong>${name}</strong></div>
+                        <div style="grid-column:1/-1;color:#64748b;font-size:.78rem">Thời gian: ${new Date().toLocaleString('vi-VN')}</div>
+                    </div>
+                </div>`;
+                toast('Tạo vai trò thành công!', 'success');
+                loadRoleDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 2: DETAIL / EDIT ============
+        async function getRole() {
+            const id = document.getElementById('roleIdSelect').value;
+            if (!id) return toast('Chọn role', 'error');
+            try {
+                const r = await apiFetch(`${API}/roles/${id}`);
+                const d = r.data || {};
+                fillRole(d);
+                const el = document.getElementById('detailInfo');
+                el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460;margin-bottom:4px">🛡️ ${d.name || '-'}</div>
+                    <div style="font-size:.8rem;color:#64748b;margin-bottom:10px">${d.roles_id || d.role_id || d.id || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">📝 Code</div><div class="dg-value">${d.code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">📊 Trạng thái</div><div class="dg-value">${statusBadge(d.status)}</div></div>
+                        <div class="dg-item"><div class="dg-label">🔧 Hệ thống</div><div class="dg-value">${d.is_system ? '<span class="badge b-system">Có</span>' : 'Không'}</div></div>
+                        <div class="dg-item"><div class="dg-label">📋 Mô tả</div><div class="dg-value">${d.description || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">📅 Tạo lúc</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">📅 Cập nhật</div><div class="dg-value">${d.updated_at ? new Date(d.updated_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div>
+                </div>`;
+                toast(`Đã tải: ${d.name}`, 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateRole() {
+            const id = document.getElementById('roleIdSelect').value;
+            if (!id) return toast('Chọn role', 'error');
+            const b = {};
+            const n = document.getElementById('uName').value; if (n) b.name = n;
+            const d = document.getElementById('uDesc').value; if (d) b.description = d;
+            try {
+                await apiFetch(`${API}/roles/${id}`, { method: 'PATCH', body: JSON.stringify(b) });
+                const el = document.getElementById('editDisplay');
+                el.style.display = 'block';
+                el.innerHTML = `<div class="success-card"><div class="title">✅ Cập nhật thành công!</div>
+                    <div style="font-size:.83rem;color:#065f46">Role ${id} đã được cập nhật lúc ${new Date().toLocaleString('vi-VN')}</div></div>`;
+                toast('Cập nhật thành công!', 'success');
+                loadRoleDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function toggleStatus() {
+            const id = document.getElementById('roleIdSelect').value;
+            if (!id) return toast('Chọn role', 'error');
+            const newSt = document.getElementById('uStatus').value;
+            try {
+                await apiFetch(`${API}/roles/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status: newSt }) });
+                const el = document.getElementById('editDisplay');
+                el.style.display = 'block';
+                el.innerHTML = `<div class="success-card"><div class="title">✅ Đổi trạng thái thành công!</div>
+                    <div style="font-size:.83rem">Role: <strong>${id}</strong> → ${statusBadge(newSt)}</div></div>`;
+                toast('Đổi status!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteRole() {
+            const id = document.getElementById('roleIdSelect').value;
+            if (!id) return toast('Chọn role', 'error');
+            if (!confirm('Xóa role này?')) return;
+            try {
+                await apiFetch(`${API}/roles/${id}`, { method: 'DELETE' });
+                const el = document.getElementById('editDisplay');
+                el.style.display = 'block';
+                el.innerHTML = `<div class="success-card"><div class="title">✅ Đã xóa role!</div>
+                    <div style="font-size:.83rem;color:#065f46">${id} đã bị xóa lúc ${new Date().toLocaleString('vi-VN')}</div></div>`;
+                toast('Đã xóa!', 'success');
+                loadRoleDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 3: ROLE-PERMISSIONS ============
+        async function getRolePerms() {
+            const id = document.getElementById('rpRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            try {
+                const r = await apiFetch(`${API}/roles/${id}/permissions`);
+                const perms = r.data || [];
+                const el = document.getElementById('rpDisplay');
+                el.style.display = 'block';
+                if (!Array.isArray(perms) || perms.length === 0) {
+                    el.innerHTML = '<div style="text-align:center;padding:14px;color:#94a3b8">🔑 Role chưa có quyền nào</div>';
+                    return;
+                }
+                el.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#0f3460">Tổng: ${perms.length} quyền</div>
+                    <table><thead><tr><th>#</th><th>Permission ID</th><th>Code</th><th>Tên</th><th>Module</th></tr></thead>
+                    <tbody>${perms.map((p, i) => `<tr>
+                        <td>${i + 1}</td>
+                        <td style="font-size:.75rem">${p.permissions_id || p.permission_id || p.id || '-'}</td>
+                        <td><strong>${p.code || '-'}</strong></td>
+                        <td>${p.name || p.description || '-'}</td>
+                        <td>${p.module || '-'}</td>
+                    </tr>`).join('')}</tbody></table>`;
+                toast(`Có ${perms.length} quyền`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function addPerm() {
+            const id = document.getElementById('rpRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const pid = document.getElementById('rpSingle').value.trim();
+            if (!pid) return toast('Nhập permission code', 'error');
+            try {
+                await apiFetch(`${API}/roles/${id}/permissions`, { method: 'POST', body: JSON.stringify({ permission_id: pid }) });
+                showSuccessCard('rpResDisplay', 'Gán quyền thành công!', `Permission <strong>${pid}</strong> → Role <strong>${id}</strong>`);
+                toast('Gán quyền!', 'success');
+                getRolePerms();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function replacePerm() {
+            const id = document.getElementById('rpRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const ids = document.getElementById('rpIds').value.split(',').map(s => s.trim()).filter(Boolean);
+            if (!ids.length) return toast('Nhập danh sách permission codes', 'error');
+            if (!confirm(`Thay thế tất cả quyền bằng ${ids.length} quyền mới?`)) return;
+            try {
+                await apiFetch(`${API}/roles/${id}/permissions`, { method: 'PUT', body: JSON.stringify({ permissions: ids }) });
+                showSuccessCard('rpResDisplay', 'Replace ALL thành công!', `Đã gán ${ids.length} quyền cho Role <strong>${id}</strong>`);
+                toast('Replace thành công!', 'success');
+                getRolePerms();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function removePerm() {
+            const id = document.getElementById('rpRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const pid = document.getElementById('rpRemove').value.trim();
+            if (!pid) return toast('Nhập Permission code', 'error');
+            if (!confirm(`Xóa quyền "${pid}" khỏi role?`)) return;
+            try {
+                await apiFetch(`${API}/roles/${id}/permissions/${pid}`, { method: 'DELETE' });
+                showSuccessCard('rpResDisplay', 'Xóa quyền thành công!', `Permission <strong>${pid}</strong> đã bị gỡ khỏi Role <strong>${id}</strong>`);
+                toast('Xóa quyền!', 'success');
+                getRolePerms();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 4: ROLE-MENUS ============
+        async function getRoleMenus() {
+            const id = document.getElementById('rmRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            try {
+                const r = await apiFetch(`${API}/roles/${id}/menus`);
+                const menus = r.data || [];
+                const el = document.getElementById('rmDisplay');
+                el.style.display = 'block';
+                if (!Array.isArray(menus) || menus.length === 0) {
+                    el.innerHTML = '<div style="text-align:center;padding:14px;color:#94a3b8">📂 Role chưa có menu nào</div>';
+                    return;
+                }
+                el.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#0f3460">Tổng: ${menus.length} menu</div>
+                    <table><thead><tr><th>#</th><th>Menu ID</th><th>Code</th><th>Tên</th><th>Icon</th><th>URL</th></tr></thead>
+                    <tbody>${menus.map((m, i) => `<tr>
+                        <td>${i + 1}</td>
+                        <td style="font-size:.75rem">${m.menus_id || m.menu_id || m.id || '-'}</td>
+                        <td><strong>${m.code || '-'}</strong></td>
+                        <td>${m.name || m.title || '-'}</td>
+                        <td>${m.icon || '-'}</td>
+                        <td style="font-size:.75rem">${m.url || m.path || '-'}</td>
+                    </tr>`).join('')}</tbody></table>`;
+                toast(`Có ${menus.length} menu`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function addMenu() {
+            const id = document.getElementById('rmRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const mid = document.getElementById('rmAdd').value.trim();
+            if (!mid) return toast('Nhập Menu ID', 'error');
+            try {
+                await apiFetch(`${API}/roles/${id}/menus`, { method: 'POST', body: JSON.stringify({ menu_id: mid }) });
+                showSuccessCard('rmResDisplay', 'Gán menu thành công!', `Menu <strong>${mid}</strong> → Role <strong>${id}</strong>`);
+                toast('Gán menu!', 'success');
+                getRoleMenus();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function removeMenu() {
+            const id = document.getElementById('rmRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const mid = document.getElementById('rmRemove').value.trim();
+            if (!mid) return toast('Nhập Menu ID', 'error');
+            if (!confirm(`Xóa menu "${mid}" khỏi role?`)) return;
+            try {
+                await apiFetch(`${API}/roles/${id}/menus/${mid}`, { method: 'DELETE' });
+                showSuccessCard('rmResDisplay', 'Xóa menu thành công!', `Menu <strong>${mid}</strong> đã bị gỡ khỏi Role <strong>${id}</strong>`);
+                toast('Xóa menu!', 'success');
+                getRoleMenus();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ TAB 5: ROLE-API PERMS ============
+        async function getRoleApiPerms() {
+            const id = document.getElementById('raRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            try {
+                const r = await apiFetch(`${API}/roles/${id}/api-permissions`);
+                const apis = r.data || [];
+                const el = document.getElementById('raDisplay');
+                el.style.display = 'block';
+                if (!Array.isArray(apis) || apis.length === 0) {
+                    el.innerHTML = '<div style="text-align:center;padding:14px;color:#94a3b8">🌐 Role chưa có API permission nào</div>';
+                    return;
+                }
+                el.innerHTML = `<div style="margin-bottom:8px;font-weight:600;color:#0f3460">Tổng: ${apis.length} API</div>
+                    <table><thead><tr><th>#</th><th>API ID</th><th>Method</th><th>Endpoint</th><th>Mô tả</th></tr></thead>
+                    <tbody>${apis.map((a, i) => `<tr>
+                        <td>${i + 1}</td>
+                        <td style="font-size:.75rem">${a.api_permissions_id || a.api_id || a.id || '-'}</td>
+                        <td><span class="badge ${a.method === 'GET' ? 'b-active' : a.method === 'DELETE' ? 'b-inactive' : 'b-system'}">${a.method || '-'}</span></td>
+                        <td style="font-size:.78rem;font-family:monospace">${a.endpoint || a.path || '-'}</td>
+                        <td>${a.description || a.name || '-'}</td>
+                    </tr>`).join('')}</tbody></table>`;
+                toast(`Có ${apis.length} API permissions`, 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function addApiPerm() {
+            const id = document.getElementById('raRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const aid = document.getElementById('raAdd').value.trim();
+            if (!aid) return toast('Nhập API ID', 'error');
+            try {
+                await apiFetch(`${API}/roles/${id}/api-permissions`, { method: 'POST', body: JSON.stringify({ api_id: aid }) });
+                showSuccessCard('raResDisplay', 'Gán API thành công!', `API <strong>${aid}</strong> → Role <strong>${id}</strong>`);
+                toast('Gán API!', 'success');
+                getRoleApiPerms();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function removeApiPerm() {
+            const id = document.getElementById('raRoleId').value;
+            if (!id) return toast('Chọn role', 'error');
+            const aid = document.getElementById('raRemove').value.trim();
+            if (!aid) return toast('Nhập API ID', 'error');
+            if (!confirm(`Xóa API "${aid}" khỏi role?`)) return;
+            try {
+                await apiFetch(`${API}/roles/${id}/api-permissions/${aid}`, { method: 'DELETE' });
+                showSuccessCard('raResDisplay', 'Xóa API thành công!', `API <strong>${aid}</strong> đã bị gỡ khỏi Role <strong>${id}</strong>`);
+                toast('Xóa API!', 'success');
+                getRoleApiPerms();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ UTILS ============
+        function showSuccessCard(elId, title, msg) {
+            const el = document.getElementById(elId);
+            el.style.display = 'block';
+            el.innerHTML = `<div class="success-card">
+                <div class="title">✅ ${title}</div>
+                <div style="font-size:.83rem;color:#065f46">${msg}</div>
+                <div style="font-size:.78rem;color:#64748b;margin-top:4px">Thời gian: ${new Date().toLocaleString('vi-VN')}</div>
+            </div>`;
+        }
+    </script>
+</body>
+
+</html>

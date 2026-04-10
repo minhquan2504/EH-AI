@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Module 2.12 - Cấu hình Quy tắc Đặt khám</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --primary-bg: #eef2ff;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .06);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, .1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ─── */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(79, 70, 229, .3);
+        }
+
+        .header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -.3px;
+        }
+
+        .header a {
+            color: rgba(255, 255, 255, .75);
+            font-size: .82rem;
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .header a:hover {
+            color: #fff;
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .83rem;
+            background: rgba(255, 255, 255, .9);
+            outline: none;
+        }
+
+        .auth-bar input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .4);
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: transform .15s;
+        }
+
+        .auth-bar button:active {
+            transform: scale(.96);
+        }
+
+        .btn-login {
+            background: #f97316;
+            color: #fff;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, .25);
+        }
+
+        .user-txt {
+            color: rgba(255, 255, 255, .85);
+            font-size: .82rem;
+        }
+
+        /* ── MAIN ─── */
+        .main {
+            max-width: 960px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        /* ── CARDS ─── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, .04);
+        }
+
+        .card h3 {
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hint {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        /* ── TOOLBAR ─── */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .toolbar select,
+        .toolbar input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .84rem;
+            background: var(--card);
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+
+        .toolbar select:focus,
+        .toolbar input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        /* ── BUTTONS ─── */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: .78rem;
+            border-radius: 6px;
+        }
+
+        /* ── FORM ─── */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .83rem;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+
+        .form-group label .sub {
+            font-weight: 400;
+            color: var(--muted);
+            font-size: .78rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .88rem;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            background: var(--card);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ── CONFIG TABLE ─── */
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .86rem;
+        }
+
+        th {
+            background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background .15s;
+        }
+
+        tbody tr:hover {
+            background: var(--primary-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── SOURCE BADGES ─── */
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .73rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .src-branch {
+            background: var(--success-bg);
+            color: #065f46;
+        }
+
+        .src-global {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .src-default {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .null-label {
+            color: var(--danger);
+            font-size: .8rem;
+            font-style: italic;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        /* ── TOAST ─── */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 280px;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ── BRANCH SYNC BANNER ─── */
+        .sync-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--primary-bg);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(79, 70, 229, .12);
+        }
+
+        .sync-bar label {
+            font-weight: 600;
+            font-size: .88rem;
+            color: var(--primary-dark);
+            white-space: nowrap;
+        }
+
+        .sync-bar select {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .88rem;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .sync-bar select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>⚙️ Module 2.12 — Cấu hình Quy tắc Đặt khám</h1>
+            <a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-txt" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+
+        <!-- Branch selector (shared for all 3 sections) -->
+        <div class="sync-bar">
+            <label>🏢 Chi nhánh:</label>
+            <select id="gBranch" title="Chọn chi nhánh" onchange="onBranchChange()">
+                <option value="">-- Chọn chi nhánh --</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="loadResolved()">📊 Resolved</button>
+            <button class="btn btn-outline btn-sm" onclick="loadRaw()">📋 Raw</button>
+        </div>
+
+        <!-- ========== RESOLVED CONFIG ========== -->
+        <div class="card">
+            <h3>📊 Cấu hình Resolved (Kế thừa: Branch → Global → Default)</h3>
+            <p class="hint">Trả về cấu hình <strong>cuối cùng có hiệu lực</strong> cho chi nhánh. Trường
+                <code>sources</code> cho biết nguồn gốc: <span class="badge src-branch">branch</span> <span
+                    class="badge src-global">global</span> <span class="badge src-default">default</span></p>
+            <div id="resolvedResult" class="empty">Chọn chi nhánh và nhấn "📊 Resolved"</div>
+        </div>
+
+        <!-- ========== RAW CONFIG ========== -->
+        <div class="card">
+            <h3>📋 Cấu hình Raw (Dữ liệu thô riêng chi nhánh)</h3>
+            <p class="hint">Dữ liệu thô lưu trong bảng <code>booking_configurations</code>. Nếu chưa setup →
+                <code>data = null</code>.</p>
+            <div id="rawResult" class="empty">Chọn chi nhánh và nhấn "📋 Raw"</div>
+        </div>
+
+        <!-- ========== UPSERT CONFIG ========== -->
+        <div class="card">
+            <h3>✏️ Cập nhật (UPSERT) cấu hình cho chi nhánh</h3>
+            <p class="hint">Chỉ gửi field muốn Override. Gửi giá trị <code>null</code> = xóa override (về
+                Global/Default). Trường để trống = không gửi (giữ nguyên).</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>max_patients_per_slot <span class="sub">(1-50 người)</span></label>
+                    <input type="number" id="up_maxPatients" placeholder="VD: 2 (trống = không gửi)" min="1" max="50">
+                </div>
+                <div class="form-group">
+                    <label>buffer_duration <span class="sub">(0-60 phút)</span></label>
+                    <input type="number" id="up_buffer" placeholder="VD: 5 (trống = không gửi)" min="0" max="60">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>advance_booking_days <span class="sub">(1-365 ngày)</span></label>
+                    <input type="number" id="up_advance" placeholder="VD: 30 (trống = không gửi)" min="1" max="365">
+                </div>
+                <div class="form-group">
+                    <label>minimum_booking_hours <span class="sub">(0-72 giờ)</span></label>
+                    <input type="number" id="up_minHours" placeholder="VD: 2 (trống = không gửi)" min="0" max="72">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>cancellation_allowed_hours <span class="sub">(0-168 giờ)</span></label>
+                <input type="number" id="up_cancel" placeholder="VD: 12 (trống = không gửi)" min="0" max="168">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px">
+                <button class="btn btn-success" onclick="upsertConfig()">💾 Lưu Override</button>
+                <button class="btn btn-warning" onclick="clearAllOverrides()">🔄 Xóa tất cả Override</button>
+            </div>
+            <div id="upsertResult"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+
+        // ==================== AUTH ====================
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+
+        window.onload = () => {
+            const auth = getAuth();
+            if (auth?.accessToken) { token = auth.accessToken; showLoggedIn(auth.user); loadDropdowns(); }
+        };
+
+        async function handleLogin() {
+            try {
+                const res = await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'BookingCfg Test', userAgent: navigator.userAgent } })
+                });
+                const r = await res.json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+                loadDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function handleLogout() {
+            token = null; localStorage.removeItem('ehealth_auth');
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+            toast('Đã đăng xuất', 'info');
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('currentUser').textContent = `👤 ${user?.name || 'User'} (${user?.role || ''})`;
+        }
+
+        // ==================== UTILS ====================
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`; t.textContent = msg;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        }
+
+        async function apiFetch(url, opts = {}) {
+            if (!token) { toast('Vui lòng đăng nhập trước', 'error'); throw new Error('No token'); }
+            const res = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        // ==================== DROPDOWN ====================
+        let allBranches = [];
+
+        async function loadDropdowns() {
+            try {
+                const branchRes = await apiFetch(`${API}/branches?limit=200`);
+                allBranches = branchRes.data?.data || branchRes.data?.items || branchRes.data || [];
+                const sel = document.getElementById('gBranch');
+                sel.innerHTML = '<option value="">-- Chọn chi nhánh --</option>' + allBranches.map(b =>
+                    `<option value="${b.branches_id}">${b.name} (${b.branches_id})</option>`
+                ).join('');
+            } catch (e) { console.error('loadDropdowns:', e); }
+        }
+
+        function onBranchChange() {
+            // Auto-load resolved when selecting a branch
+            const brId = document.getElementById('gBranch').value;
+            if (brId) loadResolved();
+        }
+
+        function getSelectedBranch() {
+            const brId = document.getElementById('gBranch').value;
+            if (!brId) { toast('Vui lòng chọn chi nhánh', 'error'); return null; }
+            return brId;
+        }
+
+        // ==================== RENDER TABLE ====================
+        function srcBadge(src) {
+            const cls = { branch: 'src-branch', global: 'src-global', default: 'src-default' };
+            const icon = { branch: '🏢', global: '🌐', default: '⚙️' };
+            return `<span class="badge ${cls[src] || 'src-default'}">${icon[src] || ''} ${src}</span>`;
+        }
+
+        const CONFIG_FIELDS = [
+            { key: 'max_patients_per_slot', label: 'Số BN tối đa / slot', unit: 'người', icon: '👥' },
+            { key: 'buffer_duration', label: 'Thời gian đệm', unit: 'phút', icon: '⏱️' },
+            { key: 'advance_booking_days', label: 'Đặt trước tối đa', unit: 'ngày', icon: '📅' },
+            { key: 'minimum_booking_hours', label: 'Đặt lịch trước ít nhất', unit: 'giờ', icon: '⏰' },
+            { key: 'cancellation_allowed_hours', label: 'Cho phép hủy trước', unit: 'giờ', icon: '🚫' }
+        ];
+
+        function renderConfigTable(data, containerId) {
+            const el = document.getElementById(containerId);
+            if (!data) {
+                el.innerHTML = '<div class="empty">📭 data = null — Chi nhánh chưa có cấu hình riêng</div>';
+                return;
+            }
+            const hasSources = !!data.sources;
+            let html = `<div class="tbl-wrap"><table>
+                <thead><tr><th>Cấu hình</th><th>Giá trị</th><th>Đơn vị</th>${hasSources ? '<th>Nguồn</th>' : ''}</tr></thead>
+                <tbody>`;
+            for (const f of CONFIG_FIELDS) {
+                const val = data[f.key];
+                const valDisplay = val !== null && val !== undefined
+                    ? `<strong>${val}</strong>`
+                    : '<span class="null-label">null (dùng mặc định)</span>';
+                html += `<tr>
+                    <td>${f.icon} ${f.label}</td>
+                    <td>${valDisplay}</td>
+                    <td>${f.unit}</td>`;
+                if (hasSources) html += `<td>${srcBadge(data.sources[f.key] || 'default')}</td>`;
+                html += `</tr>`;
+            }
+            html += '</tbody></table></div>';
+            if (data.branch_id) {
+                const br = allBranches.find(b => b.branches_id === data.branch_id);
+                html += `<p style="margin-top:10px; font-size:.82rem; color:var(--muted)">🏢 Branch: ${br ? br.name : data.branch_id}</p>`;
+            }
+            el.innerHTML = html;
+        }
+
+        // ==================== 1. RESOLVED ====================
+        async function loadResolved() {
+            const brId = getSelectedBranch();
+            if (!brId) return;
+            try {
+                const r = await apiFetch(`${API}/booking-configs/branch/${brId}`);
+                renderConfigTable(r.data, 'resolvedResult');
+            } catch (e) {
+                toast(e.message, 'error');
+                document.getElementById('resolvedResult').innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+            }
+        }
+
+        // ==================== 2. RAW ====================
+        async function loadRaw() {
+            const brId = getSelectedBranch();
+            if (!brId) return;
+            try {
+                const r = await apiFetch(`${API}/booking-configs/branch/${brId}/raw`);
+                renderConfigTable(r.data, 'rawResult');
+            } catch (e) {
+                toast(e.message, 'error');
+                document.getElementById('rawResult').innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+            }
+        }
+
+        // ==================== 3. UPSERT ====================
+        async function upsertConfig() {
+            const brId = getSelectedBranch();
+            if (!brId) return;
+            const body = {};
+            const fields = [
+                ['up_maxPatients', 'max_patients_per_slot'],
+                ['up_buffer', 'buffer_duration'],
+                ['up_advance', 'advance_booking_days'],
+                ['up_minHours', 'minimum_booking_hours'],
+                ['up_cancel', 'cancellation_allowed_hours']
+            ];
+            for (const [elId, key] of fields) {
+                const v = document.getElementById(elId).value;
+                if (v !== '') body[key] = parseInt(v);
+            }
+            if (Object.keys(body).length === 0) {
+                toast('Vui lòng nhập ít nhất 1 field để override', 'error');
+                return;
+            }
+            try {
+                const r = await apiFetch(`${API}/booking-configs/branch/${brId}`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Cập nhật cấu hình thành công!', 'success');
+                renderConfigTable(r.data, 'upsertResult');
+                loadResolved(); // Refresh resolved view too
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== CLEAR OVERRIDES ====================
+        async function clearAllOverrides() {
+            const brId = getSelectedBranch();
+            if (!brId) return;
+            const brName = allBranches.find(b => b.branches_id === brId)?.name || brId;
+            if (!confirm(`Xóa tất cả override cho chi nhánh "${brName}"?\nCấu hình sẽ về Global/Default.`)) return;
+            const body = {
+                max_patients_per_slot: null,
+                buffer_duration: null,
+                advance_booking_days: null,
+                minimum_booking_hours: null,
+                cancellation_allowed_hours: null
+            };
+            try {
+                const r = await apiFetch(`${API}/booking-configs/branch/${brId}`, { method: 'PUT', body: JSON.stringify(body) });
+                toast('Đã xóa tất cả override!', 'success');
+                renderConfigTable(r.data, 'upsertResult');
+                loadResolved();
+                loadRaw();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>

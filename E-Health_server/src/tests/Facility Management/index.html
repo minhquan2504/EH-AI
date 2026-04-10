@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 E-Health - Facility Management Hub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .auth-bar input {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: .85rem;
+        }
+
+        .auth-bar button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff;
+        }
+
+        .user-info {
+            color: #a8d8ea;
+            font-size: .85rem;
+        }
+
+        .main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0f3460;
+            color: #0f3460;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+            border-left: 4px solid #0f3460;
+            transition: transform .15s, box-shadow .15s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
+        }
+
+        .card h3 {
+            font-size: .95rem;
+            margin-bottom: 6px;
+        }
+
+        .card p {
+            font-size: .8rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .card .badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 2px 10px;
+            background: #e8f4f8;
+            color: #0f3460;
+            font-size: .72rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .card.disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            pointer-events: none;
+            border-left-color: #ccc;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 10px 18px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .85rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+        }
+
+        .toast-success {
+            background: #10b981;
+        }
+
+        .toast-error {
+            background: #ef4444;
+        }
+
+        .toast-info {
+            background: #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🏥 E-Health — Facility Management Test Hub</h1>
+        <div>
+            <div class="auth-bar" id="authSection">
+                <input type="text" id="loginEmail" placeholder="Email" value="admin@ehealth.com">
+                <input type="password" id="loginPassword" placeholder="Mật khẩu" value="Admin@123">
+                <button class="btn-login" onclick="handleLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-bar" id="userSection" style="display:none">
+                <span class="user-info" id="currentUser"></span>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main">
+
+        <div class="section-title">📋 Cơ sở & Tổ chức</div>
+        <div class="grid">
+            <a class="card" href="organization.html">
+                <h3>🏢 Cơ sở, Chi nhánh, Khoa, Phòng, Chuyên khoa</h3>
+                <p>Quản lý cơ cấu tổ chức: cơ sở y tế, chi nhánh, khoa/phòng ban, phòng khám, chuyên khoa.</p>
+                <span class="badge">5 tabs — 5 modules</span>
+            </a>
+        </div>
+
+        <div class="section-title">👨‍⚕️ Nhân sự & Ca trực</div>
+        <div class="grid">
+            <a class="card" href="staff-hr.html">
+                <h3>👥 Nhân viên, Ca trực, Lịch LV, Đổi ca, Nghỉ phép, Chứng chỉ</h3>
+                <p>Quản lý nhân sự y tế, thiết lập ca trực, phân lịch, xin nghỉ phép, giấy phép hành nghề.</p>
+                <span class="badge">6 tabs — 6 modules</span>
+            </a>
+        </div>
+
+        <div class="section-title">⏰ Lịch hoạt động & Khung giờ khám</div>
+        <div class="grid">
+            <a class="card" href="scheduling.html">
+                <h3>🕐 Giờ hoạt động, Ngày đóng cửa, Ngày lễ, Trạng thái, Khung giờ khám</h3>
+                <p>Cấu hình giờ mở/đóng, ngày nghỉ, kiểm tra trạng thái cơ sở, tạo khung giờ khám bệnh.</p>
+                <span class="badge">5 tabs — 5 modules</span>
+            </a>
+        </div>
+
+        <div class="section-title">💊 Dịch vụ Y tế (Module 2.9)</div>
+        <div class="grid">
+            <a class="card" href="medical-services.html">
+                <h3>📋 Quản lý Dịch vụ Y tế</h3>
+                <p>Dịch vụ chuẩn, dịch vụ cơ sở, gán chuyên khoa, gán bác sĩ.</p>
+                <span class="badge">Module 2.9 — 4 tabs</span>
+            </a>
+        </div>
+
+        <div class="section-title">🔧 Trang thiết bị Y tế (Module 2.10)</div>
+        <div class="grid">
+            <a class="card" href="medical-equipment.html">
+                <h3>🔧 Quản lý Thiết bị</h3>
+                <p>CRUD thiết bị, gán phòng, thay đổi trạng thái, lịch sử bảo trì.</p>
+                <span class="badge">Module 2.10 — 10 APIs</span>
+            </a>
+        </div>
+
+        <div class="section-title">🛏 Giường bệnh (Module 2.11)</div>
+        <div class="grid">
+            <a class="card" href="beds.html">
+                <h3>🛏 Quản lý Giường bệnh</h3>
+                <p>CRUD giường, gán phòng/khoa, đổi trạng thái (EMPTY→OCCUPIED→CLEANING), xóa mềm.</p>
+                <span class="badge">Module 2.11 — 7 APIs</span>
+            </a>
+        </div>
+
+        <div class="section-title">⚙️ Cấu hình Đặt khám (Module 2.12)</div>
+        <div class="grid">
+            <a class="card" href="booking-config.html" style="border-left-color:#10b981">
+                <h3>⚙️ Cấu hình Quy tắc Đặt khám</h3>
+                <p>Xem cấu hình Resolved/Raw, UPSERT override cho chi nhánh. Kế thừa: Branch → Global → Default.</p>
+                <span class="badge" style="background:#d1fae5;color:#065f46">Module 2.12 — 3 APIs</span>
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        let token = null;
+
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`; t.textContent = msg;
+            c.appendChild(t); setTimeout(() => t.remove(), 4000);
+        }
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+
+        window.onload = () => {
+            const auth = getAuth();
+            if (auth?.accessToken) { token = auth.accessToken; showLoggedIn(auth.user); }
+        };
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            try {
+                const res = await fetch(`${API}/auth/login/email`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pw, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'Facility Hub', userAgent: navigator.userAgent } })
+                });
+                const r = await res.json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user);
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function handleLogout() {
+            token = null; localStorage.removeItem('ehealth_auth');
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+            toast('Đã đăng xuất', 'info');
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('currentUser').textContent = `👤 ${user?.name || 'User'} (${user?.role || ''})`;
+        }
+    </script>
+
+</body>
+
+</html>

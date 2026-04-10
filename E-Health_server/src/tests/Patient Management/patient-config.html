@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Danh mục Cấu hình — Patient Management</title>
+    <style>
+        :root{--p:#4f46e5;--pl:#818cf8;--pd:#3730a3;--pbg:#eef2ff;--ok:#10b981;--err:#ef4444;--warn:#f59e0b;--bg:#f1f5f9;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--r:12px;--shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.06)}
+        *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+        .header{background:linear-gradient(135deg,var(--pd),var(--p));color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(79,70,229,.3)}
+        .header h1{font-size:1.1rem;font-weight:700}.header a{color:rgba(255,255,255,.7);font-size:.82rem;text-decoration:none}.header a:hover{color:#fff}
+        .auth-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.auth-bar input{padding:6px 10px;border:none;border-radius:6px;font-size:.83rem;background:rgba(255,255,255,.9)}.auth-bar button{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.82rem}
+        .btn-login{background:#f97316;color:#fff}.btn-logout{background:rgba(255,255,255,.15);color:#fff}.user-txt{color:rgba(255,255,255,.85);font-size:.82rem}
+        .main{max-width:1060px;margin:20px auto;padding:0 16px}
+        .tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}.tab{padding:10px 18px;cursor:pointer;font-weight:600;font-size:.84rem;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted);transition:all .2s}.tab:hover{color:var(--p)}.tab.active{color:var(--p);border-bottom-color:var(--p);background:var(--pbg);border-radius:8px 8px 0 0}
+        .panel{display:none}.panel.active{display:block}
+        .card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}.card h3{margin-bottom:12px;font-size:1rem;color:var(--pd)}
+        .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+        .toolbar input,.toolbar select{padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:.84rem;outline:none}.toolbar input:focus,.toolbar select:focus{border-color:var(--pl);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+        .btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;display:inline-flex;align-items:center;gap:4px}.btn:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .btn-p{background:var(--p);color:#fff}.btn-ok{background:var(--ok);color:#fff}.btn-err{background:var(--err);color:#fff}.btn-warn{background:var(--warn);color:#000}.btn-out{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-sm{padding:4px 8px;font-size:.75rem;border-radius:6px}
+        .form-group{margin-bottom:12px}.form-group label{display:block;font-weight:600;font-size:.83rem;margin-bottom:4px;color:#475569}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.84rem;outline:none}.form-group input:focus,.form-group select:focus{border-color:var(--pl);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+        .tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}table{width:100%;border-collapse:collapse;font-size:.84rem}th{background:linear-gradient(180deg,#f8fafc,#f1f5f9);padding:10px 12px;text-align:left;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);white-space:nowrap;font-size:.76rem;text-transform:uppercase;letter-spacing:.3px}td{padding:9px 12px;border-bottom:1px solid #f1f5f9}tbody tr{transition:background .15s}tbody tr:hover{background:var(--pbg)}
+        .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}.badge-ok{background:#d1fae5;color:#065f46}.badge-err{background:#fee2e2;color:#991b1b}.badge-info{background:#dbeafe;color:#1e40af}
+        .detail-grid{display:grid;grid-template-columns:160px 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-top:10px}.detail-grid dt{background:#f8fafc;padding:10px 14px;font-weight:600;font-size:.82rem;color:var(--muted)}.detail-grid dd{background:var(--card);padding:10px 14px;font-size:.84rem}
+        .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+        .toast-c{position:fixed;top:70px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}.toast{padding:12px 18px;border-radius:10px;color:#fff;font-size:.84rem;font-weight:500;box-shadow:0 4px 15px rgba(0,0,0,.15);animation:slideIn .3s;min-width:260px}.toast-success{background:linear-gradient(135deg,#10b981,#059669)}.toast-error{background:linear-gradient(135deg,#ef4444,#dc2626)}.toast-info{background:linear-gradient(135deg,var(--p),var(--pd))}@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+        .color-swatch{display:inline-block;width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px;border:2px solid #e2e8f0}
+    </style>
+</head>
+<body>
+<div class="header">
+    <div><h1>⚙️ Danh mục Cấu hình</h1><a href="index.html">← Quay về Hub</a></div>
+    <div>
+        <div class="auth-bar" id="authSection"><input id="loginEmail" value="admin@ehealth.com"><input type="password" id="loginPassword" value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+        <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt" id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+    </div>
+</div>
+<div class="toast-c" id="toastC"></div>
+<div class="main">
+    <div class="tabs">
+        <div class="tab active" data-t="tags">🏷️ Thẻ phân loại</div>
+        <div class="tab" data-t="doctypes">📄 Loại tài liệu</div>
+        <div class="tab" data-t="rels">👨‍👩‍👧 Loại quan hệ</div>
+        <div class="tab" data-t="rules">🤖 Luật tự động</div>
+        <div class="tab" data-t="contacts">👤 Người thân</div>
+    </div>
+
+    <!-- ===== TAGS ===== -->
+    <div class="panel active" id="panel_tags">
+        <div class="card">
+            <h3>🏷️ Danh sách Thẻ phân loại</h3>
+            <div class="toolbar"><button class="btn btn-p" onclick="loadTags()">🔄 Tải</button></div>
+            <div id="tagList"></div>
+        </div>
+        <div class="card">
+            <h3>➕ Tạo / ✏️ Sửa Thẻ</h3>
+            <div class="form-group"><label>Chọn để sửa</label><select id="tag_sel" onchange="fillTag()"><option value="">-- Tạo mới --</option></select></div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Mã code *</label><input id="tag_code" placeholder="VIP"></div>
+                <div class="form-group"><label>Tên *</label><input id="tag_name" placeholder="Bệnh nhân VIP"></div>
+                <div class="form-group"><label>Màu</label><input type="color" id="tag_color" value="#4f46e5"></div>
+            </div>
+            <div class="form-group"><label>Mô tả</label><input id="tag_desc"></div>
+            <div class="form-group"><label>Trạng thái</label><select id="tag_active"><option value="true">Hoạt động</option><option value="false">Ngừng</option></select></div>
+            <div class="toolbar">
+                <button class="btn btn-ok" onclick="saveTag()">💾 Lưu</button>
+                <button class="btn btn-err btn-sm" onclick="deleteTag()">🗑️ Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DOCUMENT TYPES ===== -->
+    <div class="panel" id="panel_doctypes">
+        <div class="card">
+            <h3>📄 Danh sách Loại tài liệu</h3>
+            <div class="toolbar"><button class="btn btn-p" onclick="loadDocTypes()">🔄 Tải</button></div>
+            <div id="docTypeList"></div>
+        </div>
+        <div class="card">
+            <h3>➕ Tạo / ✏️ Sửa Loại tài liệu</h3>
+            <div class="form-group"><label>Chọn để sửa</label><select id="dt_sel" onchange="fillDocType()"><option value="">-- Tạo mới --</option></select></div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Mã code *</label><input id="dt_code" placeholder="CMND"></div>
+                <div class="form-group"><label>Tên *</label><input id="dt_name" placeholder="Giấy CMND/CCCD"></div>
+                <div class="form-group"><label>Trạng thái</label><select id="dt_active"><option value="true">Hoạt động</option><option value="false">Ngừng</option></select></div>
+            </div>
+            <div class="form-group"><label>Mô tả</label><input id="dt_desc" placeholder="Căn cước công dân hoặc chứng minh nhân dân"></div>
+            <div class="toolbar">
+                <button class="btn btn-ok" onclick="saveDocType()">💾 Lưu</button>
+                <button class="btn btn-err btn-sm" onclick="deleteDocType()">🗑️ Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RELATION TYPES ===== -->
+    <div class="panel" id="panel_rels">
+        <div class="card">
+            <h3>👨‍👩‍👧 Danh sách Loại quan hệ</h3>
+            <div class="toolbar"><button class="btn btn-p" onclick="loadRelTypes()">🔄 Tải</button></div>
+            <div id="relTypeList"></div>
+        </div>
+        <div class="card">
+            <h3>➕ Tạo / ✏️ Sửa Loại quan hệ</h3>
+            <div class="form-group"><label>Chọn để sửa</label><select id="rel_sel" onchange="fillRelType()"><option value="">-- Tạo mới --</option></select></div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Mã code *</label><input id="rel_code" placeholder="FATHER"></div>
+                <div class="form-group"><label>Tên *</label><input id="rel_name" placeholder="Cha"></div>
+                <div class="form-group"><label>Trạng thái</label><select id="rel_active"><option value="true">Hoạt động</option><option value="false">Ngừng</option></select></div>
+            </div>
+            <div class="form-group"><label>Mô tả</label><input id="rel_desc" placeholder="Cha ruột hoặc cha dượng"></div>
+            <div class="toolbar">
+                <button class="btn btn-ok" onclick="saveRelType()">💾 Lưu</button>
+                <button class="btn btn-err btn-sm" onclick="deleteRelType()">🗑️ Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CLASSIFICATION RULES ===== -->
+    <div class="panel" id="panel_rules">
+        <div class="card">
+            <h3>🤖 Luật phân loại tự động</h3>
+            <div class="toolbar">
+                <select id="rule_filter"><option value="">-- Tất cả --</option><option value="true">Đang hoạt động</option><option value="false">Đã tắt</option></select>
+                <button class="btn btn-p" onclick="loadRules()">🔄 Tải</button>
+            </div>
+            <div id="ruleList"></div>
+        </div>
+        <div class="card">
+            <h3>➕ Tạo / ✏️ Sửa Luật</h3>
+            <div class="form-group"><label>Chọn để sửa</label><select id="rule_sel" onchange="fillRule()"><option value="">-- Tạo mới --</option></select></div>
+            <div class="form-row">
+                <div class="form-group"><label>Tên luật *</label><input id="rule_name" placeholder="Auto VIP - Khám trên 10 lần/năm"></div>
+                <div class="form-group"><label>Thẻ đích *</label><select id="rule_tag"><option value="">-- Chọn tag --</option></select></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Tiêu chí *</label><select id="rule_criteria"><option value="VISIT_COUNT">Số lần khám</option><option value="DIAGNOSIS">Chẩn đoán ICD-10</option><option value="TOTAL_SPEND">Tổng chi tiêu</option></select></div>
+                <div class="form-group"><label>Toán tử *</label><select id="rule_op"><option value=">=">≥</option><option value=">">></option><option value="<"><</option><option value="<=">≤</option><option value="=">=</option><option value="IN">IN</option></select></div>
+                <div class="form-group"><label>Giá trị *</label><input id="rule_val" placeholder="10"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Khung thời gian (ngày)</label><input type="number" id="rule_tf" placeholder="365 (null = all time)"></div>
+                <div class="form-group"><label>Trạng thái</label><select id="rule_active"><option value="true">Hoạt động</option><option value="false">Ngừng</option></select></div>
+            </div>
+            <div class="toolbar">
+                <button class="btn btn-ok" onclick="saveRule()">💾 Lưu</button>
+                <button class="btn btn-err btn-sm" onclick="deleteRule()">🗑️ Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PATIENT CONTACTS ===== -->
+    <div class="panel" id="panel_contacts">
+        <div class="card">
+            <h3>👤 Quản lý Người thân / Liên hệ</h3>
+            <div class="toolbar">
+                <select id="pc_patient" style="flex:1"><option value="">-- Chọn bệnh nhân --</option></select>
+                <button class="btn btn-p btn-sm" onclick="loadContacts()">📋 Tất cả</button>
+            </div>
+            <div id="contactList"></div>
+        </div>
+        <div class="card">
+            <h3>➕ Thêm Người thân</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Họ tên *</label><input id="pc_name" placeholder="Nguyễn Thị B"></div>
+                <div class="form-group"><label>Loại quan hệ *</label><select id="pc_relType"><option value="">-- Chọn --</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>SĐT</label><input id="pc_phone" placeholder="0987654321"></div>
+                <div class="form-group"><label>Địa chỉ</label><input id="pc_addr"></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Liên hệ khẩn cấp?</label><select id="pc_emergency"><option value="false">Không</option><option value="true">Có</option></select></div>
+                <div class="form-group"><label>Đại diện PL?</label><select id="pc_legal"><option value="false">Không</option><option value="true">Có</option></select></div>
+                <div class="form-group"><label>Giám hộ?</label><select id="pc_guardian"><option value="false">Không</option><option value="true">Có</option></select></div>
+            </div>
+            <div class="form-group"><label>Ghi chú y tế</label><input id="pc_medNotes" placeholder="Quyết định y tế khi BN bất tỉnh"></div>
+            <button class="btn btn-ok" onclick="createContact()">➕ Thêm</button>
+        </div>
+        <div class="card">
+            <h3>✏️ Cập nhật / 🗑️ Xóa Liên hệ</h3>
+            <div class="toolbar">
+                <input id="pc_contactId" placeholder="Contact ID" style="flex:1">
+                <button class="btn btn-out btn-sm" onclick="loadContactDetail()">📄 Chi tiết</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Họ tên mới</label><input id="pcu_name"></div>
+                <div class="form-group"><label>SĐT mới</label><input id="pcu_phone"></div>
+            </div>
+            <div class="toolbar">
+                <button class="btn btn-ok btn-sm" onclick="updateContact()">💾 Cập nhật</button>
+                <button class="btn btn-warn btn-sm" onclick="setEmergency()">🚨 Đặt Khẩn cấp</button>
+                <button class="btn btn-warn btn-sm" onclick="setLegalRep()">⚖️ Đặt Đại diện PL</button>
+                <button class="btn btn-warn btn-sm" onclick="updateMedNotes()">📝 Cập nhật ghi chú YT</button>
+                <button class="btn btn-err btn-sm" onclick="deleteContact()">🗑️ Xóa</button>
+            </div>
+            <div id="contactDetailResult"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API='http://160.250.186.97:3000/api';let token=null;
+function getAuth(){const d=localStorage.getItem('ehealth_auth');return d?JSON.parse(d):null}
+function headers(){return{'Content-Type':'application/json','Authorization':`Bearer ${token}`}}
+function toast(m,t='info'){const c=document.getElementById('toastC'),e=document.createElement('div');e.className=`toast toast-${t}`;e.textContent=m;c.appendChild(e);setTimeout(()=>e.remove(),4000)}
+async function apiFetch(url,opts={}){if(!token){toast('Đăng nhập trước','error');throw new Error('No token')}const r=await fetch(url,{...opts,headers:{...headers(),...opts.headers}});const d=await r.json();if(!r.ok)throw new Error(d.message||`HTTP ${r.status}`);return d}
+function renderTable(data,cols,cId){const el=document.getElementById(cId);if(!data||data.length===0){el.innerHTML='<div class="empty">Không có dữ liệu</div>';return}let html='<div class="tbl-wrap"><table><thead><tr>'+cols.map(c=>`<th>${c.label}</th>`).join('')+'</tr></thead><tbody>';for(const row of data){html+='<tr>'+cols.map(c=>{let v=c.key.split('.').reduce((o,k)=>o?.[k],row);if(c.render)v=c.render(v,row);return`<td>${v??'—'}</td>`}).join('')+'</tr>'}html+='</tbody></table></div>';el.innerHTML=html}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel_'+t.dataset.t).classList.add('active')}));
+
+window.onload=()=>{const a=getAuth();if(a?.accessToken){token=a.accessToken;showLoggedIn(a.user);loadDropdowns()}}
+async function handleLogin(){try{const r=await(await fetch(`${API}/auth/login/email`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('loginEmail').value,password:document.getElementById('loginPassword').value,clientInfo:{deviceId:'HTML_TEST',deviceName:'Config Test',userAgent:navigator.userAgent}})})).json();if(!r.success)throw new Error(r.message);token=r.data.accessToken;localStorage.setItem('ehealth_auth',JSON.stringify({accessToken:r.data.accessToken,refreshToken:r.data.refreshToken,user:r.data.user}));showLoggedIn(r.data.user);toast('Đăng nhập thành công!','success');loadDropdowns()}catch(e){toast(e.message,'error')}}
+function handleLogout(){token=null;localStorage.removeItem('ehealth_auth');document.getElementById('authSection').style.display='flex';document.getElementById('userSection').style.display='none';toast('Đã đăng xuất','info')}
+function showLoggedIn(u){document.getElementById('authSection').style.display='none';document.getElementById('userSection').style.display='flex';document.getElementById('currentUser').textContent=`👤 ${u?.name||''} (${u?.role||''})`}
+
+let allTags=[],allDocTypes=[],allRelTypes=[],allRules=[],allPatients=[];
+async function loadDropdowns(){
+    try{const r=await apiFetch(`${API}/patient-tags?limit=100`);allTags=r.data?.data||r.data||[];populateTagDropdown()}catch(e){}
+    try{const r=await apiFetch(`${API}/document-types`);allDocTypes=r.data||[];populateDocTypeDropdown()}catch(e){}
+    try{const r=await apiFetch(`${API}/relation-types`);allRelTypes=r.data||[];populateRelTypeDropdown()}catch(e){}
+    try{const r=await apiFetch(`${API}/patient-classification-rules?limit=100`);allRules=r.data?.data||r.data||[];populateRuleDropdown()}catch(e){}
+    try{const r=await apiFetch(`${API}/patients?limit=100`);allPatients=r.data?.data||r.data||[];document.getElementById('pc_patient').innerHTML='<option value="">-- Chọn bệnh nhân --</option>'+allPatients.map(p=>`<option value="${p.id}">${p.full_name} (${p.patient_code||''})</option>`).join('')}catch(e){}
+}
+function populateTagDropdown(){document.getElementById('tag_sel').innerHTML='<option value="">-- Tạo mới --</option>'+allTags.map(t=>`<option value="${t.tag_id||t.tags_id}">${t.name} (${t.code})</option>`).join('');document.getElementById('rule_tag').innerHTML='<option value="">-- Chọn tag --</option>'+allTags.map(t=>`<option value="${t.tag_id||t.tags_id}">${t.name} (${t.code})</option>`).join('')}
+function populateDocTypeDropdown(){document.getElementById('dt_sel').innerHTML='<option value="">-- Tạo mới --</option>'+allDocTypes.map(d=>`<option value="${d.document_type_id||d.document_types_id}">${d.name} (${d.code})</option>`).join('')}
+function populateRelTypeDropdown(){const html='<option value="">-- Chọn --</option>'+allRelTypes.map(r=>`<option value="${r.relation_types_id}">${r.name} (${r.code})</option>`).join('');document.getElementById('rel_sel').innerHTML='<option value="">-- Tạo mới --</option>'+allRelTypes.map(r=>`<option value="${r.relation_types_id}">${r.name} (${r.code})</option>`).join('');document.getElementById('pc_relType').innerHTML=html}
+function populateRuleDropdown(){document.getElementById('rule_sel').innerHTML='<option value="">-- Tạo mới --</option>'+allRules.map(r=>`<option value="${r.classification_rules_id}">${r.name}</option>`).join('')}
+
+// ========== TAGS ==========
+async function loadTags(){try{const r=await apiFetch(`${API}/patient-tags?limit=100`);allTags=r.data?.data||r.data||[];populateTagDropdown();renderTable(allTags,[{key:'code',label:'Code'},{key:'name',label:'Tên'},{key:'color_hex',label:'Màu',render:v=>v?`<span class="color-swatch" style="background:${v}"></span>${v}`:'—'},{key:'is_active',label:'TT',render:v=>`<span class="badge ${v!==false?'badge-ok':'badge-err'}">${v!==false?'Active':'Off'}</span>`},{key:'description',label:'Mô tả'}],'tagList')}catch(e){toast(e.message,'error')}}
+function fillTag(){const id=document.getElementById('tag_sel').value;const t=allTags.find(x=>(x.tag_id||x.tags_id)===id);if(t){document.getElementById('tag_code').value=t.code||'';document.getElementById('tag_name').value=t.name||'';document.getElementById('tag_color').value=t.color_hex||'#4f46e5';document.getElementById('tag_desc').value=t.description||'';document.getElementById('tag_active').value=t.is_active!==false?'true':'false'}else{['tag_code','tag_name','tag_desc'].forEach(i=>document.getElementById(i).value='')}}
+async function saveTag(){const id=document.getElementById('tag_sel').value;const body={code:document.getElementById('tag_code').value,name:document.getElementById('tag_name').value,color_hex:document.getElementById('tag_color').value};const d=document.getElementById('tag_desc').value;if(d)body.description=d;body.is_active=document.getElementById('tag_active').value==='true';try{if(id){await apiFetch(`${API}/patient-tags/${id}`,{method:'PUT',body:JSON.stringify(body)});toast('Cập nhật OK!','success')}else{await apiFetch(`${API}/patient-tags`,{method:'POST',body:JSON.stringify(body)});toast('Tạo OK!','success')}loadTags()}catch(e){toast(e.message,'error')}}
+async function deleteTag(){const id=document.getElementById('tag_sel').value;if(!id){toast('Chọn thẻ','error');return}if(!confirm('Xóa thẻ?'))return;try{await apiFetch(`${API}/patient-tags/${id}`,{method:'DELETE'});toast('Đã xóa!','success');loadTags()}catch(e){toast(e.message,'error')}}
+
+// ========== DOCUMENT TYPES ==========
+async function loadDocTypes(){try{const r=await apiFetch(`${API}/document-types`);allDocTypes=r.data||[];populateDocTypeDropdown();renderTable(allDocTypes,[{key:'code',label:'Code'},{key:'name',label:'Tên'},{key:'is_active',label:'TT',render:v=>`<span class="badge ${v!==false?'badge-ok':'badge-err'}">${v!==false?'Active':'Off'}</span>`},{key:'description',label:'Mô tả'}],'docTypeList')}catch(e){toast(e.message,'error')}}
+function fillDocType(){const id=document.getElementById('dt_sel').value;const d=allDocTypes.find(x=>(x.document_type_id||x.document_types_id)===id);if(d){document.getElementById('dt_code').value=d.code||'';document.getElementById('dt_name').value=d.name||'';document.getElementById('dt_desc').value=d.description||'';document.getElementById('dt_active').value=d.is_active!==false?'true':'false'}else{['dt_code','dt_name','dt_desc'].forEach(i=>document.getElementById(i).value='')}}
+async function saveDocType(){const id=document.getElementById('dt_sel').value;const body={code:document.getElementById('dt_code').value,name:document.getElementById('dt_name').value};const d=document.getElementById('dt_desc').value;if(d)body.description=d;body.is_active=document.getElementById('dt_active').value==='true';try{if(id){await apiFetch(`${API}/document-types/${id}`,{method:'PUT',body:JSON.stringify(body)});toast('Cập nhật OK!','success')}else{await apiFetch(`${API}/document-types`,{method:'POST',body:JSON.stringify(body)});toast('Tạo OK!','success')}loadDocTypes()}catch(e){toast(e.message,'error')}}
+async function deleteDocType(){const id=document.getElementById('dt_sel').value;if(!id){toast('Chọn loại tài liệu','error');return}if(!confirm('Xóa loại tài liệu?'))return;try{await apiFetch(`${API}/document-types/${id}`,{method:'DELETE'});toast('Đã xóa!','success');loadDocTypes()}catch(e){toast(e.message,'error')}}
+
+// ========== RELATION TYPES ==========
+async function loadRelTypes(){try{const r=await apiFetch(`${API}/relation-types`);allRelTypes=r.data||[];populateRelTypeDropdown();renderTable(allRelTypes,[{key:'code',label:'Code'},{key:'name',label:'Tên'},{key:'is_active',label:'TT',render:v=>`<span class="badge ${v!==false?'badge-ok':'badge-err'}">${v!==false?'Active':'Off'}</span>`},{key:'description',label:'Mô tả'}],'relTypeList')}catch(e){toast(e.message,'error')}}
+function fillRelType(){const id=document.getElementById('rel_sel').value;const r=allRelTypes.find(x=>x.relation_types_id===id);if(r){document.getElementById('rel_code').value=r.code||'';document.getElementById('rel_name').value=r.name||'';document.getElementById('rel_desc').value=r.description||'';document.getElementById('rel_active').value=r.is_active!==false?'true':'false'}else{['rel_code','rel_name','rel_desc'].forEach(i=>document.getElementById(i).value='')}}
+async function saveRelType(){const id=document.getElementById('rel_sel').value;const body={code:document.getElementById('rel_code').value,name:document.getElementById('rel_name').value};const d=document.getElementById('rel_desc').value;if(d)body.description=d;body.is_active=document.getElementById('rel_active').value==='true';try{if(id){await apiFetch(`${API}/relation-types/${id}`,{method:'PUT',body:JSON.stringify(body)});toast('Cập nhật OK!','success')}else{await apiFetch(`${API}/relation-types`,{method:'POST',body:JSON.stringify(body)});toast('Tạo OK!','success')}loadRelTypes()}catch(e){toast(e.message,'error')}}
+async function deleteRelType(){const id=document.getElementById('rel_sel').value;if(!id){toast('Chọn loại quan hệ','error');return}if(!confirm('Xóa?'))return;try{await apiFetch(`${API}/relation-types/${id}`,{method:'DELETE'});toast('Đã xóa!','success');loadRelTypes()}catch(e){toast(e.message,'error')}}
+
+// ========== CLASSIFICATION RULES ==========
+async function loadRules(){try{const p=new URLSearchParams({limit:'100'});const f=document.getElementById('rule_filter').value;if(f)p.set('is_active',f);const r=await apiFetch(`${API}/patient-classification-rules?${p}`);allRules=r.data?.data||r.data||[];populateRuleDropdown();renderTable(allRules,[{key:'name',label:'Tên luật'},{key:'criteria_type',label:'Tiêu chí'},{key:'criteria_operator',label:'Toán tử'},{key:'criteria_value',label:'Giá trị'},{key:'timeframe_days',label:'Khung TG (ngày)'},{key:'target_tag_name',label:'Tag đích',render:(v,row)=>v||row.tag?.name||'—'},{key:'is_active',label:'TT',render:v=>`<span class="badge ${v?'badge-ok':'badge-err'}">${v?'On':'Off'}</span>`}],'ruleList')}catch(e){toast(e.message,'error')}}
+function fillRule(){const id=document.getElementById('rule_sel').value;const r=allRules.find(x=>x.classification_rules_id===id);if(r){document.getElementById('rule_name').value=r.name||'';document.getElementById('rule_tag').value=r.target_tag_id||'';document.getElementById('rule_criteria').value=r.criteria_type||'VISIT_COUNT';document.getElementById('rule_op').value=r.criteria_operator||'>=';document.getElementById('rule_val').value=r.criteria_value||'';document.getElementById('rule_tf').value=r.timeframe_days||'';document.getElementById('rule_active').value=r.is_active?'true':'false'}else{['rule_name','rule_val','rule_tf'].forEach(i=>document.getElementById(i).value='')}}
+async function saveRule(){const id=document.getElementById('rule_sel').value;const body={name:document.getElementById('rule_name').value,target_tag_id:document.getElementById('rule_tag').value,criteria_type:document.getElementById('rule_criteria').value,criteria_operator:document.getElementById('rule_op').value,criteria_value:document.getElementById('rule_val').value};const tf=document.getElementById('rule_tf').value;if(tf)body.timeframe_days=parseInt(tf);if(id)body.is_active=document.getElementById('rule_active').value==='true';try{if(id){await apiFetch(`${API}/patient-classification-rules/${id}`,{method:'PUT',body:JSON.stringify(body)});toast('Cập nhật OK!','success')}else{await apiFetch(`${API}/patient-classification-rules`,{method:'POST',body:JSON.stringify(body)});toast('Tạo OK!','success')}loadRules()}catch(e){toast(e.message,'error')}}
+async function deleteRule(){const id=document.getElementById('rule_sel').value;if(!id){toast('Chọn luật','error');return}if(!confirm('Xóa luật?'))return;try{await apiFetch(`${API}/patient-classification-rules/${id}`,{method:'DELETE'});toast('Đã xóa!','success');loadRules()}catch(e){toast(e.message,'error')}}
+
+// ========== PATIENT CONTACTS ==========
+function getPcPatient(){const v=document.getElementById('pc_patient').value;if(!v)toast('Chọn bệnh nhân','error');return v}
+async function loadContacts(){const id=getPcPatient();if(!id)return;try{const r=await apiFetch(`${API}/patients/${id}/relations`);const list=r.data||[];renderTable(list,[{key:'contact_name',label:'Họ tên'},{key:'phone_number',label:'SĐT'},{key:'relation_type_name',label:'Quan hệ'},{key:'is_emergency_contact',label:'Khẩn cấp',render:v=>v?'🚨':'—'},{key:'is_legal_representative',label:'Đại diện PL',render:v=>v?'⚖️':'—'},{key:'is_guardian',label:'Giám hộ',render:v=>v?'👨‍⚖️':'—'},{key:'patient_contacts_id',label:'ID',render:v=>`<span style="font-size:.7rem;cursor:pointer;color:var(--p)" onclick="document.getElementById('pc_contactId').value='${v}'">${(v||'').substring(0,12)}…</span>`}],'contactList')}catch(e){toast(e.message,'error')}}
+async function createContact(){
+    const id=getPcPatient();if(!id)return;
+    const body={contact_name:document.getElementById('pc_name').value,relation_type_id:document.getElementById('pc_relType').value};
+    const ph=document.getElementById('pc_phone').value;if(ph)body.phone_number=ph;
+    const ad=document.getElementById('pc_addr').value;if(ad)body.address=ad;
+    body.is_emergency_contact=document.getElementById('pc_emergency').value==='true';
+    body.is_legal_representative=document.getElementById('pc_legal').value==='true';
+    body.is_guardian=document.getElementById('pc_guardian').value==='true';
+    const mn=document.getElementById('pc_medNotes').value;if(mn)body.medical_decision_notes=mn;
+    try{await apiFetch(`${API}/patients/${id}/contacts`,{method:'POST',body:JSON.stringify(body)});toast('Thêm liên hệ OK!','success');loadContacts()}catch(e){toast(e.message,'error')}
+}
+async function loadContactDetail(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;try{const r=await apiFetch(`${API}/patients/${id}/contacts/${cid}`);const d=r.data;let html='<dl class="detail-grid">';for(const[k,v]of Object.entries(d||{}))html+=`<dt>${k}</dt><dd>${v??'—'}</dd>`;html+='</dl>';document.getElementById('contactDetailResult').innerHTML=html;if(d.contact_name)document.getElementById('pcu_name').value=d.contact_name||'';if(d.phone_number)document.getElementById('pcu_phone').value=d.phone_number||''}catch(e){toast(e.message,'error')}}
+async function updateContact(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;const body={};const n=document.getElementById('pcu_name').value;if(n)body.contact_name=n;const p=document.getElementById('pcu_phone').value;if(p)body.phone_number=p;try{await apiFetch(`${API}/patients/${id}/contacts/${cid}`,{method:'PUT',body:JSON.stringify(body)});toast('Cập nhật OK!','success');loadContacts()}catch(e){toast(e.message,'error')}}
+async function setEmergency(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;try{await apiFetch(`${API}/patients/${id}/contacts/${cid}/emergency`,{method:'PATCH',body:JSON.stringify({is_emergency_contact:true})});toast('Đã đặt khẩn cấp!','success');loadContacts()}catch(e){toast(e.message,'error')}}
+async function setLegalRep(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;try{await apiFetch(`${API}/patients/${id}/contacts/${cid}/legal-representative`,{method:'PATCH',body:JSON.stringify({is_legal_representative:true})});toast('Đã đặt đại diện PL!','success');loadContacts()}catch(e){toast(e.message,'error')}}
+async function updateMedNotes(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;const notes=document.getElementById('pc_medNotes').value;try{await apiFetch(`${API}/patients/${id}/contacts/${cid}/medical-decision-notes`,{method:'PATCH',body:JSON.stringify({medical_decision_notes:notes})});toast('Cập nhật ghi chú OK!','success')}catch(e){toast(e.message,'error')}}
+async function deleteContact(){const cid=document.getElementById('pc_contactId').value;if(!cid){toast('Nhập Contact ID','error');return}const id=getPcPatient();if(!id)return;if(!confirm('Xóa liên hệ?'))return;try{await apiFetch(`${API}/patients/${id}/contacts/${cid}`,{method:'DELETE'});toast('Đã xóa!','success');loadContacts()}catch(e){toast(e.message,'error')}}
+</script>
+</body>
+</html>

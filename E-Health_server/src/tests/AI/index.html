@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Health AI Chat — Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #212121;
+            --sidebar: #171717;
+            --chat-bg: #2f2f2f;
+            --text: #ececec;
+            --text-muted: #8e8e8e;
+            --accent: #10a37f;
+            --accent-hover: #1a7f64;
+            --border: #3e3e3e;
+            --input-bg: #303030;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ═══ LOGIN OVERLAY ═══ */
+        #loginOverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        #loginOverlay.hidden { display: none; }
+
+        .login-card {
+            background: var(--sidebar);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 32px;
+            width: 380px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        }
+        .login-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+            color: var(--accent);
+        }
+        .login-card .login-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: var(--accent); }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:disabled { background: var(--border); cursor: default; }
+
+        .btn-ghost {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+
+        #loginError {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 14px;
+            display: none;
+        }
+        #loginError.show { display: block; }
+
+        /* ═══ SIDEBAR ═══ */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-header h3 { font-size: 1rem; color: var(--accent); }
+        .sidebar-header p  { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* User badge trong sidebar */
+        .user-badge {
+            margin: 10px 12px;
+            padding: 10px 12px;
+            background: var(--chat-bg);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .user-badge:hover { background: var(--border); }
+        .user-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem;
+            color: white; flex-shrink: 0;
+        }
+        .user-info-text { flex: 1; overflow: hidden; }
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-role {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .logout-btn {
+            background: none; border: none;
+            color: var(--danger); cursor: pointer;
+            font-size: 1rem; padding: 2px;
+            opacity: 0.7;
+        }
+        .logout-btn:hover { opacity: 1; }
+
+        /* Guest badge */
+        .guest-badge {
+            margin: 10px 12px;
+            padding: 10px 12px;
+            background: rgba(245,158,11,0.08);
+            border: 1px solid rgba(245,158,11,0.25);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .guest-badge .g-icon { font-size: 1.4rem; }
+        .guest-badge .g-text { flex: 1; }
+        .guest-badge .g-text .g-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--warning);
+        }
+        .guest-badge .g-text .g-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+        .guest-badge .btn-login-small {
+            padding: 4px 10px;
+            background: var(--accent);
+            color: white;
+            border: none; border-radius: 6px;
+            font-size: 0.72rem; cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-new-chat {
+            margin: 6px 12px;
+            padding: 9px;
+            background: var(--accent);
+            color: white; border: none;
+            border-radius: 8px;
+            font-size: 0.85rem; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-new-chat:hover { background: var(--accent-hover); }
+
+        .session-list {
+            flex: 1; overflow-y: auto;
+            padding: 6px;
+        }
+        .session-list-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 10px 4px;
+        }
+        .session-item {
+            padding: 8px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            margin-bottom: 2px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .session-item:hover { background: var(--chat-bg); color: var(--text); }
+        .session-item.active { background: var(--chat-bg); color: var(--text); }
+        .session-code { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; }
+        .session-status {
+            font-size: 0.68rem; padding: 2px 6px;
+            border-radius: 4px; font-weight: 700;
+            flex-shrink: 0; margin-left: 6px;
+        }
+        .status-ACTIVE   { background: rgba(16,163,127,0.2); color: var(--accent); }
+        .status-COMPLETED{ background: rgba(142,142,142,0.2); color: var(--text-muted); }
+        .status-EXPIRED  { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+        .sidebar-footer {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* ═══ CHAT MAIN ═══ */
+        .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        .chat-header {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header-left h4 { font-size: 0.9rem; }
+        .chat-header-left p  { font-size: 0.72rem; color: var(--text-muted); margin-top: 1px; }
+        .btn-end-session {
+            padding: 5px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px; cursor: pointer;
+            font-size: 0.78rem;
+            transition: all 0.2s;
+        }
+        .btn-end-session:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* ═══ MESSAGES ═══ */
+        .messages-container {
+            flex: 1; overflow-y: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+        .message-row {
+            padding: 12px 24px;
+            max-width: 800px; margin: 0 auto; width: 100%;
+        }
+        .role-label {
+            font-weight: 700; font-size: 0.82rem;
+            margin-bottom: 5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .message-row.user .role-label  { color: var(--text); }
+        .message-row.assistant .role-label { color: var(--accent); }
+        .msg-content {
+            font-size: 0.92rem; line-height: 1.65;
+            white-space: pre-wrap; word-break: break-word;
+        }
+
+        /* ═══ ANALYSIS CARD ═══ */
+        .analysis-card {
+            margin-top: 10px;
+            background: var(--sidebar);
+            border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px;
+            font-size: 0.78rem;
+        }
+        .analysis-card summary {
+            cursor: pointer; font-weight: 700;
+            color: var(--accent); font-size: 0.82rem;
+        }
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px; margin-top: 10px;
+        }
+        .analysis-item {
+            background: var(--chat-bg);
+            padding: 7px 9px; border-radius: 6px;
+        }
+        .analysis-item.full { grid-column: 1 / -1; }
+        .analysis-item .label {
+            font-size: 0.65rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .analysis-item .value { margin-top: 2px; font-weight: 600; }
+        .tag {
+            display: inline-block; padding: 2px 7px;
+            border-radius: 4px; font-size: 0.72rem; font-weight: 700;
+        }
+        .tag-mild     { background: rgba(34,197,94,0.2);   color: #22c55e; }
+        .tag-moderate { background: rgba(245,158,11,0.2);  color: #f59e0b; }
+        .tag-severe   { background: rgba(239,68,68,0.2);   color: #ef4444; }
+        .tag-normal   { background: rgba(34,197,94,0.2);   color: #22c55e; }
+        .tag-soon     { background: rgba(245,158,11,0.2);  color: #f59e0b; }
+        .tag-urgent   { background: rgba(239,68,68,0.2);   color: #ef4444; }
+        .tag-yes      { background: rgba(34,197,94,0.2);   color: #22c55e; }
+        .tag-no       { background: rgba(142,142,142,0.2); color: var(--text-muted); }
+        .section-label {
+            font-size: 0.65rem; color: var(--text-muted);
+            margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .chips-row   { display: flex; flex-wrap: wrap; gap: 4px; }
+        .chip        { background: rgba(16,163,127,0.15); color: var(--accent); padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; }
+        .chip.red    { background: rgba(239,68,68,0.15);  color: var(--danger); }
+        .analysis-meta { margin-top: 8px; font-size: 0.65rem; color: var(--text-muted); }
+
+        /* ═══ WELCOME ═══ */
+        .welcome-screen {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: var(--text-muted); padding: 20px;
+        }
+        .welcome-screen h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 8px; }
+        .welcome-screen p  { font-size: 0.88rem; max-width: 400px; text-align: center; line-height: 1.5; }
+        .suggestion-chips {
+            display: flex; flex-wrap: wrap;
+            gap: 8px; margin-top: 20px;
+            justify-content: center; max-width: 580px;
+        }
+        .suggestion-chip {
+            padding: 8px 14px;
+            background: var(--sidebar);
+            border: 1px solid var(--border);
+            border-radius: 12px; cursor: pointer;
+            font-size: 0.82rem; color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .suggestion-chip:hover { border-color: var(--accent); color: var(--text); }
+
+        /* ═══ INPUT BAR ═══ */
+        .input-bar { padding: 14px 20px; border-top: 1px solid var(--border); }
+        .input-wrapper {
+            max-width: 800px; margin: 0 auto;
+            display: flex; gap: 8px; align-items: flex-end;
+        }
+        .input-wrapper textarea {
+            flex: 1; padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text);
+            font-size: 0.92rem; font-family: inherit;
+            resize: none; outline: none;
+            max-height: 120px; min-height: 44px;
+            transition: border-color 0.2s;
+        }
+        .input-wrapper textarea:focus { border-color: var(--accent); }
+        .btn-send {
+            width: 44px; height: 44px;
+            background: var(--accent); border: none;
+            border-radius: 12px; color: white;
+            font-size: 1.15rem; cursor: pointer;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .btn-send:hover { background: var(--accent-hover); }
+        .btn-send:disabled { background: var(--border); cursor: default; }
+        .input-options {
+            max-width: 800px; margin: 6px auto 0;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 0.75rem; color: var(--text-muted);
+        }
+        .input-options label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        .input-options input[type="checkbox"] { accent-color: var(--accent); }
+
+        /* ═══ TYPING ═══ */
+        .typing { color: var(--text-muted); font-style: italic; }
+        .typing .dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%  { content: ''; }  25% { content: '.'; }
+            50% { content: '..'; } 75% { content: '...'; }
+        }
+
+        /* ═══ SCROLLBAR ═══ */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* ═══ TOAST ═══ */
+        #toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--chat-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 0.85rem;
+            color: var(--text);
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+            max-width: 300px;
+        }
+        #toast.show { opacity: 1; }
+        #toast.success { border-color: var(--accent); color: var(--accent); }
+        #toast.error   { border-color: var(--danger); color: #fca5a5; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ LOGIN OVERLAY ═══ -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2>🏥 E-Health AI</h2>
+        <p class="login-sub">Đăng nhập để sử dụng đầy đủ tính năng AI tư vấn sức khỏe</p>
+
+        <div id="loginError"></div>
+
+        <div class="form-group">
+            <label>Tài khoản (username / email / phone)</label>
+            <input type="text" id="loginUser" placeholder="admin@ehealth.vn"
+                   onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="loginPass" placeholder="••••••••"
+                   onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+
+        <button class="btn-primary" id="btnLogin" onclick="doLogin()">🔐 Đăng nhập</button>
+        <button class="btn-ghost" onclick="enterGuestMode()">👤 Tiếp tục không đăng nhập (Guest)</button>
+    </div>
+</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h3>🏥 E-Health AI</h3>
+        <p>Tư vấn sức khỏe thông minh</p>
+    </div>
+
+    <!-- User / Guest badge -->
+    <div id="userBadge" class="user-badge" style="display:none;" title="Click để đăng xuất">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-info-text">
+            <div class="user-name" id="userName">—</div>
+            <div class="user-role" id="userRole">—</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Đăng xuất">⏏</button>
+    </div>
+
+    <div id="guestBadge" class="guest-badge" style="display:none;">
+        <span class="g-icon">👤</span>
+        <div class="g-text">
+            <div class="g-title">Chế độ Guest</div>
+            <div class="g-sub">Giới hạn 2000 tokens/phiên</div>
+        </div>
+        <button class="btn-login-small" onclick="showLoginOverlay()">Đăng nhập</button>
+    </div>
+
+    <button class="btn-new-chat" onclick="doNewChat()">＋ Phiên tư vấn mới</button>
+
+    <div class="session-list" id="sessionList">
+        <div class="session-list-label">Lịch sử phiên</div>
+    </div>
+
+    <div class="sidebar-footer" id="sidebarFooter">Chưa đăng nhập</div>
+</div>
+
+<!-- ═══ CHAT MAIN ═══ -->
+<div class="chat-main">
+    <!-- Chat header -->
+    <div class="chat-header" id="chatHeader" style="display:none;">
+        <div class="chat-header-left">
+            <h4 id="chatTitle">Phiên tư vấn</h4>
+            <p id="chatSubtitle">AI Tư Vấn Sức Khỏe</p>
+        </div>
+        <button class="btn-end-session" id="btnEndSession" onclick="doEndSession()">Kết thúc phiên ✓</button>
+    </div>
+
+    <!-- Welcome -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <h2>🤖 AI Tư Vấn Sức Khỏe</h2>
+        <p>Mô tả triệu chứng của bạn, AI sẽ phân tích và gợi ý chuyên khoa phù hợp.</p>
+        <div class="suggestion-chips">
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị ho khan 3 ngày, rát họng, không sốt')">🤧 Ho khan + rát họng</div>
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị đau đầu từ sáng, mức độ khoảng 5/10')">🤕 Đau đầu</div>
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị đau bụng bên phải dưới, kèm sốt nhẹ')">🤢 Đau bụng + sốt</div>
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị tăng huyết áp, đang dùng thuốc nhưng vẫn dao động')">💊 Tăng huyết áp</div>
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị đau ngực trái, khó thở khi gắng sức')">🚨 Đau ngực + khó thở</div>
+            <div class="suggestion-chip" onclick="quickStart('Tôi bị đái tháo đường type 2, đường huyết cao bất thường')">🩸 Đái tháo đường</div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-container" id="messagesContainer" style="display:none;"></div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+        <div class="input-wrapper">
+            <textarea id="messageInput" placeholder="Mô tả triệu chứng của bạn..." rows="1"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doSendMessage();}">
+            </textarea>
+            <button class="btn-send" id="btnSend" onclick="doSendMessage()">➤</button>
+        </div>
+        <div class="input-options">
+            <label>
+                <input type="checkbox" id="streamMode" checked>
+                Streaming (SSE)
+            </label>
+            <span id="tokenInfo" style="margin-left: auto;"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script type="module">
+    import { login, logout, isLoggedIn, getUserInfo, buildHeaders, getToken } from './auth.js';
+    import {
+        sendMessage, loadSessions, loadSession, resetSession, endSession,
+        setChatCallbacks, currentSessionId
+    } from './chat.js';
+
+    // ─── expose to onclick handlers ───────────────────────────
+    window.doLogin        = doLogin;
+    window.doLogout       = doLogout;
+    window.enterGuestMode = enterGuestMode;
+    window.showLoginOverlay = showLoginOverlay;
+    window.doNewChat      = doNewChat;
+    window.doSendMessage  = doSendMessage;
+    window.doEndSession   = doEndSession;
+    window.quickStart     = quickStart;
+
+    // ─── streaming state ──────────────────────────────────────
+    let streamingRow = null;
+    let streamingContentEl = null;
+
+    // ─── Chat callbacks ───────────────────────────────────────
+    setChatCallbacks({
+        newMessage: handleNewMessage,
+        typingStart: handleTypingStart,
+        typingEnd: handleTypingEnd,
+        sessionsChange: renderSessionList,
+        sessionError: (msg) => showToast(msg, 'error'),
+    });
+
+    // ─── LOGIN ────────────────────────────────────────────────
+    async function doLogin() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        if (!user || !pass) return showLoginError('Vui lòng nhập đầy đủ thông tin.');
+
+        const btn = document.getElementById('btnLogin');
+        btn.disabled = true;
+        btn.textContent = 'Đang đăng nhập...';
+        hideLoginError();
+
+        const result = await login(user, pass);
+        btn.disabled = false;
+        btn.textContent = '🔐 Đăng nhập';
+
+        if (result.success) {
+            hideLoginOverlay();
+            refreshUserUI();
+            await loadSessions();
+            showToast('Đăng nhập thành công!', 'success');
+        } else {
+            showLoginError(result.message);
+        }
+    }
+
+    function doLogout() {
+        if (!confirm('Bạn có chắc muốn đăng xuất?')) return;
+        logout();
+        resetSession();
+        refreshUserUI();
+        renderSessionList([]);
+        doNewChat();
+        showLoginOverlay();
+    }
+
+    function enterGuestMode() {
+        hideLoginOverlay();
+        refreshUserUI();
+        showToast('Chế độ Guest — giới hạn 2000 tokens/phiên', '');
+    }
+
+    function showLoginOverlay() {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+    }
+
+    function hideLoginOverlay() {
+        document.getElementById('loginOverlay').classList.add('hidden');
+    }
+
+    function showLoginError(msg) {
+        const el = document.getElementById('loginError');
+        el.textContent = '⚠️ ' + msg;
+        el.classList.add('show');
+    }
+    function hideLoginError() {
+        document.getElementById('loginError').classList.remove('show');
+    }
+
+    // ─── USER UI ─────────────────────────────────────────────
+    function refreshUserUI() {
+        const loggedIn = isLoggedIn();
+        const user = getUserInfo();
+
+        document.getElementById('userBadge').style.display  = loggedIn ? 'flex' : 'none';
+        document.getElementById('guestBadge').style.display = loggedIn ? 'none' : 'flex';
+
+        if (loggedIn && user) {
+            const name = user.full_name || user.username || user.email || 'User';
+            const role = user.role_name || user.role || 'Người dùng';
+            document.getElementById('userName').textContent   = name;
+            document.getElementById('userRole').textContent   = role;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('sidebarFooter').textContent = `Đăng nhập: ${name}`;
+        } else {
+            document.getElementById('sidebarFooter').textContent = 'Guest mode • Giới hạn token';
+        }
+    }
+
+    // ─── SESSIONS LIST ────────────────────────────────────────
+    function renderSessionList(sessions) {
+        const list = document.getElementById('sessionList');
+        list.innerHTML = '<div class="session-list-label">Lịch sử phiên</div>';
+
+        if (!sessions || sessions.length === 0) {
+            list.innerHTML += `<div style="padding:10px;font-size:0.75rem;color:var(--text-muted);text-align:center;">${isLoggedIn() ? 'Chưa có phiên nào' : 'Đăng nhập để xem lịch sử'}</div>`;
+            return;
+        }
+
+        // Lấy currentSessionId từ module chat (cần import thêm)
+        sessions.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'session-item';
+            div.innerHTML = `
+                <span class="session-code" title="${s.session_code}">${s.session_code}</span>
+                <span class="session-status status-${s.status}">${s.status === 'ACTIVE' ? 'Active' : s.status === 'COMPLETED' ? 'Done' : s.status}</span>
+            `;
+            div.onclick = () => doLoadSession(s.session_id);
+            list.appendChild(div);
+        });
+    }
+
+    async function doLoadSession(sessionId) {
+        const data = await loadSession(sessionId);
+        if (!data) return;
+
+        const { session, messages } = data;
+        showChatUI(session.session_code, session.status === 'ACTIVE');
+
+        const container = document.getElementById('messagesContainer');
+        container.innerHTML = '';
+
+        messages.forEach(msg => {
+            if (msg.role === 'USER') {
+                appendMessage('user', msg.content);
+            } else if (msg.role === 'ASSISTANT') {
+                appendMessage('assistant', msg.content, msg.analysis_data, msg.model_used, msg.response_time_ms);
+            }
+        });
+
+        scrollToBottom();
+        // Mark active
+        document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
+    }
+
+    // ─── CHAT UI ─────────────────────────────────────────────
+    function doNewChat() {
+        resetSession();
+        document.getElementById('welcomeScreen').style.display = 'flex';
+        document.getElementById('messagesContainer').style.display = 'none';
+        document.getElementById('messagesContainer').innerHTML = '';
+        document.getElementById('chatHeader').style.display = 'none';
+        document.getElementById('messageInput').value = '';
+        streamingRow = null;
+        streamingContentEl = null;
+    }
+
+    function showChatUI(title, showEnd = true) {
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('messagesContainer').style.display = 'block';
+        document.getElementById('chatHeader').style.display = 'flex';
+        document.getElementById('chatTitle').textContent = title || 'Phiên tư vấn';
+        document.getElementById('btnEndSession').style.display = showEnd ? 'inline-block' : 'none';
+    }
+
+    function quickStart(message) {
+        document.getElementById('messageInput').value = message;
+        doSendMessage();
+    }
+
+    async function doSendMessage() {
+        const input = document.getElementById('messageInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        input.style.height = 'auto';
+
+        setBtnLoading(true);
+        appendMessage('user', msg);
+        showChatUI('Đang tạo phiên...', false);
+
+        const useStream = document.getElementById('streamMode').checked;
+        await sendMessage(msg, useStream);
+        setBtnLoading(false);
+    }
+
+    async function doEndSession() {
+        if (!confirm('Kết thúc phiên tư vấn này?')) return;
+        await endSession();
+        document.getElementById('btnEndSession').style.display = 'none';
+        showToast('Phiên đã kết thúc.');
+    }
+
+    // ─── MESSAGE CALLBACKS ────────────────────────────────────
+    function handleNewMessage(type, content, analysis, model, ms, session) {
+        switch (type) {
+            case 'assistant':
+                appendMessage('assistant', content, analysis, model, ms);
+                if (session) showChatUI(session.session_code, session.status === 'ACTIVE');
+                break;
+            case 'stream-start':
+                // Tạo row mới cho streaming
+                streamingRow = createMessageRow('assistant');
+                streamingContentEl = streamingRow.querySelector('.msg-content');
+                streamingContentEl.textContent = '';
+                document.getElementById('messagesContainer').appendChild(streamingRow);
+                scrollToBottom();
+                break;
+            case 'stream-chunk':
+                if (streamingContentEl) {
+                    streamingContentEl.textContent += content;
+                    scrollToBottom();
+                }
+                break;
+            case 'stream-replace':
+                if (streamingContentEl) streamingContentEl.textContent = content;
+                break;
+            case 'stream-end':
+                if (streamingRow && analysis) {
+                    streamingRow.querySelector('.analysis-placeholder')?.remove();
+                    const el = renderAnalysis(analysis, model, ms);
+                    if (el) streamingRow.appendChild(el);
+                }
+                if (session) showChatUI(session.session_code, session.status === 'ACTIVE');
+                streamingRow = null;
+                streamingContentEl = null;
+                scrollToBottom();
+                break;
+        }
+    }
+
+    let typingEl = null;
+    function handleTypingStart(mode) {
+        if (mode === 'stream') return; // streaming tự tạo row
+        const row = document.createElement('div');
+        row.className = 'message-row assistant';
+        row.id = 'typing-indicator';
+        row.innerHTML = '<div class="role-label" style="color:var(--accent);">🤖 AI Tư vấn</div><div class="msg-content typing">Đang suy nghĩ<span class="dots"></span></div>';
+        document.getElementById('messagesContainer').appendChild(row);
+        scrollToBottom();
+        typingEl = row;
+    }
+
+    function handleTypingEnd() {
+        document.getElementById('typing-indicator')?.remove();
+        typingEl = null;
+    }
+
+    // ─── DOM HELPERS ──────────────────────────────────────────
+    function appendMessage(role, content, analysis, model, ms) {
+        const container = document.getElementById('messagesContainer');
+        const row = createMessageRow(role);
+        row.querySelector('.msg-content').textContent = content;
+        if (analysis) {
+            const el = renderAnalysis(analysis, model, ms);
+            if (el) row.appendChild(el);
+        }
+        container.appendChild(row);
+        scrollToBottom();
+    }
+
+    function createMessageRow(role) {
+        const row = document.createElement('div');
+        row.className = `message-row ${role}`;
+        row.innerHTML = `
+            <div class="role-label">${role === 'user' ? '👤 Bạn' : '🤖 AI Tư vấn'}</div>
+            <div class="msg-content"></div>
+            <div class="analysis-placeholder"></div>
+        `;
+        return row;
+    }
+
+    function renderAnalysis(a, model, ms) {
+        if (!a) return null;
+        const el = document.createElement('details');
+        el.className = 'analysis-card';
+        el.open = !!a.is_complete;
+
+        const tag = (val, map) => {
+            if (!val) return '<span class="tag tag-no">—</span>';
+            const cls = map[val.toLowerCase()] || 'tag-no';
+            return `<span class="tag ${cls}">${val}</span>`;
+        };
+        const sevTag  = tag(a.severity, { mild: 'tag-mild', moderate: 'tag-moderate', severe: 'tag-severe' });
+        const priTag  = tag(a.priority, { normal: 'tag-normal', soon: 'tag-soon', urgent: 'tag-urgent' });
+        const selfTag = a.can_self_treat ? '<span class="tag tag-yes">✅ Có</span>' : '<span class="tag tag-no">❌ Không</span>';
+        const docTag  = a.needs_doctor  ? '<span class="tag tag-severe">🔴 Cần khám</span>' : '<span class="tag tag-yes">Chưa cần</span>';
+
+        let html = `
+            <summary>📊 Phân Tích AI ${a.is_complete ? '— ✅ Hoàn tất' : '— ⏳ Đang thu thập'}</summary>
+            <div class="analysis-grid">
+                <div class="analysis-item"><div class="label">Mức độ</div><div class="value">${sevTag}</div></div>
+                <div class="analysis-item"><div class="label">Ưu tiên</div><div class="value">${priTag}</div></div>
+                <div class="analysis-item"><div class="label">Tự điều trị</div><div class="value">${selfTag}</div></div>
+                <div class="analysis-item"><div class="label">Cần bác sĩ</div><div class="value">${docTag}</div></div>
+        `;
+        if (a.suggested_specialty_name) {
+            html += `<div class="analysis-item full"><div class="label">Chuyên khoa gợi ý</div><div class="value">🏥 ${a.suggested_specialty_name}${a.suggested_specialty_code ? ' (' + a.suggested_specialty_code + ')' : ''}</div></div>`;
+        }
+        if (a.preliminary_assessment) {
+            html += `<div class="analysis-item full"><div class="label">Đánh giá sơ bộ</div><div class="value">${a.preliminary_assessment}</div></div>`;
+        }
+        if (a.reasoning) {
+            html += `<div class="analysis-item full"><div class="label">Lý do gợi ý</div><div class="value">${a.reasoning}</div></div>`;
+        }
+        html += '</div>';
+
+        if (a.symptoms_collected?.length) {
+            html += `<div class="section-label">TRIỆU CHỨNG THU THẬP:</div><div class="chips-row">${a.symptoms_collected.map(s => `<span class="chip">${s}</span>`).join('')}</div>`;
+        }
+        if (a.recommended_actions?.length) {
+            html += `<div class="section-label">GỢI Ý XỬ LÝ:</div><div class="chips-row">${a.recommended_actions.map(s => `<span class="chip">💊 ${s}</span>`).join('')}</div>`;
+        }
+        if (a.red_flags_detected?.length) {
+            html += `<div class="section-label">⚠️ RED FLAGS:</div><div class="chips-row">${a.red_flags_detected.map(s => `<span class="chip red">🚨 ${s}</span>`).join('')}</div>`;
+        }
+        if (model || ms) {
+            html += `<div class="analysis-meta">${model ? 'Model: ' + model : ''} ${ms ? '| ' + ms + 'ms' : ''}</div>`;
+        }
+        el.innerHTML = html;
+        return el;
+    }
+
+    function scrollToBottom() {
+        const c = document.getElementById('messagesContainer');
+        setTimeout(() => c.scrollTop = c.scrollHeight, 30);
+    }
+
+    function setBtnLoading(loading) {
+        const btn = document.getElementById('btnSend');
+        btn.disabled = loading;
+        btn.textContent = loading ? '⏳' : '➤';
+    }
+
+    // ─── TOAST ────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type = '') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `show ${type}`;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.className = '', 3000);
+    }
+
+    // ─── AUTO-RESIZE TEXTAREA ─────────────────────────────────
+    const textarea = document.getElementById('messageInput');
+    textarea.addEventListener('input', () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    });
+
+    // ─── INIT ─────────────────────────────────────────────────
+    (async function init() {
+        if (isLoggedIn()) {
+            hideLoginOverlay();
+            refreshUserUI();
+            await loadSessions();
+        } else {
+            // Hiển thị overlay ngay khi load
+        }
+    })();
+
+    // Lắng nghe sự kiện hết hạn token từ chat.js
+    window.addEventListener('auth-expired', () => {
+        showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'error');
+        logout();
+        resetSession();
+        refreshUserUI();
+        renderSessionList([]);
+        doNewChat();
+        showLoginOverlay();
+    });
+</script>
+</body>
+</html>

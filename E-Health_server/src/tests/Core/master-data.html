@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Danh mục nền — Core Test</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            font-size: 14px
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .header h1 {
+            font-size: 1.1rem
+        }
+
+        .header a {
+            color: #a8d8ea;
+            font-size: .82rem;
+            text-decoration: none
+        }
+
+        .auth-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .auth-bar input {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: .82rem
+        }
+
+        .auth-bar button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem
+        }
+
+        .btn-login {
+            background: #e94560;
+            color: #fff
+        }
+
+        .btn-logout {
+            background: #533483;
+            color: #fff
+        }
+
+        .user-txt {
+            color: #a8d8ea;
+            font-size: .82rem
+        }
+
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto
+        }
+
+        .tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: .15s
+        }
+
+        .tab:hover {
+            background: #f8fafc
+        }
+
+        .tab.active {
+            border-bottom-color: #0f3460;
+            color: #0f3460
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 16px auto;
+            padding: 0 14px
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+            margin-bottom: 14px
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: #0f3460
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            align-items: center
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .82rem
+        }
+
+        .btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .8rem;
+            transition: opacity .15s
+        }
+
+        .btn:hover {
+            opacity: .85
+        }
+
+        .btn-primary {
+            background: #0f3460;
+            color: #fff
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: #fff
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #000
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: #fff
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: .75rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .82rem
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        tr:hover {
+            background: #f8fafc
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 600
+        }
+
+        .b-active {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .b-inactive {
+            background: #e2e8f0;
+            color: #475569
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8
+        }
+
+        .form-group {
+            margin-bottom: 8px
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-bottom: 2px;
+            color: #475569
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: .83rem
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .toast {
+            padding: 9px 14px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: .82rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            animation: slideIn .3s ease;
+            min-width: 220px
+        }
+
+        .toast-success {
+            background: #10b981
+        }
+
+        .toast-error {
+            background: #ef4444
+        }
+
+        .toast-info {
+            background: #3b82f6
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        .pagination {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            font-size: .82rem
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            font-size: .8rem
+        }
+
+        .pagination button.active {
+            background: #0f3460;
+            color: #fff;
+            border-color: #0f3460
+        }
+
+        .pagination button:disabled {
+            opacity: .4;
+            cursor: default
+        }
+
+        .pagination span {
+            color: #64748b
+        }
+
+        .action-group {
+            display: flex;
+            gap: 4px
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 10px
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        .dg-item {
+            padding: 6px 0
+        }
+
+        .dg-label {
+            font-size: .75rem;
+            color: #64748b;
+            margin-bottom: 2px
+        }
+
+        .dg-value {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #1e293b
+        }
+
+        .success-card {
+            padding: 12px;
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            margin-top: 10px
+        }
+
+        .success-card .title {
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 6px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <h1>📋 Danh mục nền (Master Data)</h1><a href="index.html">← Quay về Hub</a>
+        </div>
+        <div>
+            <div class="auth-bar" id="authSection"><input type="text" id="loginEmail" placeholder="Email"
+                    value="admin@ehealth.com"><input type="password" id="loginPassword" placeholder="Mật khẩu"
+                    value="Admin@123"><button class="btn-login" onclick="handleLogin()">Đăng nhập</button></div>
+            <div class="auth-bar" id="userSection" style="display:none"><span class="user-txt"
+                    id="currentUser"></span><button class="btn-logout" onclick="handleLogout()">Đăng xuất</button></div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📁 Categories</div>
+        <div class="tab" onclick="switchTab(1)">➕ Tạo / ✏️ Sửa Category</div>
+        <div class="tab" onclick="switchTab(2)">📄 Items</div>
+        <div class="tab" onclick="switchTab(3)">➕ Tạo / ✏️ Sửa Item</div>
+        <div class="tab" onclick="switchTab(4)">📥 Import / 📤 Export</div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="main">
+        <!-- TAB 0: CATEGORIES LIST -->
+        <div class="panel active" id="p0">
+            <div class="card">
+                <h3>📁 Danh sách Nhóm danh mục</h3>
+                <div class="toolbar">
+                    <input id="catSearch" placeholder="🔍 Tìm tên/code..." style="flex:1">
+                    <input id="catLimit" type="number" value="10" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadCats(1)">Tải</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Mô tả</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="catTable"></tbody>
+                </table>
+                <div class="pagination" id="catPagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CREATE / EDIT CATEGORY -->
+        <div class="panel" id="p1">
+            <div class="card">
+                <h3>➕ Tạo nhóm danh mục mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Code *</label><input id="ccCode" placeholder="BLOOD_TYPE"></div>
+                    <div class="form-group"><label>Tên *</label><input id="ccName" placeholder="Nhóm máu"></div>
+                </div>
+                <div class="form-group"><label>Mô tả</label><input id="ccDesc" placeholder="Danh mục nhóm máu..."></div>
+                <button class="btn btn-success" onclick="createCat()">💾 Tạo</button>
+                <div id="ccDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Chi tiết / Sửa / Xóa Category</h3>
+                <div class="toolbar">
+                    <select id="catIdSelect" title="Chọn category" style="flex:1">
+                        <option value="">-- Chọn category --</option>
+                    </select>
+                    <button class="btn btn-info" onclick="getCat()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteCat()">🗑️ Xóa</button>
+                </div>
+                <div id="catDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên mới</label><input id="cuName"></div>
+                    <div class="form-group"><label>Mô tả mới</label><input id="cuDesc"></div>
+                </div>
+                <button class="btn btn-success" onclick="updateCat()">💾 Lưu</button>
+                <div id="cuDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ITEMS LIST -->
+        <div class="panel" id="p2">
+            <div class="card">
+                <h3>📄 Items theo Category</h3>
+                <div class="toolbar">
+                    <select id="itemCatCode" title="Chọn category" style="flex:1">
+                        <option value="">-- Chọn category --</option>
+                    </select>
+                    <input id="itemLimit" type="number" value="10" min="1" max="50" style="width:60px" title="Số dòng">
+                    <button class="btn btn-primary" onclick="loadItems()">Tải Items</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Giá trị</th>
+                            <th>Thứ tự</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemTable"></tbody>
+                </table>
+                <div class="pagination" id="itemPagination"></div>
+            </div>
+            <div class="card">
+                <h3>📋 Tất cả Items (Admin)</h3>
+                <div class="toolbar">
+                    <input id="itemSearch" placeholder="🔍 Tìm..." style="flex:1">
+                    <input id="allItemLimit" type="number" value="15" min="1" max="100" style="width:60px"
+                        title="Số dòng">
+                    <button class="btn btn-outline" onclick="loadAllItems()">Tải tất cả</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Tên</th>
+                            <th>Category</th>
+                            <th>Giá trị</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allItemsTable"></tbody>
+                </table>
+                <div class="pagination" id="allItemsPagination"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CREATE / EDIT ITEM -->
+        <div class="panel" id="p3">
+            <div class="card">
+                <h3>➕ Tạo Item mới</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Category *</label>
+                        <select id="icCat" title="Chọn category">
+                            <option value="">-- Chọn category --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Code *</label><input id="icCode" placeholder="A_POS"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Tên *</label><input id="icName" placeholder="Nhóm A+"></div>
+                    <div class="form-group"><label>Giá trị</label><input id="icVal" placeholder="A+"></div>
+                </div>
+                <div class="form-group"><label>Thứ tự</label><input id="icOrder" type="number" value="0"></div>
+                <button class="btn btn-success" onclick="createItem()">💾 Tạo Item</button>
+                <div id="icDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>✏️ Sửa / Vô hiệu hóa Item</h3>
+                <div class="toolbar">
+                    <input id="itemId" placeholder="Item ID" style="flex:1">
+                    <button class="btn btn-info" onclick="getItemDetail()">🔍 Xem</button>
+                    <button class="btn btn-danger" onclick="deleteItem()">🗑️ Vô hiệu hóa</button>
+                </div>
+                <div id="itemDetailInfo" style="display:none"></div>
+                <div class="form-row" style="margin-top:10px">
+                    <div class="form-group"><label>Tên mới</label><input id="iuName"></div>
+                    <div class="form-group"><label>Giá trị mới</label><input id="iuVal"></div>
+                </div>
+                <div class="form-group"><label>Thứ tự</label><input id="iuOrder" type="number"></div>
+                <button class="btn btn-success" onclick="updateItem()">💾 Lưu</button>
+                <div id="iuDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: IMPORT / EXPORT -->
+        <div class="panel" id="p4">
+            <div class="card">
+                <h3>📤 Export Categories</h3>
+                <button class="btn btn-primary" onclick="exportCats()">📤 Tải xuống Excel (Categories)</button>
+                <div id="exportCatDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📥 Import Categories</h3>
+                <div class="toolbar"><input id="catImportFile" type="file" accept=".xlsx,.xls"><button
+                        class="btn btn-success" onclick="importCats()">📥 Import</button></div>
+                <div id="catImportDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📤 Export Items</h3>
+                <div class="toolbar">
+                    <select id="exportItemCat" title="Chọn category" style="flex:1">
+                        <option value="">-- Chọn category --</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="exportItems()">📤 Tải xuống Excel</button>
+                </div>
+                <div id="exportItemDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+            <div class="card">
+                <h3>📥 Import Items</h3>
+                <div class="toolbar">
+                    <select id="iiCat" title="Chọn category" style="flex:1">
+                        <option value="">-- Chọn category --</option>
+                    </select>
+                    <input id="itemImportFile" type="file" accept=".xlsx,.xls">
+                    <button class="btn btn-success" onclick="importItems()">📥 Import</button>
+                </div>
+                <div id="itemImportDisplay" style="display:none;margin-top:10px"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://160.250.186.97:3000/api';
+        const TABS = ['p0', 'p1', 'p2', 'p3', 'p4'];
+        let token = null, catPage = 1;
+        let allItemsCache = [], allItemsCatItems = [];
+
+        function getAuth() { const d = localStorage.getItem('ehealth_auth'); return d ? JSON.parse(d) : null; }
+        function headers() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+        function toast(m, t = 'info') { const c = document.getElementById('toastContainer'), e = document.createElement('div'); e.className = `toast toast-${t}`; e.textContent = m; c.appendChild(e); setTimeout(() => e.remove(), 4000); }
+        function switchTab(i) { document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i)); TABS.forEach((id, j) => document.getElementById(id).classList.toggle('active', j === i)); }
+        function statusBadge(s) { const active = s === true || s === 'ACTIVE' || s === 'true'; return `<span class="badge ${active ? 'b-active' : 'b-inactive'}">${active ? 'Active' : 'Inactive'}</span>`; }
+
+        window.onload = () => { const a = getAuth(); if (a?.accessToken) { token = a.accessToken; showLoggedIn(a.user); loadCatDropdowns(); } };
+        async function handleLogin() {
+            const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+            try {
+                const r = await (await fetch(`${API}/auth/login/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p, clientInfo: { deviceId: 'HTML_TEST', deviceName: 'MasterData', userAgent: navigator.userAgent } }) })).json();
+                if (!r.success) throw new Error(r.message);
+                token = r.data.accessToken;
+                localStorage.setItem('ehealth_auth', JSON.stringify({ accessToken: r.data.accessToken, refreshToken: r.data.refreshToken, user: r.data.user }));
+                showLoggedIn(r.data.user); loadCatDropdowns();
+                toast('Đăng nhập thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+        function handleLogout() { token = null; localStorage.removeItem('ehealth_auth'); document.getElementById('authSection').style.display = 'flex'; document.getElementById('userSection').style.display = 'none'; toast('Đã đăng xuất'); }
+        function showLoggedIn(u) { document.getElementById('authSection').style.display = 'none'; document.getElementById('userSection').style.display = 'flex'; document.getElementById('currentUser').textContent = `👤 ${u?.name || u?.full_name || 'User'} (${u?.role || ''})`; }
+        async function tryRefreshToken() { const a = getAuth(); if (!a?.refreshToken) return false; try { const r = await (await fetch(`${API}/auth/refresh-token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: a.refreshToken }) })).json(); if (!r.success) return false; token = r.data.accessToken; a.accessToken = r.data.accessToken; if (r.data.refreshToken) a.refreshToken = r.data.refreshToken; localStorage.setItem('ehealth_auth', JSON.stringify(a)); toast('🔄 Token đã tự động refresh!', 'info'); return true; } catch { return false; } }
+        async function apiFetch(url, opts = {}) { if (!token) { toast('Đăng nhập trước', 'error'); throw new Error('No token'); } let r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); if (r.status === 401) { const ok = await tryRefreshToken(); if (ok) { r = await fetch(url, { ...opts, headers: { ...headers(), ...opts.headers } }); } else { handleLogout(); throw new Error('Phiên hết hạn.'); } } const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; }
+
+        function showSuccess(elId, title, msg) {
+            const el = document.getElementById(elId); el.style.display = 'block';
+            el.innerHTML = `<div class="success-card"><div class="title">✅ ${title}</div><div style="font-size:.83rem;color:#065f46">${msg}</div><div style="font-size:.78rem;color:#64748b;margin-top:4px">${new Date().toLocaleString('vi-VN')}</div></div>`;
+        }
+        function buildPagination(elId, cur, total, limit, fn) {
+            const el = document.getElementById(elId), tp = Math.ceil(total / limit) || 1;
+            let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>← Trước</button>`;
+            if (tp <= 7) { for (let i = 1; i <= tp; i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; }
+            else { h += `<button class="${cur === 1 ? 'active' : ''}" onclick="${fn}(1)">1</button>`; if (cur > 3) h += '<span>...</span>'; for (let i = Math.max(2, cur - 1); i <= Math.min(tp - 1, cur + 1); i++) h += `<button class="${i === cur ? 'active' : ''}" onclick="${fn}(${i})">${i}</button>`; if (cur < tp - 2) h += '<span>...</span>'; h += `<button class="${cur === tp ? 'active' : ''}" onclick="${fn}(${tp})">${tp}</button>`; }
+            h += `<button onclick="${fn}(${cur + 1})" ${cur >= tp ? 'disabled' : ''}>Sau →</button><span style="margin-left:8px">Tổng: ${total}</span>`;
+            el.innerHTML = h;
+        }
+
+        /** Load categories vào combo boxes */
+        async function loadCatDropdowns() {
+            try {
+                const r = await apiFetch(`${API}/master-data/categories?limit=100`);
+                const data = r.data;
+                const cats = data.categories || data.items || data.rows || (Array.isArray(data) ? data : []);
+                const selectors = ['catIdSelect', 'itemCatCode', 'icCat', 'exportItemCat', 'iiCat'];
+                selectors.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+                    sel.innerHTML = '<option value="">-- Chọn category --</option>';
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = (selId === 'catIdSelect') ? (c.master_data_categories_id || c.category_id || c.id) : (c.code || c.master_data_categories_id || c.id);
+                        opt.textContent = `${c.name || '-'} (${c.code || '-'})`;
+                        sel.appendChild(opt);
+                    });
+                });
+            } catch (e) { console.warn('Categories:', e.message); }
+        }
+
+        // ============ CATEGORIES ============
+        function fillCat(c) {
+            const id = c.master_data_categories_id || c.category_id || c.id || '';
+            document.getElementById('catIdSelect').value = id;
+            document.getElementById('cuName').value = c.name || '';
+            document.getElementById('cuDesc').value = c.description || '';
+        }
+        function viewCat(c) { fillCat(c); switchTab(1); getCat(); toast(`👁️ ${c.name || ''}`, 'info'); }
+        function editCat(c) { fillCat(c); switchTab(1); toast(`✏️ ${c.name || ''}`, 'info'); }
+        function viewCatItems(c) {
+            const sel = document.getElementById('itemCatCode');
+            sel.value = c.code;
+            switchTab(2);
+            loadItems();
+            toast(`📄 Items: ${c.name || c.code}`, 'info');
+        }
+
+        async function loadCats(page = 1) {
+            catPage = page;
+            const p = new URLSearchParams();
+            const s = document.getElementById('catSearch').value; if (s) p.set('search', s);
+            const limit = parseInt(document.getElementById('catLimit').value) || 10;
+            p.set('page', page); p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/master-data/categories?${p}`);
+                const data = res.data;
+                const list = data.categories || data.items || data.rows || (Array.isArray(data) ? data : []);
+                const tb = document.getElementById('catTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('catPagination').innerHTML = ''; return; }
+                list.forEach((c, i) => {
+                    const cj = JSON.stringify(c).replace(/'/g, "&#39;");
+                    const status = c.status || (c.is_active !== undefined ? (c.is_active ? 'ACTIVE' : 'INACTIVE') : '');
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${c.code || ''}</strong></td>
+                        <td>${c.name || ''}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${c.description || '-'}</td>
+                        <td>${statusBadge(status || 'ACTIVE')}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewCat(${cj})' title="Xem">👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editCat(${cj})' title="Sửa">✏️</button>
+                            <button class="btn btn-sm btn-primary" onclick='viewCatItems(${cj})' title="Xem Items">📄</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteCatById(${cj})' title="Xóa">🗑️</button>
+                        </div></td></tr>`;
+                });
+                const pg = data.pagination || {};
+                const totalItems = pg.total || data.total || list.length;
+                buildPagination('catPagination', page, totalItems, limit, 'loadCats');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function createCat() {
+            const code = document.getElementById('ccCode').value, name = document.getElementById('ccName').value;
+            if (!code || !name) return toast('Nhập Code và Tên', 'error');
+            try {
+                await apiFetch(`${API}/master-data/categories`, { method: 'POST', body: JSON.stringify({ code, name, description: document.getElementById('ccDesc').value }) });
+                showSuccess('ccDisplay', 'Tạo nhóm danh mục thành công!', `Code: <strong>${code}</strong>, Tên: <strong>${name}</strong>`);
+                toast('Tạo thành công!', 'success'); loadCatDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getCat() {
+            const id = document.getElementById('catIdSelect').value;
+            if (!id) return toast('Chọn category', 'error');
+            try {
+                const r = await apiFetch(`${API}/master-data/categories/${id}`);
+                const d = r.data || {};
+                fillCat(d);
+                const el = document.getElementById('catDetailInfo'); el.style.display = 'block';
+                el.innerHTML = `<div class="detail-card">
+                    <div style="font-size:1.05rem;font-weight:700;color:#0f3460">📁 ${d.name || '-'}</div>
+                    <div class="detail-grid">
+                        <div class="dg-item"><div class="dg-label">ID</div><div class="dg-value" style="font-size:.75rem">${d.master_data_categories_id || d.category_id || d.id || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Code</div><div class="dg-value">${d.code || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Mô tả</div><div class="dg-value">${d.description || '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Trạng thái</div><div class="dg-value">${statusBadge(d.status || d.is_active || 'ACTIVE')}</div></div>
+                        <div class="dg-item"><div class="dg-label">Tạo lúc</div><div class="dg-value">${d.created_at ? new Date(d.created_at).toLocaleString('vi-VN') : '-'}</div></div>
+                        <div class="dg-item"><div class="dg-label">Cập nhật</div><div class="dg-value">${d.updated_at ? new Date(d.updated_at).toLocaleString('vi-VN') : '-'}</div></div>
+                    </div></div>`;
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateCat() {
+            const id = document.getElementById('catIdSelect').value;
+            if (!id) return toast('Chọn category', 'error');
+            const b = {};
+            if (document.getElementById('cuName').value) b.name = document.getElementById('cuName').value;
+            if (document.getElementById('cuDesc').value) b.description = document.getElementById('cuDesc').value;
+            try {
+                await apiFetch(`${API}/master-data/categories/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('cuDisplay', 'Cập nhật thành công!', `Category <strong>${id}</strong> đã được cập nhật`);
+                toast('OK!', 'success'); loadCatDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteCat() {
+            const id = document.getElementById('catIdSelect').value;
+            if (!id) return toast('Chọn category', 'error');
+            if (!confirm('Xóa category này?')) return;
+            try { await apiFetch(`${API}/master-data/categories/${id}`, { method: 'DELETE' }); showSuccess('cuDisplay', 'Đã xóa!', `${id}`); toast('Đã xóa!', 'success'); loadCatDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteCatById(c) {
+            const id = c.master_data_categories_id || c.category_id || c.id || '';
+            if (!id || !confirm(`Xóa "${c.name || id}"?`)) return;
+            try { await apiFetch(`${API}/master-data/categories/${id}`, { method: 'DELETE' }); toast('Đã xóa!', 'success'); loadCats(catPage); loadCatDropdowns(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ ITEMS ============
+        function fillItem(item) {
+            document.getElementById('itemId').value = item.master_data_items_id || item.item_id || item.id || '';
+            document.getElementById('iuName').value = item.name || '';
+            document.getElementById('iuVal').value = item.value || '';
+            document.getElementById('iuOrder').value = item.sort_order || 0;
+        }
+        function viewItemRow(item) { fillItem(item); switchTab(3); toast(`👁️ ${item.name || ''}`, 'info'); }
+        function editItemRow(item) { fillItem(item); switchTab(3); toast(`✏️ ${item.name || ''}`, 'info'); }
+
+        async function loadItems(page = 1) {
+            const code = document.getElementById('itemCatCode').value;
+            if (!code) return toast('Chọn Category', 'error');
+            try {
+                const res = await apiFetch(`${API}/master-data/categories/${code}/items`);
+                const data = res.data;
+                allItemsCatItems = data.items || data.rows || (Array.isArray(data) ? data : []);
+                const limit = parseInt(document.getElementById('itemLimit').value) || 10;
+                const total = allItemsCatItems.length;
+                const tp = Math.ceil(total / limit) || 1;
+                if (page > tp) page = tp;
+                const start = (page - 1) * limit;
+                const pageData = allItemsCatItems.slice(start, start + limit);
+                const tb = document.getElementById('itemTable'); tb.innerHTML = '';
+                if (!pageData.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có item nào</td></tr>'; document.getElementById('itemPagination').innerHTML = ''; return; }
+                pageData.forEach((item, i) => {
+                    const ij = JSON.stringify(item).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${start + i + 1}</td>
+                        <td><strong>${item.code || ''}</strong></td>
+                        <td>${item.name || ''}</td>
+                        <td>${item.value || '-'}</td>
+                        <td>${item.sort_order ?? '-'}</td>
+                        <td>${statusBadge(item.is_active !== undefined ? item.is_active : 'ACTIVE')}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewItemRow(${ij})'>👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editItemRow(${ij})'>✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick='deleteItemById(${ij})'>🗑️</button>
+                        </div></td></tr>`;
+                });
+                buildPagination('itemPagination', page, total, limit, 'loadItems');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function loadAllItems(page = 1) {
+            const p = new URLSearchParams();
+            const s = document.getElementById('itemSearch').value; if (s) p.set('search', s);
+            p.set('page', page);
+            const limit = parseInt(document.getElementById('allItemLimit').value) || 15;
+            p.set('limit', limit);
+            try {
+                const res = await apiFetch(`${API}/master-data/items?${p}`);
+                const data = res.data;
+                const list = data.items || data.rows || (Array.isArray(data) ? data : []);
+                const tb = document.getElementById('allItemsTable'); tb.innerHTML = '';
+                if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>'; document.getElementById('allItemsPagination').innerHTML = ''; return; }
+                list.forEach((item, i) => {
+                    const ij = JSON.stringify(item).replace(/'/g, "&#39;");
+                    tb.innerHTML += `<tr>
+                        <td>${(page - 1) * limit + i + 1}</td>
+                        <td><strong>${item.code || ''}</strong></td>
+                        <td>${item.name || ''}</td>
+                        <td><span class="badge b-active">${item.category_code || item.category_name || '-'}</span></td>
+                        <td>${item.value || '-'}</td>
+                        <td>${statusBadge(item.is_active !== undefined ? item.is_active : 'ACTIVE')}</td>
+                        <td><div class="action-group">
+                            <button class="btn btn-sm btn-info" onclick='viewItemRow(${ij})'>👁️</button>
+                            <button class="btn btn-sm btn-outline" onclick='editItemRow(${ij})'>✏️</button>
+                        </div></td></tr>`;
+                });
+                const totalItems = data.pagination?.total || data.total || list.length;
+                buildPagination('allItemsPagination', page, totalItems, limit, 'loadAllItems');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function getItemDetail() {
+            const id = document.getElementById('itemId').value;
+            if (!id) return toast('Nhập Item ID', 'error');
+            const el = document.getElementById('itemDetailInfo');
+            el.style.display = 'block';
+            el.innerHTML = `<div class="detail-card"><div style="font-size:.85rem;color:#0f3460;font-weight:600">📄 Item ID: ${id}</div><div style="font-size:.8rem;color:#64748b;margin-top:4px">Dữ liệu đã fill vào form phía dưới</div></div>`;
+            toast('Dữ liệu đã fill vào form', 'info');
+        }
+
+        async function createItem() {
+            const cat = document.getElementById('icCat').value, code = document.getElementById('icCode').value, name = document.getElementById('icName').value;
+            if (!cat || !code || !name) return toast('Nhập Category, Code và Tên', 'error');
+            try {
+                await apiFetch(`${API}/master-data/categories/${cat}/items`, { method: 'POST', body: JSON.stringify({ code, name, value: document.getElementById('icVal').value, sort_order: parseInt(document.getElementById('icOrder').value) || 0 }) });
+                showSuccess('icDisplay', 'Tạo Item thành công!', `<strong>${name}</strong> (${code}) trong category <strong>${cat}</strong>`);
+                toast('Tạo item thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function updateItem() {
+            const id = document.getElementById('itemId').value;
+            if (!id) return toast('Nhập Item ID', 'error');
+            const b = {};
+            if (document.getElementById('iuName').value) b.name = document.getElementById('iuName').value;
+            if (document.getElementById('iuVal').value) b.value = document.getElementById('iuVal').value;
+            const o = document.getElementById('iuOrder').value;
+            if (o) b.sort_order = parseInt(o);
+            try {
+                await apiFetch(`${API}/master-data/items/${id}`, { method: 'PUT', body: JSON.stringify(b) });
+                showSuccess('iuDisplay', 'Cập nhật Item thành công!', `Item <strong>${id}</strong> đã được cập nhật`);
+                toast('OK!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteItem() {
+            const id = document.getElementById('itemId').value;
+            if (!id) return toast('Nhập Item ID', 'error');
+            if (!confirm('Vô hiệu hóa item này?')) return;
+            try { await apiFetch(`${API}/master-data/items/${id}`, { method: 'DELETE' }); showSuccess('iuDisplay', 'Đã vô hiệu hóa!', `Item <strong>${id}</strong>`); toast('Đã vô hiệu hóa!', 'success'); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function deleteItemById(item) {
+            const id = item.master_data_items_id || item.item_id || item.id || '';
+            if (!id || !confirm(`Vô hiệu hóa "${item.name || id}"?`)) return;
+            try { await apiFetch(`${API}/master-data/items/${id}`, { method: 'DELETE' }); toast('Đã vô hiệu hóa!', 'success'); loadItems(); } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ============ IMPORT / EXPORT ============
+        async function exportCats() {
+            try {
+                const r = await fetch(`${API}/master-data/categories/export`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!r.ok) throw new Error('Lỗi export');
+                const b = await r.blob();
+                const u = URL.createObjectURL(b);
+                Object.assign(document.createElement('a'), { href: u, download: 'categories.xlsx' }).click();
+                showSuccess('exportCatDisplay', 'Export thành công!', 'File categories.xlsx đã được tải xuống');
+                toast('Export thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function importCats() {
+            const f = document.getElementById('catImportFile').files[0];
+            if (!f) return toast('Chọn file', 'error');
+            const fd = new FormData(); fd.append('file', f);
+            try {
+                const r = await fetch(`${API}/master-data/categories/import`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+                const data = await r.json();
+                const el = document.getElementById('catImportDisplay'); el.style.display = 'block';
+                if (data.success) {
+                    const d = data.data || {};
+                    el.innerHTML = `<div class="success-card"><div class="title">✅ Import thành công!</div>
+                        <div style="font-size:.83rem;color:#065f46">
+                            Thành công: <strong>${d.successCount || d.created || 0}</strong> |
+                            Cập nhật: <strong>${d.updatedCount || d.updated || 0}</strong> |
+                            Lỗi: <strong>${d.errorCount || d.errors?.length || 0}</strong>
+                        </div></div>`;
+                } else { el.innerHTML = `<div style="padding:10px;background:#fee2e2;border-radius:8px;color:#991b1b;font-size:.83rem">❌ ${data.message || 'Import thất bại'}</div>`; }
+                toast('Import xong!', 'info'); loadCatDropdowns();
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function exportItems() {
+            const code = document.getElementById('exportItemCat').value;
+            if (!code) return toast('Chọn category', 'error');
+            try {
+                const r = await fetch(`${API}/master-data/categories/${code}/items/export`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!r.ok) throw new Error('Lỗi export');
+                const b = await r.blob();
+                Object.assign(document.createElement('a'), { href: URL.createObjectURL(b), download: `items_${code}.xlsx` }).click();
+                showSuccess('exportItemDisplay', 'Export thành công!', `File items_${code}.xlsx đã được tải xuống`);
+                toast('Export thành công!', 'success');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function importItems() {
+            const code = document.getElementById('iiCat').value;
+            if (!code) return toast('Chọn category', 'error');
+            const f = document.getElementById('itemImportFile').files[0];
+            if (!f) return toast('Chọn file', 'error');
+            const fd = new FormData(); fd.append('file', f);
+            try {
+                const r = await fetch(`${API}/master-data/categories/${code}/items/import`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+                const data = await r.json();
+                const el = document.getElementById('itemImportDisplay'); el.style.display = 'block';
+                if (data.success) {
+                    const d = data.data || {};
+                    el.innerHTML = `<div class="success-card"><div class="title">✅ Import Items thành công!</div>
+                        <div style="font-size:.83rem;color:#065f46">
+                            Thành công: <strong>${d.successCount || d.created || 0}</strong> |
+                            Cập nhật: <strong>${d.updatedCount || d.updated || 0}</strong> |
+                            Lỗi: <strong>${d.errorCount || d.errors?.length || 0}</strong>
+                        </div></div>`;
+                } else { el.innerHTML = `<div style="padding:10px;background:#fee2e2;border-radius:8px;color:#991b1b;font-size:.83rem">❌ ${data.message || 'Import thất bại'}</div>`; }
+                toast('Import xong!', 'info');
+            } catch (e) { toast(e.message, 'error'); }
+        }
+    </script>
+</body>
+
+</html>
