@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { dispensingService } from "@/services/dispensingService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AIDispensingAssistant } from "@/components/portal/ai";
 
 const MOCK_DISPENSING = {
     id: "DT003", patient: "Trần Văn Cường", patientId: "BN-24933", age: 58, gender: "Nam", phone: "0903 *** 789",
@@ -21,6 +23,7 @@ export default function DispensingPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const prescriptionId = searchParams.get("id");
+    usePageAIContext({ pageKey: 'dispensing' });
     const [checkedMeds, setCheckedMeds] = useState<Record<number, boolean>>({});
     const [patientConfirmed, setPatientConfirmed] = useState(false);
     const [dispensing, setDispensing] = useState(false);
@@ -112,6 +115,9 @@ export default function DispensingPage() {
                     </div>
                 )}
             </div>
+
+            {/* AI Drug Interaction Checker */}
+            <AIDispensingAssistant />
 
             {/* Medicine Checklist */}
             <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e] overflow-hidden">

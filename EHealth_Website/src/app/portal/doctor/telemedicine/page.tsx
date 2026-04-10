@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { telemedicineService } from "@/services/telemedicineService";
 import { useAuth } from "@/contexts/AuthContext";
 import { AITelemedicineBrief } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 const MOCK_SESSIONS = [
     { id: "TM001", patient: "Nguyễn Văn An", patientId: "BN001", doctor: "BS. Trần Văn Minh", date: "28/02/2025", time: "14:00", status: "scheduled", department: "Tim mạch", reason: "Tái khám tăng huyết áp" },
@@ -21,6 +22,7 @@ const statusMap: Record<string, { label: string; style: string }> = {
 };
 
 export default function TelemedicinePage() {
+    usePageAIContext({ pageKey: 'telemedicine' });
     const { user } = useAuth();
     const [sessions, setSessions] = useState(MOCK_SESSIONS);
     const [filter, setFilter] = useState("all");

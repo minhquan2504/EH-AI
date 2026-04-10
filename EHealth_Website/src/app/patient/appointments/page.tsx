@@ -7,6 +7,8 @@ import { AppointmentStatusBadge } from "@/components/patient/AppointmentStatusBa
 import { useAuth } from "@/contexts/AuthContext";
 import { getAppointments, type Appointment } from "@/services/appointmentService";
 import { filterMockAppointments } from "@/data/patient-mock";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AIAppointmentSuggester } from "@/components/portal/ai";
 
 const TABS = [
     { id: "upcoming", label: "Sắp tới", icon: "event_upcoming" },
@@ -15,6 +17,7 @@ const TABS = [
 ];
 
 export default function AppointmentsPage() {
+    usePageAIContext({ pageKey: 'appointments' });
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("upcoming");
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -72,6 +75,9 @@ export default function AppointmentsPage() {
                     Đặt lịch mới
                 </Link>
             </div>
+
+            {/* AI Appointment Suggester */}
+            <AIAppointmentSuggester />
 
             {/* Tabs */}
             <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">

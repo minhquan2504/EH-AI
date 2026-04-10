@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAppointments } from "@/services/appointmentService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 // Mock data
 const MOCK_APPOINTMENTS = [
@@ -24,6 +25,7 @@ const STATUS_MAP: Record<string, { label: string; class: string }> = {
 };
 
 export default function ReceptionistAppointments() {
+    usePageAIContext({ pageKey: 'appointments' });
     const router = useRouter();
     const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
 

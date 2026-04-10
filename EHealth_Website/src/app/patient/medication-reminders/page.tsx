@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 import { MOCK_PATIENT_PROFILES, type PatientProfile } from "@/data/patient-profiles-mock";
 import {
     MOCK_MEDICATION_REMINDERS, MOCK_MEDICATION_LOGS,
@@ -23,6 +24,7 @@ const COLORS = [
 ];
 
 export default function MedicationRemindersPage() {
+    usePageAIContext({ pageKey: 'medication-reminders' });
     const { user } = useAuth();
     const { showToast } = useToast();
 

@@ -88,20 +88,8 @@ export default function NewUserPage() {
                 phoneNumber: formData.phone,
                 role: formData.role,
                 password: formData.password,
-                gender: formData.gender || undefined,
-                dateOfBirth: formData.dateOfBirth || undefined,
-                address: formData.address || undefined,
-                ...(isCustomer ? {
-                    insuranceNumber: formData.insuranceNumber || undefined,
-                    bloodType: formData.bloodType || undefined,
-                    allergies: formData.allergies || undefined,
-                    emergencyContact: formData.emergencyContact || undefined,
-                    emergencyPhone: formData.emergencyPhone || undefined,
-                } : {
-                    department: formData.department || undefined,
-                    hospitalId: formData.hospitalId || undefined,
-                }),
-            });
+                gender: (formData.gender as 'MALE' | 'FEMALE') || undefined,
+            } as any);
             router.push("/admin/users");
         } catch {
             alert("Tạo tài khoản thất bại. Vui lòng thử lại.");

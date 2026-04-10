@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 import { MOCK_PATIENT_PROFILES, getProfilesByUserId, type PatientProfile } from "@/data/patient-profiles-mock";
 import {
     MOCK_VITAL_SIGNS, MOCK_HEALTH_TIMELINE, MOCK_MEDICAL_HISTORY,
@@ -19,6 +20,7 @@ const TABS = [
 ];
 
 export default function HealthRecordsPage() {
+    usePageAIContext({ pageKey: 'health-records' });
     const [activeTab, setActiveTab] = useState("overview");
     const [selectedProfileId, setSelectedProfileId] = useState("pp-001");
     const profiles = getProfilesByUserId("patient-001");

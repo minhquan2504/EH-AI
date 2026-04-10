@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { prescriptionService } from "@/services/prescriptionService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 type RxStatus = "pending" | "checking" | "dispensed";
 
@@ -26,6 +27,7 @@ const INTERACTION_WARNINGS: Record<string, { drugs: string[]; warning: string; s
 };
 
 export default function PharmacistPrescriptions() {
+    usePageAIContext({ pageKey: 'prescriptions' });
     const [rxs, setRxs] = useState(MOCK_RX);
 
     useEffect(() => {

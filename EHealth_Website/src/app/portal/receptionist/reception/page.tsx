@@ -7,6 +7,7 @@ import { createAppointment } from "@/services/appointmentService";
 import { getDepartments } from "@/services/departmentService";
 import { AITriageAssistant } from "@/components/portal/ai";
 import { AISchedulingOptimizer } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 const WIZARD_STEPS = [
     { key: "patient", label: "Hồ sơ BN", icon: "person_search" },
@@ -38,6 +39,7 @@ const MOCK_FOUND_PATIENT = {
 };
 
 export default function ReceptionPage() {
+    usePageAIContext({ pageKey: 'reception' });
     const router = useRouter();
     const [step, setStep] = useState(0);
     const [searchType, setSearchType] = useState<"phone" | "cccd" | "bhyt">("phone");
@@ -127,7 +129,7 @@ export default function ReceptionPage() {
             if (isNewPatient && newPatient.name && newPatient.phone) {
                 const created = await createPatient({
                     full_name: newPatient.name,
-                    date_of_birth: newPatient.age ? `${new Date().getFullYear() - parseInt(newPatient.age)}-01-01` : undefined,
+                    date_of_birth: newPatient.age ? `${new Date().getFullYear() - parseInt(newPatient.age)}-01-01` : '',
                     gender: newPatient.gender === "male" ? "MALE" : "FEMALE",
                     contact: { phone_number: newPatient.phone, street_address: newPatient.address },
                 });

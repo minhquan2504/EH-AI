@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { reportService } from "@/services/reportService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 /* ──────────────────────────────────────────────────────────────
    MOCK DATA — Đầy đủ theo Tháng / Quý / Năm
@@ -108,6 +109,7 @@ const SUMMARY = {
    COMPONENT
    ────────────────────────────────────────────────────────────── */
 export default function RevenuePage() {
+    usePageAIContext({ pageKey: 'statistics' });
     const [period, setPeriod] = useState<Period>("month");
     const [summary, setSummary] = useState(SUMMARY[period]);
     const [deptData, setDeptData] = useState(REVENUE_BY_DEPT[period]);

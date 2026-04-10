@@ -38,3 +38,5 @@ export { AIRevenueInsight } from './AIRevenueInsight';
 export { AICrossPatientInsight } from './AICrossPatientInsight';
 export { AISimilarCases } from './AISimilarCases';
 export { AIPatientPreAnalysis } from './AIPatientPreAnalysis';
+// Phase 5 components
+export { AIResultExplainer } from './AIResultExplainer';

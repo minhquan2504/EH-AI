@@ -10,10 +10,12 @@ import {
 import * as appointmentService from "@/services/appointmentService";
 import { useAuth } from "@/contexts/AuthContext";
 import { AIAppointmentTriage } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 type ViewMode = "day" | "week" | "month";
 
 export default function AppointmentsPage() {
+    usePageAIContext({ pageKey: 'appointments' });
     const router = useRouter();
     const { user } = useAuth();
     const [viewMode, setViewMode] = useState<ViewMode>("week");

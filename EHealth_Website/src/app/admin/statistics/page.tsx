@@ -7,6 +7,7 @@ import {
     HourlyVisitsChart,
 } from "@/components/admin/dashboard";
 import { reportService } from "@/services/reportService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 /* ──────────────────────────────────────────────────────────────
    MOCK DATA — Đầy đủ cho 3 kỳ: Tháng, Quý, Năm
@@ -103,6 +104,7 @@ type Period = "month" | "quarter" | "year";
    COMPONENT
    ────────────────────────────────────────────────────────────── */
 export default function StatisticsPage() {
+    usePageAIContext({ pageKey: 'statistics' });
     const [timeRange, setTimeRange] = useState<Period>("month");
 
     // Fetch real report data — overlay onto mock if available
@@ -193,6 +195,23 @@ export default function StatisticsPage() {
                         Xuất báo cáo
                     </button>
                 </div>
+            </div>
+
+            {/* ── AI Insight Card ── */}
+            <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-[#3C81C6]/5 to-indigo-500/5 border border-[#3C81C6]/20 dark:border-[#3C81C6]/30 rounded-2xl">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3C81C6] to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-[#3C81C6]/20">
+                    <span className="material-symbols-outlined text-white" style={{ fontSize: "20px" }}>auto_awesome</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-[#121417] dark:text-white flex items-center gap-1.5 mb-1">
+                        AI phân tích thống kê
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#3C81C6] text-white rounded-md">AI</span>
+                    </p>
+                    <p className="text-sm text-[#374151] dark:text-[#d1d5db] leading-relaxed">
+                        Doanh thu giảm 8% do giảm khám ngoại trú trong tháng. Khoa Tim mạch có tỷ lệ tái khám cao nhất (65%). <strong className="text-[#3C81C6]">Gợi ý:</strong> Tăng slot khám online và triển khai chương trình tái khám nhắc nhở tự động để cải thiện doanh thu.
+                    </p>
+                </div>
+                <span className="text-xs text-[#687582] whitespace-nowrap">AI phân tích</span>
             </div>
 
             {/* ── Summary Cards ── */}

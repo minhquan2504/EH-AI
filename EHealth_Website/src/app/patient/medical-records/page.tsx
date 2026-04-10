@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import axiosClient from "@/api/axiosClient";
 import { MEDICAL_RECORD_ENDPOINTS } from "@/api/endpoints";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AIResultExplainer } from "@/components/portal/ai";
 
 interface MedicalRecord {
     id: string;
@@ -16,6 +18,7 @@ interface MedicalRecord {
 }
 
 export default function MedicalRecordsPage() {
+    usePageAIContext({ pageKey: 'medical-records' });
     const { user } = useAuth();
     const [records, setRecords] = useState<MedicalRecord[]>([]);
     const [loading, setLoading] = useState(true);
@@ -45,6 +48,9 @@ export default function MedicalRecordsPage() {
                 <h1 className="text-2xl font-bold text-gray-900">Kết quả khám bệnh</h1>
                 <p className="text-sm text-gray-500 mt-0.5">Xem lại kết quả khám, đơn thuốc và xét nghiệm</p>
             </div>
+
+            {/* AI Result Explainer */}
+            <AIResultExplainer />
 
             {loading ? (
                 <div className="space-y-4">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { billingService } from "@/services/billingService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 const MOCK_INVOICES = [
     { id: "HD001", patient: "Nguyễn Văn An", patientId: "BN001", date: "28/02/2025", services: "Khám Tim mạch + Xét nghiệm máu", total: 850000, insurance: 680000, paid: 170000, status: "paid", method: "Tiền mặt" },
@@ -31,6 +32,7 @@ const statusMap: Record<string, { label: string; style: string }> = {
 };
 
 export default function BillingPage() {
+    usePageAIContext({ pageKey: 'billing' });
     const router = useRouter();
     const [invoices, setInvoices] = useState(MOCK_INVOICES);
     const [filter, setFilter] = useState("all");
