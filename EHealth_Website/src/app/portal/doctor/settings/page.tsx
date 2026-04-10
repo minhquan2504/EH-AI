@@ -7,8 +7,9 @@ import axiosClient from "@/api/axiosClient";
 import { PROFILE_ENDPOINTS } from "@/api/endpoints";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
+import { AISettingsTab } from "@/components/portal/ai";
 
-type SettingsTab = "profile" | "password" | "notifications" | "working_hours" | "appearance";
+type SettingsTab = "profile" | "password" | "notifications" | "working_hours" | "appearance" | "ai_preferences";
 
 export default function SettingsPage() {
     const { user, updateUser } = useAuth();
@@ -55,6 +56,7 @@ export default function SettingsPage() {
         { key: "notifications", label: UI_TEXT.DOCTOR.SETTINGS.NOTIFICATIONS, icon: "notifications" },
         { key: "working_hours", label: UI_TEXT.DOCTOR.SETTINGS.WORKING_HOURS, icon: "schedule" },
         { key: "appearance", label: UI_TEXT.DOCTOR.SETTINGS.APPEARANCE, icon: "palette" },
+        { key: "ai_preferences", label: "🤖 AI", icon: "smart_toy" },
     ];
 
     const handleSave = async () => {
@@ -545,6 +547,11 @@ export default function SettingsPage() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                        {activeTab === "ai_preferences" && (
+                            <div className="p-6">
+                                <AISettingsTab doctorId={user?.id} />
                             </div>
                         )}
                     </div>

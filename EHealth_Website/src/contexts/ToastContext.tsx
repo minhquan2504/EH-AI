@@ -15,7 +15,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 // Types
 // ============================================
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'ai';
 
 export interface Toast {
     id: string;
@@ -34,6 +34,7 @@ interface ToastContextType {
     error: (message: string) => void;
     warning: (message: string) => void;
     info: (message: string) => void;
+    aiAlert: (message: string) => void;
 }
 
 // ============================================
@@ -104,6 +105,10 @@ export function ToastProvider({ children }: ToastProviderProps) {
         showToast(message, 'info');
     }, [showToast]);
 
+    const aiAlert = useCallback((message: string) => {
+        showToast(message, 'ai', 8000);
+    }, [showToast]);
+
     // ============================================
     // Context Value
     // ============================================
@@ -115,6 +120,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         error,
         warning,
         info,
+        aiAlert,
     };
 
     return (
@@ -141,8 +147,24 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, onClose }: ToastItemProps) {
+    // AI type gets special treatment
+    if (toast.type === 'ai') {
+        return (
+            <div className="bg-violet-50 border border-violet-300 text-violet-800 dark:bg-violet-950/30 dark:border-violet-800 dark:text-violet-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[400px] animate-slide-in">
+                <span className="material-symbols-outlined text-[20px]">smart_toy</span>
+                <p className="flex-1 text-sm">{toast.message}</p>
+                <button
+                    onClick={onClose}
+                    className="p-1 hover:bg-violet-200/50 dark:hover:bg-violet-800/50 rounded transition-colors"
+                >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+        );
+    }
+
     // Màu sắc theo type
-    const colors = {
+    const colors: Record<Exclude<ToastType, 'ai'>, string> = {
         success: 'bg-green-500',
         error: 'bg-red-500',
         warning: 'bg-yellow-500',
@@ -150,19 +172,22 @@ function ToastItem({ toast, onClose }: ToastItemProps) {
     };
 
     // Icon theo type
-    const icons = {
+    const icons: Record<Exclude<ToastType, 'ai'>, string> = {
         success: 'check_circle',
         error: 'error',
         warning: 'warning',
         info: 'info',
     };
 
+    const colorClass = colors[toast.type as Exclude<ToastType, 'ai'>] ?? 'bg-blue-500';
+    const iconName = icons[toast.type as Exclude<ToastType, 'ai'>] ?? 'info';
+
     return (
         <div
-            className={`${colors[toast.type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[400px] animate-slide-in`}
+            className={`${colorClass} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-[400px] animate-slide-in`}
         >
             <span className="material-symbols-outlined text-[20px]">
-                {icons[toast.type]}
+                {iconName}
             </span>
             <p className="flex-1 text-sm">{toast.message}</p>
             <button

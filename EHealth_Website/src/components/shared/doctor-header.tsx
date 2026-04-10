@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ROUTES, DOCTOR_MENU_ITEMS } from "@/constants/routes";
 import { NotificationDropdown } from "./notification-dropdown";
 import { SettingsDropdown } from "./settings-dropdown";
+import AIStatusBadge from '@/components/ai-copilot/AIStatusBadge';
+import AISearchBar from '@/components/ai-copilot/AISearchBar';
+import AIGamificationBadge from '@/components/ai-copilot/AIGamificationBadge';
 
 export function DoctorHeader() {
     const pathname = usePathname();
@@ -67,20 +70,13 @@ export function DoctorHeader() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
-                {/* Search */}
-                <div className="relative w-72 hidden md:block">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="material-symbols-outlined text-[#94a3b8]">search</span>
-                    </div>
-                    <input
-                        className="block w-full pl-10 pr-3 py-2.5 border border-[#e5e7eb] dark:border-[#2d353e] rounded-lg leading-5 bg-[#f8fafc] dark:bg-gray-800 placeholder-[#94a3b8] focus:outline-none focus:bg-white dark:focus:bg-gray-700 focus:border-[#3C81C6] sm:text-sm dark:text-white"
-                        placeholder="Tìm kiếm bệnh nhân, hồ sơ..."
-                        type="text"
-                    />
-                </div>
+                {/* AI Search */}
+                <AISearchBar />
 
-                {/* Notifications & Settings */}
+                {/* AI Status + Notifications & Settings */}
                 <div className="flex items-center gap-1">
+                    <AIGamificationBadge />
+                    <AIStatusBadge />
                     <NotificationDropdown />
                     <SettingsDropdown />
                 </div>

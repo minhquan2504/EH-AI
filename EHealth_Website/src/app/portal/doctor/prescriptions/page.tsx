@@ -6,6 +6,8 @@ import { UI_TEXT } from "@/constants/ui-text";
 import { MOCK_DOCTOR_PRESCRIPTIONS } from "@/lib/mock-data/doctor";
 import { prescriptionService } from "@/services/prescriptionService";
 import { useAuth } from "@/contexts/AuthContext";
+import { AIPrescriptionAudit } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 type StatusFilter = "all" | "pending" | "completed" | "cancelled";
 
@@ -36,6 +38,7 @@ export default function PrescriptionsPage() {
             })
             .catch(() => {/* keep mock */});
     }, [user?.id]);
+    usePageAIContext({ pageKey: "prescriptions" });
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
     const [selectedMonth, setSelectedMonth] = useState("this_month");
@@ -172,6 +175,16 @@ export default function PrescriptionsPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* AI Prescription Safety Audit */}
+                <AIPrescriptionAudit
+                    prescriptions={prescriptions.map(p => ({
+                        id: p.id,
+                        patientName: p.patientName,
+                        medicines: p.medicines,
+                        status: p.status,
+                    }))}
+                />
 
                 {/* Stats Card */}
                 <div className="bg-gradient-to-r from-[#3C81C6] to-[#2a6da8] rounded-xl p-6 text-white shadow-lg shadow-blue-200 dark:shadow-none">

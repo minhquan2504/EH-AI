@@ -9,6 +9,7 @@ import {
 } from "@/lib/mock-data/doctor";
 import * as appointmentService from "@/services/appointmentService";
 import { useAuth } from "@/contexts/AuthContext";
+import { AIAppointmentTriage } from "@/components/portal/ai";
 
 type ViewMode = "day" | "week" | "month";
 
@@ -87,6 +88,19 @@ export default function AppointmentsPage() {
     return (
         <div className="p-6 md:p-8 h-full">
             <div className="max-w-7xl mx-auto flex flex-col h-full gap-6">
+                {/* AI Appointment Triage */}
+                {user?.id && (
+                    <AIAppointmentTriage
+                        pendingRequests={pendingRequests.map((r: any) => ({
+                            id: r.id,
+                            patientName: r.patientName ?? r.patient ?? "",
+                            reason: r.reason ?? r.visitReason ?? "",
+                            patientAge: r.patientAge ?? r.age,
+                        }))}
+                        doctorId={user.id}
+                    />
+                )}
+
                 {/* Page Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>

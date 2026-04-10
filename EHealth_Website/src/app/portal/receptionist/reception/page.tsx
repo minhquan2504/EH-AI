@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { getPatients, createPatient } from "@/services/patientService";
 import { createAppointment } from "@/services/appointmentService";
 import { getDepartments } from "@/services/departmentService";
+import { AITriageAssistant } from "@/components/portal/ai";
+import { AISchedulingOptimizer } from "@/components/portal/ai";
 
 const WIZARD_STEPS = [
     { key: "patient", label: "Hồ sơ BN", icon: "person_search" },
@@ -300,6 +302,10 @@ export default function ReceptionPage() {
                             <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="VD: Đau bụng, sốt cao, tái khám..."
                                 className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                         </div>
+                        {/* AI Triage */}
+                        {reason.trim().length >= 5 && (
+                            <AITriageAssistant reason={reason} />
+                        )}
                     </div>
                 )}
 
@@ -307,6 +313,8 @@ export default function ReceptionPage() {
                 {step === 2 && (
                     <div className="space-y-5">
                         <h2 className="text-base font-bold text-[#121417] dark:text-white">Chọn bác sĩ & khung giờ</h2>
+                        {/* AI Scheduling Optimizer */}
+                        <AISchedulingOptimizer department={dept?.name} reason={reason} />
                         {dept && (
                             <>
                                 <div>

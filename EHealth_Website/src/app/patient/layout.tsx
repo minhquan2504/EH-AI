@@ -3,6 +3,7 @@ import { PatientSidebar } from "@/components/shared/patient-sidebar";
 import { PatientHeader } from "@/components/shared/patient-header";
 import { AuthGuard } from "@/components/common/AuthGuard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
+import { PortalShell } from "@/components/shared/portal-shell";
 
 export const metadata: Metadata = {
     title: "Cổng bệnh nhân - EHealth",
@@ -17,13 +18,13 @@ export default function PatientPortalLayout({
     return (
         <AuthGuard allowedRoles={["patient"]}>
             <SidebarProvider>
-                <div className="bg-[#f6f7f8] dark:bg-[#13191f] text-[#121417] dark:text-gray-100 font-display overflow-hidden h-screen flex">
-                    <PatientSidebar />
-                    <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#f6f7f8] dark:bg-[#13191f] relative">
-                        <PatientHeader />
-                        <div className="flex-1 overflow-y-auto p-6">{children}</div>
-                    </main>
-                </div>
+                <PortalShell
+                    leftSidebar={<PatientSidebar />}
+                    header={<PatientHeader />}
+                    role="patient"
+                >
+                    <div className="p-6">{children}</div>
+                </PortalShell>
             </SidebarProvider>
         </AuthGuard>
     );

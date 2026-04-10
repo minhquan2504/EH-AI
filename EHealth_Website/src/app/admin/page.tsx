@@ -22,6 +22,8 @@ import {
     RevenueChart,
 } from "@/components/admin/dashboard";
 import { reportService } from "@/services/reportService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AISystemMonitor, AIPredictiveAnalytics, AIStaffingOptimizer, AIRevenueInsight } from "@/components/portal/ai";
 
 const ACTIVITY_FEED = [
     { time: "09:15", icon: "person_add", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/20", text: "BN Nguyễn Văn An vừa được tiếp nhận" },
@@ -41,6 +43,7 @@ const TOP_DISEASES = [
 ];
 
 export default function AdminDashboard() {
+    usePageAIContext({ pageKey: 'admin-dashboard' });
     const [stats, setStats] = useState(MOCK_DASHBOARD_STATS);
     const [patientGrowth, setPatientGrowth] = useState(MOCK_PATIENT_GROWTH);
     const [revenueData, setRevenueData] = useState(MOCK_REVENUE_DATA);
@@ -184,6 +187,14 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <UpcomingAppointments data={appointments} />
                 <MedicineAlerts data={medicineAlerts} />
+            </div>
+
+            {/* Row 6: AI Dashboard Widgets (2x2) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <AISystemMonitor />
+                <AIPredictiveAnalytics />
+                <AIStaffingOptimizer />
+                <AIRevenueInsight />
             </div>
         </div>
     );

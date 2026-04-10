@@ -9,9 +9,12 @@ import { filterMockAppointments } from "@/data/patient-mock";
 import { MOCK_INVOICES, MOCK_TELE_SESSIONS, MOCK_VITAL_SIGNS } from "@/data/patient-portal-mock";
 import { MOCK_MEDICATION_REMINDERS, MOCK_MEDICATION_LOGS, getTodaySchedule, getActiveReminders, type MedicationReminder, type MedicationLog } from "@/data/medication-reminders-mock";
 import { loadFromStorage, STORAGE_KEYS } from "@/utils/localStorage";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AISymptomCheckerWidget, AIHealthCoach, AIAppointmentSuggester } from "@/components/portal/ai";
 
 export default function PatientDashboard() {
     const { user } = useAuth();
+    usePageAIContext({ pageKey: 'patient-dashboard' });
     const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -262,6 +265,13 @@ export default function PatientDashboard() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* ===== AI WIDGETS ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <AISymptomCheckerWidget />
+                <AIHealthCoach />
+                <AIAppointmentSuggester />
             </div>
 
             {/* Health tips */}

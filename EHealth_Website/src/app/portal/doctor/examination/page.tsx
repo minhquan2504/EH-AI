@@ -8,6 +8,11 @@ import { emrService } from "@/services/emrService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { validateBloodPressure, validateVitalSign } from "@/utils/validation";
+import { AIVitalAlertBanner, AISymptomAnalyzer, AIDrugIntelligence, AIExaminationSummary } from "@/components/portal/ai";
+import AISimilarCases from "@/components/portal/ai/AISimilarCases";
+import type { AIAuditEntry } from "@/types";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { useAIAmbientEngine } from "@/hooks/useAIAmbientEngine";
 
 /* ──────── Steps Config ──────── */
 const STEPS = [
@@ -82,6 +87,73 @@ export default function ExaminationPage() {
     const [followUp, setFollowUp] = useState("");
     const [doctorNote, setDoctorNote] = useState("");
     const [sendToPharmacy, setSendToPharmacy] = useState(false);
+
+    // AI state
+    const [aiAuditEntries, setAiAuditEntries] = useState<AIAuditEntry[]>([]);
+    const [aiSuggestedLabs, setAiSuggestedLabs] = useState<string[]>([]);
+
+    const addAuditEntry = (step: string, aiAction: string, doctorResponse: AIAuditEntry["doctorResponse"]) => {
+        setAiAuditEntries(prev => [...prev, {
+            timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+            step, aiAction, doctorResponse, citations: [],
+        }]);
+    };
+
+    const handleAIDiagnosisSelect = (icdCodeVal: string, description: string) => {
+        setIcdCode(icdCodeVal);
+        setDiagnosis(description);
+        addAuditEntry("Triệu chứng", `AI gợi ý chẩn đoán: ${description} (${icdCodeVal})`, "accepted");
+    };
+
+    const handleAISuggestLabs = (labIds: string[]) => {
+        setAiSuggestedLabs(labIds);
+        setSelectedLabs(prev => Array.from(new Set([...prev, ...labIds])));
+        addAuditEntry("Triệu chứng", `AI gợi ý ${labIds.length} xét nghiệm`, "accepted");
+    };
+
+    const handleAISummaryGenerated = (summary: string) => {
+        setDoctorNote(summary);
+        addAuditEntry("Kết luận", "AI tạo tóm tắt SOAP", "accepted");
+    };
+
+    // AI Copilot context — push state to copilot sidebar
+    const { updateContext, registerAutoFill: regAutoFill } = usePageAIContext({
+        pageKey: "examination",
+        patientId: patientId || undefined,
+        patientName: patient?.fullName,
+        currentStep: STEPS[0].key,
+    });
+
+    // Ambient engine: proactively watches vitals/symptoms and pushes AI alerts
+    useAIAmbientEngine();
+
+    // Push form data changes to copilot (debounced)
+    useEffect(() => {
+        const t = setTimeout(() => {
+            updateContext({
+                currentStep: STEPS[activeStep].key,
+                formData: { vitals, symptoms, diagnosis, icdCode, meds: meds.map(m => m.name) },
+                patientId: patientId || undefined,
+                patientName: patient?.fullName,
+            });
+        }, 400);
+        return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeStep, vitals, symptoms, diagnosis, icdCode, meds.length]);
+
+    // Register auto-fill callback for copilot
+    useEffect(() => {
+        return regAutoFill((fields) => {
+            if (fields.diagnosis) setDiagnosis(fields.diagnosis as string);
+            if (fields.icdCode) setIcdCode(fields.icdCode as string);
+            if (fields.treatment) setTreatment(fields.treatment as string);
+            if (fields.selectedLabs && Array.isArray(fields.selectedLabs)) {
+                setSelectedLabs(prev => Array.from(new Set([...prev, ...(fields.selectedLabs as string[])])));
+            }
+            if (fields.doctorNote) setDoctorNote(fields.doctorNote as string);
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Computed
     const bmi = useMemo(() => {
@@ -380,6 +452,13 @@ export default function ExaminationPage() {
                                         <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{bmi}</p>
                                     </div>
                                 </div>
+
+                                {/* AI Vital Alert */}
+                                <AIVitalAlertBanner
+                                    vitals={vitals}
+                                    patientAge={patient.age}
+                                    onDismiss={() => addAuditEntry("Sinh hiệu", "AI cảnh báo sinh hiệu", "dismissed")}
+                                />
                             </div>
                         )}
 
@@ -451,6 +530,14 @@ export default function ExaminationPage() {
                                         <div><p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-0.5">Lý do khám (từ tiếp nhận)</p><p className="text-sm text-blue-800 dark:text-blue-300">{patient.reason}</p></div>
                                     </div>
                                 )}
+
+                                {/* AI Symptom Analyzer */}
+                                <AISymptomAnalyzer
+                                    symptoms={symptoms}
+                                    vitals={vitals}
+                                    onSelectDiagnosis={handleAIDiagnosisSelect}
+                                    onSuggestLabs={handleAISuggestLabs}
+                                />
                             </div>
                         )}
 
@@ -462,17 +549,25 @@ export default function ExaminationPage() {
                                     {LAB_TESTS.map((lab) => {
                                         const isSelected = selectedLabs.includes(lab.id);
                                         const hasResult = labResults[lab.id];
+                                        const isAISuggested = aiSuggestedLabs.includes(lab.id);
                                         return (
                                             <button key={lab.id} onClick={() => toggleLab(lab.id)}
                                                 className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all ${isSelected
                                                     ? "border-[#3C81C6] bg-[#3C81C6]/5 dark:bg-[#3C81C6]/10"
-                                                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                                                    : isAISuggested
+                                                        ? "border-violet-300 dark:border-violet-700 bg-violet-50/50 dark:bg-violet-900/10"
+                                                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                                                 }`}>
                                                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-[#3C81C6]/10 text-[#3C81C6]" : "bg-gray-100 dark:bg-gray-800 text-[#687582]"}`}>
                                                     <span className="material-symbols-outlined text-[20px]">{lab.icon}</span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className={`text-sm font-medium ${isSelected ? "text-[#3C81C6]" : "text-[#121417] dark:text-white"}`}>{lab.name}</p>
+                                                    <p className={`text-sm font-medium ${isSelected ? "text-[#3C81C6]" : "text-[#121417] dark:text-white"}`}>
+                                                        {lab.name}
+                                                        {isAISuggested && !isSelected && (
+                                                            <span className="ml-1.5 text-[10px] text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-900/30 px-1.5 py-0.5 rounded">🤖 AI gợi ý</span>
+                                                        )}
+                                                    </p>
                                                     <p className="text-xs text-[#687582] mt-0.5">{lab.category}</p>
                                                     {hasResult && (
                                                         <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
@@ -546,6 +641,9 @@ export default function ExaminationPage() {
                                     <textarea value={treatment} onChange={(e) => setTreatment(e.target.value)} rows={3} placeholder="Mô tả hướng xử lý..."
                                         className="w-full px-4 py-3 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 resize-none dark:text-white" />
                                 </div>
+
+                                {/* AI Similar Cases */}
+                                <AISimilarCases />
                             </div>
                         )}
 
@@ -594,6 +692,20 @@ export default function ExaminationPage() {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* AI Drug Intelligence */}
+                                {meds.length > 0 && (
+                                    <AIDrugIntelligence
+                                        drugs={meds.map(m => ({ name: m.name, dosage: m.dosage }))}
+                                        allergies={patient.allergies}
+                                        patientProfile={{
+                                            weight: vitals.weight ? parseFloat(vitals.weight) : undefined,
+                                            age: patient.age,
+                                        }}
+                                        diagnosis={diagnosis}
+                                        onDismiss={() => addAuditEntry("Kê đơn", "AI kiểm tra tương tác thuốc", "dismissed")}
+                                    />
+                                )}
                             </div>
                         )}
 
@@ -644,6 +756,18 @@ export default function ExaminationPage() {
                                             className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                     </div>
                                 </div>
+                                {/* AI Examination Summary & Audit Trail */}
+                                <AIExaminationSummary
+                                    vitals={vitals}
+                                    symptoms={symptoms}
+                                    diagnosis={diagnosis}
+                                    icdCode={icdCode}
+                                    treatment={treatment}
+                                    meds={meds}
+                                    auditEntries={aiAuditEntries}
+                                    onGenerateSummary={handleAISummaryGenerated}
+                                />
+
                                 {meds.length > 0 && (
                                     <label className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-200 dark:border-green-800 cursor-pointer">
                                         <input type="checkbox" checked={sendToPharmacy} onChange={(e) => setSendToPharmacy(e.target.checked)}

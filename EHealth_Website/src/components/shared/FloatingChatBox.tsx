@@ -56,6 +56,16 @@ function getNow() {
 
 export function FloatingChatBox() {
     const pathname = usePathname();
+
+    // Don't render on portal/admin/patient routes — they use AICopilotSidebar
+    const isPortalRoute = pathname.startsWith('/portal') || pathname.startsWith('/admin') || pathname.startsWith('/patient');
+    if (isPortalRoute) return null;
+
+    return <FloatingChatBoxInner />;
+}
+
+function FloatingChatBoxInner() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");

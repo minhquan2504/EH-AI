@@ -6,6 +6,8 @@ import { ROUTES } from "@/constants/routes";
 import { getAppointments } from "@/services/appointmentService";
 import { getPatients } from "@/services/patientService";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AIQueuePredictor } from "@/components/portal/ai";
 
 // ==================== MOCK DATA ====================
 const STATS = [
@@ -57,6 +59,7 @@ function getCurrentDate(): string {
 // ==================== PAGE ====================
 export default function ReceptionistDashboard() {
     const { user } = useAuth();
+    usePageAIContext({ pageKey: 'dashboard' });
     const [filter, setFilter] = useState<"all" | "waiting" | "checked_in">("all");
     const [appointments, setAppointments] = useState(APPOINTMENTS);
     const [stats, setStats] = useState(STATS);
@@ -147,6 +150,9 @@ export default function ReceptionistDashboard() {
                         </div>
                     ))}
                 </div>
+
+                {/* ===== AI QUEUE PREDICTOR ===== */}
+                <AIQueuePredictor />
 
                 {/* ===== MAIN GRID ===== */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { emrService } from "@/services/emrService";
 import { useAuth } from "@/contexts/AuthContext";
+import { AIRecordSummary, AITrendDetector } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 const MOCK_TIMELINE = [
     { id: 1, date: "20/02/2025", type: "visit", title: "Khám Tim mạch", doctor: "BS. Trần Văn Minh", department: "Tim mạch", details: "Tăng huyết áp - I10. Điều chỉnh liều thuốc.", vitalSigns: { bp: "140/90", hr: "78" } },
@@ -27,6 +29,7 @@ export default function MedicalRecordsPage() {
     const router = useRouter();
     const { user } = useAuth();
     const [filterType, setFilterType] = useState("all");
+    usePageAIContext({ pageKey: "medical-records", patientId: "BN001", patientName: "Nguyễn Văn An" });
     const [timeline, setTimeline] = useState(MOCK_TIMELINE);
 
     useEffect(() => {
@@ -86,6 +89,12 @@ export default function MedicalRecordsPage() {
                     </div>
                 ))}
             </div>
+
+            {/* AI Record Summary */}
+            <AIRecordSummary patientId="BN001" patientName="Nguyễn Văn An" />
+
+            {/* AI Trend Detector */}
+            <AITrendDetector patientId="BN001" />
 
             {/* Vital Signs Trend (simplified) */}
             <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e] p-5">

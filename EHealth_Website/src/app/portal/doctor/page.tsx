@@ -23,6 +23,9 @@ import {
     TodaySchedule,
     HospitalAnnouncements,
 } from "@/components/portal/dashboard";
+import { AIBriefingCard, AIPatientPreBrief } from "@/components/portal/ai";
+import AICrossPatientInsight from "@/components/portal/ai/AICrossPatientInsight";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 // ==================== QUICK ACTIONS ====================
 const QUICK_ACTIONS = [
@@ -39,6 +42,9 @@ export default function DoctorDashboard() {
     const schedule = MOCK_TODAY_SCHEDULE;
     const announcements = MOCK_HOSPITAL_ANNOUNCEMENTS;
     const [waitingPatients, setWaitingPatients] = useState(MOCK_PATIENT_QUEUE.filter((p) => p.status === "waiting"));
+
+    // AI Copilot context
+    usePageAIContext({ pageKey: "dashboard", extra: { doctorId: user?.id } });
 
     useEffect(() => {
         if (!user?.id) return;
@@ -79,6 +85,12 @@ export default function DoctorDashboard() {
 
                 {/* Stats Cards */}
                 <DoctorStatsCards stats={stats} />
+
+                {/* AI Daily Briefing */}
+                {user?.id && <AIBriefingCard doctorId={user.id} />}
+
+                {/* AI Cross-Patient Insight */}
+                <AICrossPatientInsight />
 
                 {/* Row 2: Bệnh nhân tiếp theo (4/12) + Biểu đồ tuần (5/12) + Quick Actions (3/12) */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -136,6 +148,11 @@ export default function DoctorDashboard() {
                                         <span className="text-xs text-red-600 dark:text-red-400 font-medium">Dị ứng: {nextPatient.allergies.join(", ")}</span>
                                     </div>
                                 )}
+
+                                {/* AI Patient Pre-Brief */}
+                                <div className="mb-4">
+                                    <AIPatientPreBrief patientId={nextPatient.id} patientName={nextPatient.fullName} />
+                                </div>
 
                                 {/* Action Button */}
                                 <Link

@@ -164,3 +164,146 @@ export interface ActivityLog extends BaseEntity {
     status: "SUCCESS" | "PENDING" | "FAILED";
     time: string;
 }
+
+// ============================================
+// AI types (Evidence-based RAG)
+// ============================================
+
+export interface Citation {
+    id: string;
+    source: string; // "ESC/ESH 2023", "DrugBank", "BYT QĐ 3192"
+    section: string; // "Section 7.3", "Table 12"
+    excerpt: string; // Trích đoạn gốc từ tài liệu
+    evidenceLevel: "A" | "B" | "C" | "BYT_VN" | "Expert";
+    reference: string; // DOI hoặc số hiệu văn bản
+}
+
+export interface AISuggestion {
+    id: string;
+    type: "diagnosis" | "drug" | "lab" | "vital_alert" | "summary" | "triage";
+    content: string;
+    confidence: number; // 0-100, dựa trên mức khớp với tài liệu
+    citations: Citation[];
+    metadata?: Record<string, unknown>;
+}
+
+export interface AIDiagnosisSuggestion extends AISuggestion {
+    type: "diagnosis";
+    icdCode: string;
+    icdDescription: string;
+    matchingSymptoms: string[];
+    excludeSymptoms: string[];
+    suggestedLabs: string[];
+    sensitivity?: number;
+    specificity?: number;
+}
+
+export interface AIDrugCheck {
+    drugA: string;
+    drugB: string;
+    severity: "safe" | "caution" | "serious" | "contraindicated";
+    detail: string;
+    citations: Citation[];
+}
+
+export interface AIDrugSuggestion extends AISuggestion {
+    type: "drug";
+    drugName: string;
+    standardDosage: string;
+    adjustedDosage?: string; // Dựa trên cân nặng/eGFR
+    interactions: AIDrugCheck[];
+    allergyCheck: { safe: boolean; conflictingAllergy?: string };
+}
+
+export interface AILabSuggestion {
+    id: string;
+    labName: string;
+    reason: string;
+    priority: "urgent" | "necessary" | "supplementary";
+    relatedDiagnosis: string;
+    citations: Citation[];
+}
+
+export interface AIVitalAlert {
+    id: string;
+    parameter: string; // "blood_pressure", "heart_rate", etc.
+    value: string;
+    severity: "critical" | "warning" | "info";
+    message: string;
+    clinicalAssessment: string[];
+    suggestedLabs: AILabSuggestion[];
+    citations: Citation[];
+    confidence: number;
+}
+
+export interface AIAuditEntry {
+    timestamp: string;
+    step: string;
+    aiAction: string;
+    citations: Citation[];
+    doctorResponse: "accepted" | "dismissed" | "modified";
+    notes?: string;
+}
+
+export interface AIPreferences {
+    enableExamSuggestions: boolean;
+    enableAutoSymptomAnalysis: boolean;
+    enableDashboardBriefing: boolean;
+    enableDrugInteractionCheck: boolean;
+    confidenceThreshold: number; // 0-100, default 60
+    enableSessionMemory: boolean;
+    enableAutoNotes: boolean;
+    // 100% AI Extreme
+    enableAmbientEngine: boolean;
+    enableProactiveAlerts: boolean;
+    enableVoiceInput: boolean;
+    enableSmartSearch: boolean;
+    enableAdaptiveUI: boolean;
+    enableGamification: boolean;
+}
+
+export interface AIBriefingItem {
+    id: string;
+    type: "allergy_warning" | "follow_up_alert" | "performance" | "anomaly";
+    severity: "critical" | "warning" | "info";
+    title: string;
+    content: string;
+    patientId?: string;
+    patientName?: string;
+    citations: Citation[];
+}
+
+export interface AIPatientSummary {
+    patientId: string;
+    patientName: string;
+    chronicConditions: string[];
+    currentMedications: { name: string; dosage: string; compliance?: string }[];
+    allergies: string[];
+    redFlags: string[];
+    recentDiagnosis?: { icdCode: string; description: string; date: string };
+    citations: Citation[];
+}
+
+export interface AITrendAlert {
+    id: string;
+    parameter: string; // "glucose", "blood_pressure", etc.
+    values: { date: string; value: number }[];
+    trend: "increasing" | "decreasing" | "fluctuating";
+    clinicalSignificance: string;
+    citations: Citation[];
+}
+
+export type AIAlertSeverity = 'critical' | 'warning' | 'info';
+
+export interface AIProactiveAlert {
+    id: string;
+    severity: AIAlertSeverity;
+    message: string;
+    icon: string;
+    sourceField?: string;
+    timestamp: number;
+    dismissed: boolean;
+    autoFillPayload?: Record<string, unknown>;
+}
+
+export type AIEngineStatus = 'idle' | 'analyzing' | 'alert' | 'ready';

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { aiService } from "@/services/aiService";
+import { AIContextSidebar, AILogViewer } from "@/components/portal/ai";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Message = { id: number; role: "user" | "ai"; text: string; time: string };
 
@@ -127,12 +129,18 @@ function getTime() {
 }
 
 export default function AIAssistantPage() {
+    const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([
         { id: 0, role: "ai", text: "Xin chào BS! Tôi là **EHealth AI Assistant** 🤖\n\nTôi có thể hỗ trợ bạn:\n- 🔍 Gợi ý chẩn đoán dựa trên triệu chứng\n- 💊 Tra cứu tương tác thuốc\n- 📋 Tìm phác đồ điều trị\n- 🔬 Phân tích kết quả xét nghiệm\n- 📖 Tra mã ICD-10\n\nHãy nhập câu hỏi hoặc chọn gợi ý bên dưới.", time: getTime() },
     ]);
     const [input, setInput] = useState("");
     const [typing, setTyping] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+
+    // AI Enhancement state
+    const [activeTab, setActiveTab] = useState<"chat" | "logs">("chat");
+    const [aiContext, setAiContext] = useState<{ patientId?: string; patientName?: string; patientInfo?: string; currentStep?: string } | null>(null);
+    const [deepAnalysisMode, setDeepAnalysisMode] = useState(false);
 
     useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
 
@@ -145,8 +153,21 @@ export default function AIAssistantPage() {
 
         let responseText = "";
         try {
-            const res = await aiService.chat({ message: text.trim() });
-            responseText = res?.data?.message || res?.data?.reply || res?.data?.content || getAIResponse(text);
+            const chatPayload: { message: string; context?: Record<string, unknown>; history?: { role: string; content: string }[] } = {
+                message: text.trim(),
+            };
+            // Add context if pinned
+            if (aiContext) {
+                chatPayload.context = { ...aiContext };
+            }
+            // Add history if deep analysis mode
+            if (deepAnalysisMode) {
+                chatPayload.history = messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text }));
+            }
+            const res = await aiService.chat(chatPayload);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data = res?.data as any;
+            responseText = data?.message || data?.reply || data?.content || getAIResponse(text);
         } catch {
             responseText = getAIResponse(text);
         }
@@ -157,7 +178,18 @@ export default function AIAssistantPage() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-64px)]">
+        <div className="flex h-[calc(100vh-64px)]">
+            {/* AI Context Sidebar */}
+            <AIContextSidebar
+                context={aiContext}
+                onUpdateContext={setAiContext}
+                onClearContext={() => setAiContext(null)}
+                deepAnalysisMode={deepAnalysisMode}
+                onToggleDeepAnalysis={setDeepAnalysisMode}
+            />
+
+            {/* Main Area */}
+            <div className="flex-1 flex flex-col min-w-0">
             {/* Header */}
             <div className="flex-shrink-0 px-6 py-4 border-b border-[#dde0e4] dark:border-[#2d353e] bg-white dark:bg-[#1e242b]">
                 <div className="flex items-center gap-3">
@@ -168,7 +200,16 @@ export default function AIAssistantPage() {
                         <h1 className="text-base font-bold text-[#121417] dark:text-white">EHealth AI Assistant</h1>
                         <p className="text-xs text-green-500 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500" />Đang hoạt động • GPT-Medical v2</p>
                     </div>
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto flex items-center gap-3">
+                        {/* Tabs */}
+                        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+                            <button onClick={() => setActiveTab("chat")} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "chat" ? "bg-white dark:bg-[#1e242b] text-[#3C81C6] shadow-sm" : "text-[#687582]"}`}>
+                                💬 Chat
+                            </button>
+                            <button onClick={() => setActiveTab("logs")} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "logs" ? "bg-white dark:bg-[#1e242b] text-[#3C81C6] shadow-sm" : "text-[#687582]"}`}>
+                                📋 Lịch sử AI
+                            </button>
+                        </div>
                         <button onClick={() => setMessages([messages[0]])} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-[#687582] transition-colors" title="Cuộc hội thoại mới">
                             <span className="material-symbols-outlined text-[20px]">add_comment</span>
                         </button>
@@ -176,6 +217,15 @@ export default function AIAssistantPage() {
                 </div>
             </div>
 
+            {/* Log Viewer Tab */}
+            {activeTab === "logs" && (
+                <div className="flex-1 overflow-y-auto">
+                    <AILogViewer doctorId={user?.id} visible={activeTab === "logs"} />
+                </div>
+            )}
+
+            {/* Chat Tab */}
+            {activeTab === "chat" && <>
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f8f9fa] dark:bg-[#13191f]">
                 {messages.map(msg => (
@@ -239,6 +289,8 @@ export default function AIAssistantPage() {
                     </button>
                 </div>
             </div>
+            </>}
+            </div>{/* End Main Area */}
         </div>
     );
 }

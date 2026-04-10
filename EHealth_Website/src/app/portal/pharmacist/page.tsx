@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { prescriptionService } from "@/services/prescriptionService";
 import { getDrugs } from "@/services/medicineService";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
+import { AIInventoryPredictor } from "@/components/portal/ai";
 
 // ==================== MOCK DATA ====================
 const STATS = [
@@ -55,6 +57,7 @@ function getCurrentDate(): string {
 // ==================== PAGE ====================
 export default function PharmacistDashboard() {
     const router = useRouter();
+    usePageAIContext({ pageKey: 'dashboard' });
     const [filter, setFilter] = useState<"all" | "urgent">("all");
     const [pendingPrescriptions, setPendingPrescriptions] = useState(PENDING_PRESCRIPTIONS);
     const [lowStock, setLowStock] = useState(LOW_STOCK);
@@ -134,6 +137,9 @@ export default function PharmacistDashboard() {
                         </div>
                     ))}
                 </div>
+
+                {/* ===== AI INVENTORY PREDICTOR ===== */}
+                <AIInventoryPredictor />
 
                 {/* ===== MAIN GRID ===== */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -9,6 +9,8 @@ import { MOCK_PATIENT_QUEUE, MOCK_QUEUE_STATS } from "@/lib/mock-data/doctor";
 import { getAppointments } from "@/services/appointmentService";
 import { appointmentStatusService } from "@/services/appointmentStatusService";
 import { useAuth } from "@/contexts/AuthContext";
+import { AIQueuePriority, AIPreExamHint } from "@/components/portal/ai";
+import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 type QueueStatus = "all" | "waiting" | "examining" | "completed" | "cancelled";
 
@@ -21,6 +23,12 @@ export default function QueuePage() {
     const [stats, setStats] = useState(MOCK_QUEUE_STATS);
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 10;
+
+    // AI state
+    const [preExamPatient, setPreExamPatient] = useState<{ id: string; name: string } | null>(null);
+
+    // AI Copilot context
+    usePageAIContext({ pageKey: "queue" });
 
     useEffect(() => {
         if (!user?.id) return;
@@ -174,12 +182,21 @@ export default function QueuePage() {
     };
 
     const handleStartExam = (patientId: string) => {
-        setQueue((prev) =>
-            prev.map((p) =>
-                p.id === patientId ? { ...p, status: "examining" } : p
-            )
-        );
-        router.push(`${ROUTES.PORTAL.DOCTOR.EXAMINATION}?patient=${patientId}`);
+        const patient = queue.find(p => p.id === patientId);
+        if (patient) {
+            setPreExamPatient({ id: patientId, name: patient.fullName });
+            // Delay navigation to show AI hint briefly
+            setTimeout(() => {
+                setQueue((prev) =>
+                    prev.map((p) =>
+                        p.id === patientId ? { ...p, status: "examining" } : p
+                    )
+                );
+                router.push(`${ROUTES.PORTAL.DOCTOR.EXAMINATION}?patient=${patientId}`);
+            }, 2000);
+        } else {
+            router.push(`${ROUTES.PORTAL.DOCTOR.EXAMINATION}?patient=${patientId}`);
+        }
     };
 
     return (
@@ -297,6 +314,29 @@ export default function QueuePage() {
                         </div>
                     </div>
                 </div>
+
+                {/* AI Queue Priority & Anomaly Alerts */}
+                <AIQueuePriority
+                    queue={queue.map(p => ({
+                        id: p.id,
+                        fullName: p.fullName,
+                        age: p.age,
+                        reason: p.reason,
+                        status: p.status,
+                        waitTime: (p as any).waitTime,
+                        checkInTime: p.checkInTime,
+                    }))}
+                />
+
+                {/* AI Pre-Exam Hint */}
+                {preExamPatient && (
+                    <AIPreExamHint
+                        patientId={preExamPatient.id}
+                        patientName={preExamPatient.name}
+                        visible={!!preExamPatient}
+                        onClose={() => setPreExamPatient(null)}
+                    />
+                )}
 
                 {/* Queue Table */}
                 <div className="bg-white dark:bg-[#1e242b] border border-[#e5e7eb] dark:border-[#2d353e] rounded-xl shadow-sm">

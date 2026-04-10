@@ -494,6 +494,7 @@ export const AI_ENDPOINTS = {
     SUMMARIZE_RECORD: (recordId: string) => `/api/ai/summarize/${recordId}`,
     ANALYZE: '/api/ai/analyze',
     LOGS: '/api/ai/logs',
+    PREFERENCES: (doctorId: string) => `/api/ai/preferences/${doctorId}`,
 };
 
 // ✅ Corrected: /api/telemedicine không tồn tại — dùng /api/teleconsultation
