@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { validateBloodPressure, validateVitalSign } from "@/utils/validation";
 import { AIVitalAlertBanner, AISymptomAnalyzer, AIDrugIntelligence, AIExaminationSummary } from "@/components/portal/ai";
+import { AIPatientPreAnalysis } from "@/components/portal/ai/AIPatientPreAnalysis";
 import AISimilarCases from "@/components/portal/ai/AISimilarCases";
 import type { AIAuditEntry } from "@/types";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
@@ -375,6 +376,27 @@ export default function ExaminationPage() {
                         </div>
                     )}
                 </div>
+
+                {/* AI Patient Pre-Analysis — Auto-load when patient selected */}
+                <AIPatientPreAnalysis
+                    patientId={patient.id}
+                    patientName={patient.fullName}
+                    patientAge={patient.age}
+                    patientGender={patient.gender}
+                    allergies={patient.allergies}
+                    medicalHistory={patient.medicalHistory}
+                    reason={patient.reason || ''}
+                    onApplyDiagnosis={handleAIDiagnosisSelect}
+                    onApplyLabs={handleAISuggestLabs}
+                    onApplyMedication={(med) => {
+                        setMeds(prev => [...prev, med]);
+                        addAuditEntry("AI Pre-Analysis", `AI gợi ý thuốc: ${med.name}`, "accepted");
+                    }}
+                    onApplyVitals={(v) => {
+                        setVitals(prev => ({ ...prev, ...v }));
+                        addAuditEntry("AI Pre-Analysis", "AI điền sinh hiệu từ lần khám trước", "accepted");
+                    }}
+                />
 
                 {/* Steps Progress */}
                 <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e] px-5 py-4">

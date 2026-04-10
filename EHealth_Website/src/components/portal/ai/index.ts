@@ -37,3 +37,4 @@ export { AIRevenueInsight } from './AIRevenueInsight';
 // Phase 4 components
 export { AICrossPatientInsight } from './AICrossPatientInsight';
 export { AISimilarCases } from './AISimilarCases';
+export { AIPatientPreAnalysis } from './AIPatientPreAnalysis';
