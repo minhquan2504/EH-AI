@@ -3,27 +3,29 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createAppointment } from "@/services/appointmentService";
+import { createAppointment, doctorAvailabilityService } from "@/services/appointmentService";
 import { getDepartments } from "@/services/departmentService";
 import { staffService } from "@/services/staffService";
-
-const FALLBACK_DEPTS = ["Nội tổng quát", "Ngoại tổng quát", "Nhi khoa", "Sản phụ khoa", "Tim mạch", "Thần kinh", "Da liễu", "Mắt", "Tai mũi họng", "Cấp cứu"];
-const FALLBACK_DOCTORS: Record<string, string[]> = {
-    "Nội tổng quát": ["BS. Nguyễn Văn An", "BS. Trần Bình"], "Ngoại tổng quát": ["BS. Lê Cường"],
-    "Nhi khoa": ["BS. Phạm Dung"], "Tim mạch": ["BS. Hoàng Em", "BS. Ngô Đức"],
-    "Da liễu": ["BS. Phạm Hoa"], "Cấp cứu": ["BS. Lý Thanh"],
-};
+import { getPatients } from "@/services/patientService";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function NewAppointmentPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [saving, setSaving] = useState(false);
-    const [deptList, setDeptList] = useState(FALLBACK_DEPTS);
+    const [deptList, setDeptList] = useState<string[]>([]);
     const [deptIdMap, setDeptIdMap] = useState<Record<string, string>>({});
     const [doctorsByDept, setDoctorsByDept] = useState<Record<string, { id: string; name: string }[]>>({});
     const [formData, setFormData] = useState({
-        patientName: "", phone: "", department: "", doctor: "",
+        patientName: "", phone: "", patientId: "", department: "", doctor: "", doctorId: "",
         date: "", time: "", type: "Khám mới", note: "",
     });
+    // Patient search
+    const [patientSearch, setPatientSearch] = useState("");
+    const [searching, setSearching] = useState(false);
+    const [foundPatients, setFoundPatients] = useState<any[]>([]);
+    // Availability slots
+    const [availableSlots, setAvailableSlots] = useState<string[]>([]);
 
     useEffect(() => {
         getDepartments()
@@ -53,10 +55,62 @@ export default function NewAppointmentPage() {
             .catch(() => {});
     }, []);
 
+    // Load available slots when doctor or date changes
+    useEffect(() => {
+        const doctorId = formData.doctorId || user?.id;
+        if (doctorId && formData.date) {
+            doctorAvailabilityService.getSlots({ doctorId, date: formData.date })
+                .then((slots: any[]) => {
+                    if (slots.length > 0) {
+                        const times = slots
+                            .filter((s: any) => s.available !== false)
+                            .map((s: any) => s.startTime ?? s.time ?? "")
+                            .filter(Boolean);
+                        setAvailableSlots(times);
+                    } else {
+                        setAvailableSlots([]);
+                    }
+                })
+                .catch(() => setAvailableSlots([]));
+        }
+    }, [formData.doctorId, formData.date, user?.id]);
+
+    const handlePatientSearch = async () => {
+        if (!patientSearch.trim()) return;
+        setSearching(true);
+        try {
+            const res = await getPatients({ search: patientSearch.trim(), limit: 5 });
+            const items: any[] = (res as any)?.data?.data ?? (res as any)?.data ?? [];
+            setFoundPatients(Array.isArray(items) ? items : []);
+        } catch {
+            setFoundPatients([]);
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const selectPatient = (p: any) => {
+        setFormData(prev => ({
+            ...prev,
+            patientId: p.id ?? "",
+            patientName: p.full_name ?? p.fullName ?? p.name ?? "",
+            phone: p.contact?.phone_number ?? p.phone ?? "",
+        }));
+        setFoundPatients([]);
+        setPatientSearch("");
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        if (name === "department") setFormData((prev) => ({ ...prev, doctor: "" }));
+        if (name === "department") {
+            setFormData((prev) => ({ ...prev, department: value, doctor: "", doctorId: "" }));
+        } else if (name === "doctor") {
+            const docs = availableDoctorsApi.length > 0 ? availableDoctorsApi : [];
+            const doc = docs.find(d => d.name === value);
+            setFormData((prev) => ({ ...prev, doctor: value, doctorId: doc?.id ?? "" }));
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -67,16 +121,18 @@ export default function NewAppointmentPage() {
         setSaving(true);
         try {
             await createAppointment({
+                patientId: formData.patientId || undefined,
                 patientName: formData.patientName,
                 phone: formData.phone,
                 departmentId: deptIdMap[formData.department] ?? undefined,
-                departmentName: formData.department,
+                departmentName: formData.department || undefined,
+                doctorId: formData.doctorId || user?.id || undefined,
                 doctorName: formData.doctor || undefined,
                 date: formData.date,
                 time: formData.time,
-                type: formData.type,
+                type: formData.type === "Khám mới" ? "first_visit" : formData.type === "Tái khám" ? "re_examination" : formData.type,
                 note: formData.note || undefined,
-            } as any);
+            });
             router.push("/portal/doctor/appointments");
         } catch {
             alert("Tạo lịch hẹn thất bại. Vui lòng thử lại.");
@@ -86,8 +142,7 @@ export default function NewAppointmentPage() {
     };
 
     const availableDoctorsApi = formData.department ? (doctorsByDept[formData.department] || []) : [];
-    const availableDoctorsFallback = formData.department ? (FALLBACK_DOCTORS[formData.department] || []) : [];
-    const availableDoctors = availableDoctorsApi.length > 0 ? availableDoctorsApi.map((d) => d.name) : availableDoctorsFallback;
+    const availableDoctors = availableDoctorsApi.map((d) => d.name);
 
     return (
         <div className="space-y-6">
@@ -108,7 +163,33 @@ export default function NewAppointmentPage() {
                         <span className="material-symbols-outlined text-[#3C81C6]">calendar_add_on</span> Tạo lịch hẹn mới
                     </h1>
                 </div>
-                <form onSubmit={handleSubmit} className="p-6">
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {/* Patient search */}
+                    <div>
+                        <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Tìm bệnh nhân</label>
+                        <div className="flex gap-2">
+                            <input type="text" value={patientSearch} onChange={e => setPatientSearch(e.target.value)}
+                                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handlePatientSearch())}
+                                placeholder="Tên, SĐT hoặc mã BN..."
+                                className="flex-1 py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
+                            <button type="button" onClick={handlePatientSearch} disabled={searching}
+                                className="px-4 py-2.5 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm transition-colors disabled:opacity-60">
+                                {searching ? "..." : "Tìm"}
+                            </button>
+                        </div>
+                        {foundPatients.length > 0 && (
+                            <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+                                {foundPatients.map((p, i) => (
+                                    <button key={p.id ?? i} type="button" onClick={() => selectPatient(p)}
+                                        className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors">
+                                        <p className="text-sm font-medium text-[#121417] dark:text-white">{p.full_name ?? p.name ?? "—"}</p>
+                                        <p className="text-xs text-[#687582]">{p.contact?.phone_number ?? p.phone ?? ""} • {p.patient_code ?? p.id}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <Inp label="Tên bệnh nhân *" name="patientName" value={formData.patientName} onChange={handleChange} placeholder="Nhập họ tên" icon="person" />
                         <Inp label="Số điện thoại *" name="phone" value={formData.phone} onChange={handleChange} placeholder="0901 234 567" icon="phone" />
@@ -127,7 +208,21 @@ export default function NewAppointmentPage() {
                             </select>
                         </div>
                         <Inp label="Ngày hẹn *" name="date" type="date" value={formData.date} onChange={handleChange} icon="event" />
-                        <Inp label="Giờ hẹn *" name="time" type="time" value={formData.time} onChange={handleChange} icon="schedule" />
+                        {availableSlots.length > 0 ? (
+                            <div>
+                                <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Giờ hẹn * <span className="text-xs text-emerald-600">(slot trống)</span></label>
+                                <div className="flex flex-wrap gap-2">
+                                    {availableSlots.map(t => (
+                                        <button key={t} type="button" onClick={() => setFormData(p => ({ ...p, time: t }))}
+                                            className={`px-3 py-2 rounded-xl text-sm font-medium border transition-all ${formData.time === t ? "bg-[#3C81C6] text-white border-[#3C81C6]" : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:border-[#3C81C6]"}`}>
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <Inp label="Giờ hẹn *" name="time" type="time" value={formData.time} onChange={handleChange} icon="schedule" />
+                        )}
                         <div>
                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Loại khám</label>
                             <div className="flex gap-2">

@@ -32,28 +32,14 @@ interface StockHistory {
     user: string;
 }
 
-const MOCK_BATCH: BatchDetail = {
-    id: "1", drugName: "Amoxicillin 500mg", drugCode: "AMX-500",
-    category: "Kháng sinh", lotNumber: "LOT-2026-0312", expiryDate: "2027-03-10",
-    currentStock: 45, minStock: 100, unit: "Viên",
-    warehouseName: "Kho chính", supplier: "Dược Hậu Giang",
-    importDate: "2026-02-20", unitPrice: 8500, manufacturer: "Dược Hậu Giang",
-};
-
-const MOCK_HISTORY: StockHistory[] = [
-    { id: "1", date: "2026-03-10", type: "export", quantity: 50, refCode: "XK-2026-005", note: "Cấp phát Khoa Nội", user: "DS. Trần Dược" },
-    { id: "2", date: "2026-03-05", type: "export", quantity: 100, refCode: "XK-2026-003", note: "Cấp phát Khoa Nhi", user: "DS. Lý Minh" },
-    { id: "3", date: "2026-02-28", type: "export", quantity: 55, refCode: "XK-2026-001", note: "Cấp phát theo đơn", user: "DS. Trần Dược" },
-    { id: "4", date: "2026-02-20", type: "import", quantity: 500, refCode: "NK-2026-001", note: "Đợt nhập tháng 2", user: "Admin" },
-];
 
 export default function StockBatchDetailPage() {
     const router = useRouter();
     const params = useParams();
     const batchId = params.id as string;
 
-    const [batch, setBatch] = useState<BatchDetail>(MOCK_BATCH);
-    const [history, setHistory] = useState<StockHistory[]>(MOCK_HISTORY);
+    const [batch, setBatch] = useState<BatchDetail | null>(null);
+    const [history, setHistory] = useState<StockHistory[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -63,25 +49,37 @@ export default function StockBatchDetailPage() {
                 if (res) {
                     setBatch({
                         id: res.id ?? batchId,
-                        drugName: res.drug_name ?? res.drugName ?? res.drug?.name ?? MOCK_BATCH.drugName,
-                        drugCode: res.drug_code ?? res.drugCode ?? res.drug?.code ?? MOCK_BATCH.drugCode,
-                        category: res.category ?? res.drug?.category ?? MOCK_BATCH.category,
-                        lotNumber: res.lot_number ?? res.lotNumber ?? res.batch_number ?? MOCK_BATCH.lotNumber,
-                        expiryDate: (res.expiry_date ?? res.expiryDate ?? MOCK_BATCH.expiryDate).split("T")[0],
-                        currentStock: res.quantity ?? res.currentStock ?? res.current_stock ?? MOCK_BATCH.currentStock,
-                        minStock: res.min_quantity ?? res.minQuantity ?? res.reorder_point ?? MOCK_BATCH.minStock,
-                        unit: res.unit ?? MOCK_BATCH.unit,
-                        warehouseName: res.warehouse?.name ?? res.warehouseName ?? MOCK_BATCH.warehouseName,
-                        supplier: res.supplier?.name ?? res.supplierName ?? MOCK_BATCH.supplier,
-                        importDate: (res.import_date ?? res.importDate ?? res.created_at ?? MOCK_BATCH.importDate).split("T")[0],
-                        unitPrice: res.unit_price ?? res.unitPrice ?? MOCK_BATCH.unitPrice,
-                        manufacturer: res.manufacturer ?? res.drug?.manufacturer ?? MOCK_BATCH.manufacturer,
+                        drugName: res.drug_name ?? res.drugName ?? res.drug?.name ?? "",
+                        drugCode: res.drug_code ?? res.drugCode ?? res.drug?.code ?? "",
+                        category: res.category ?? res.drug?.category ?? "",
+                        lotNumber: res.lot_number ?? res.lotNumber ?? res.batch_number ?? "",
+                        expiryDate: (res.expiry_date ?? res.expiryDate ?? "").split("T")[0],
+                        currentStock: res.quantity ?? res.currentStock ?? res.current_stock ?? 0,
+                        minStock: res.min_quantity ?? res.minQuantity ?? res.reorder_point ?? 0,
+                        unit: res.unit ?? "",
+                        warehouseName: res.warehouse?.name ?? res.warehouseName ?? "",
+                        supplier: res.supplier?.name ?? res.supplierName ?? "",
+                        importDate: (res.import_date ?? res.importDate ?? res.created_at ?? "").split("T")[0],
+                        unitPrice: res.unit_price ?? res.unitPrice ?? 0,
+                        manufacturer: res.manufacturer ?? res.drug?.manufacturer ?? "",
                     });
+                } else {
+                    setBatch(null);
                 }
             })
-            .catch(() => {/* keep mock */})
+            .catch(() => { setBatch(null); })
             .finally(() => setLoading(false));
     }, [batchId]);
+
+    if (!batch) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">inventory_2</span>
+                <p className="text-lg text-gray-500 mb-4">Không tìm thấy thông tin tồn kho</p>
+                <button onClick={() => router.back()} className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors">Quay lại</button>
+            </div>
+        );
+    }
 
     const stockPercent = batch.minStock > 0 ? Math.min((batch.currentStock / batch.minStock) * 100, 100) : 100;
     const stockLevel = batch.currentStock === 0 ? "OUT" : batch.currentStock < batch.minStock ? "LOW" : batch.currentStock > batch.minStock * 3 ? "HIGH" : "NORMAL";
@@ -165,7 +163,7 @@ export default function StockBatchDetailPage() {
                 </div>
                 <div className="bg-white dark:bg-[#1e242b] p-4 rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
                     <p className="text-xs text-[#687582] dark:text-gray-400 font-medium uppercase tracking-wider mb-1">Giá nhập</p>
-                    <p className="text-sm font-bold text-[#3C81C6]">{batch.unitPrice.toLocaleString()}₫/{batch.unit}</p>
+                    <p className="text-sm font-bold text-[#3C81C6]">{batch.unitPrice.toLocaleString("vi-VN")}₫/{batch.unit}</p>
                 </div>
             </div>
 
@@ -226,7 +224,7 @@ export default function StockBatchDetailPage() {
                                         </span>
                                     </td>
                                     <td className={`py-3 px-5 text-sm font-bold text-right ${h.type === "import" ? "text-emerald-600" : "text-amber-600"}`}>
-                                        {h.type === "import" ? "+" : "-"}{h.quantity.toLocaleString()}
+                                        {h.type === "import" ? "+" : "-"}{h.quantity.toLocaleString("vi-VN")}
                                     </td>
                                     <td className="py-3 px-5 text-sm font-medium text-[#3C81C6]">{h.refCode}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{h.note}</td>

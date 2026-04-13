@@ -215,6 +215,57 @@ export const markAllNotificationsAsRead = async (): Promise<any> => {
     }
 };
 
+// ============================================
+// Inbox — các method bổ sung
+// ============================================
+
+// Local constants cho endpoints chưa có trong NOTIFICATION_ENDPOINTS
+const INBOX_DELETE = (id: string) => `/api/notifications/inbox/${id}`;
+const INBOX_MARK_READ_PATCH = (id: string) => `/api/notifications/inbox/${id}/read`;
+
+/** DELETE /api/notifications/inbox/:id — Xóa thông báo */
+export const deleteNotification = async (id: string): Promise<any> => {
+    try {
+        const response = await axiosClient.delete(INBOX_DELETE(id));
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || 'Xóa thông báo thất bại');
+    }
+};
+
+/** PATCH /api/notifications/inbox/:id/read — Đánh dấu đã đọc (PATCH thay vì PUT) */
+export const patchMarkNotificationRead = async (id: string): Promise<any> => {
+    try {
+        // Thử PATCH trước, fallback về PUT nếu server dùng PUT
+        const response = await axiosClient.patch(INBOX_MARK_READ_PATCH(id));
+        return response.data;
+    } catch (error: any) {
+        // Fallback PUT
+        try {
+            const res2 = await axiosClient.put(NOTIFICATION_ENDPOINTS.MARK_READ(id));
+            return res2.data;
+        } catch {
+            throw new Error(error.response?.data?.message || 'Đánh dấu đã đọc thất bại');
+        }
+    }
+};
+
+/** PATCH /api/notifications/inbox/read-all — Đánh dấu tất cả (PATCH) */
+export const patchMarkAllNotificationsRead = async (): Promise<any> => {
+    try {
+        const response = await axiosClient.patch('/api/notifications/inbox/read-all');
+        return response.data;
+    } catch (error: any) {
+        // Fallback PUT
+        try {
+            const res2 = await axiosClient.put(NOTIFICATION_ENDPOINTS.MARK_ALL_READ);
+            return res2.data;
+        } catch {
+            throw new Error(error.response?.data?.message || 'Đánh dấu tất cả đã đọc thất bại');
+        }
+    }
+};
+
 export default {
     // Categories
     getNotificationCategories, createNotificationCategory,
@@ -228,4 +279,5 @@ export default {
     sendAdminBroadcast,
     // Inbox
     getNotifications, markNotificationAsRead, markAllNotificationsAsRead,
+    deleteNotification, patchMarkNotificationRead, patchMarkAllNotificationsRead,
 };

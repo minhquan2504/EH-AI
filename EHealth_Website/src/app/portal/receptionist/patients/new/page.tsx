@@ -58,7 +58,7 @@ export default function NewPatientPage() {
         if (!validate()) return;
         setSaving(true);
         try {
-            await createPatient({
+            const res = await createPatient({
                 full_name: fd.name,
                 date_of_birth: fd.dob || '',
                 gender: fd.gender === "Nam" ? "MALE" : "FEMALE",
@@ -70,9 +70,21 @@ export default function NewPatientPage() {
                     street_address: fd.address || undefined,
                 },
             });
-            router.push("/portal/receptionist/patients");
-        } catch {
-            alert("Tiếp nhận bệnh nhân thất bại. Vui lòng thử lại.");
+
+            if (!res.success) {
+                throw new Error(res.message || "Tạo hồ sơ thất bại");
+            }
+
+            // Lấy patient_id để redirect đến trang chi tiết
+            const patientId = res.data?.patient_id ?? res.data?.patient_code;
+
+            if (patientId) {
+                router.push(`/portal/receptionist/patients/${patientId}`);
+            } else {
+                router.push("/portal/receptionist/patients");
+            }
+        } catch (err: any) {
+            alert(err?.message || "Tiếp nhận bệnh nhân thất bại. Vui lòng thử lại.");
         } finally {
             setSaving(false);
         }

@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { MOCK_DOCTORS, MOCK_DEPARTMENTS } from "@/lib/mock-data/admin";
 import type { Doctor } from "@/types";
 import { staffService } from "@/services/staffService";
-import { getDepartments } from "@/services/departmentService";
+import { getDepartments, unwrapDepartments } from "@/services/departmentService";
 
 export default function EditDoctorPage() {
     const router = useRouter();
@@ -25,34 +24,52 @@ export default function EditDoctorPage() {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const [departments, setDepartments] = useState(MOCK_DEPARTMENTS);
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
-        getDepartments()
+        getDepartments({ limit: 100 })
             .then((res: any) => {
-                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) setDepartments(items.map((d: any) => ({ id: d.id, name: d.name })) as typeof MOCK_DEPARTMENTS);
+                const items = unwrapDepartments(res);
+                if (items.length > 0) {
+                    setDepartments(items.map(d => ({ id: d.id, name: d.name })));
+                }
             })
             .catch(() => {});
 
         if (!doctorId) return;
+        setLoading(true);
         staffService.getById(doctorId)
             .then((res: any) => {
                 const d = res?.data ?? res;
-                if (d) {
-                    const doc = { ...MOCK_DOCTORS[0], id: d.id ?? doctorId, fullName: d.full_name ?? d.fullName ?? "", email: d.email ?? "", phone: d.phone_number ?? d.phone ?? "", departmentId: d.department?.id ?? d.departmentId ?? "", specialization: d.specialization ?? "", experience: d.experience ?? 5 } as Doctor;
+                if (d && (d.id || d.staff_id)) {
+                    const doc = {
+                        id: d.id ?? d.staff_id ?? doctorId,
+                        fullName: d.full_name ?? d.fullName ?? "",
+                        email: d.email ?? "",
+                        phone: d.phone_number ?? d.phone ?? "",
+                        departmentId: d.department?.id ?? d.departmentId ?? d.department_id ?? "",
+                        specialization: d.specialization ?? "",
+                        experience: d.experience ?? 0,
+                        gender: d.gender ?? "Nam",
+                    } as unknown as Doctor;
                     setDoctor(doc);
-                    setFormData({ fullName: doc.fullName || "", email: doc.email || "", phone: doc.phone || "", departmentId: doc.departmentId || "", specialization: doc.specialization || "", experience: String(doc.experience || 5), gender: "Nam" });
+                    setFormData({
+                        fullName: doc.fullName || "",
+                        email: doc.email || "",
+                        phone: doc.phone || "",
+                        departmentId: doc.departmentId || "",
+                        specialization: doc.specialization || "",
+                        experience: String(doc.experience || 0),
+                        gender: (d.gender ?? "Nam") as string,
+                    });
                 }
             })
             .catch(() => {
-                const found = MOCK_DOCTORS.find((d) => d.id === doctorId);
-                if (found) {
-                    setDoctor(found);
-                    setFormData({ fullName: found.fullName || "", email: found.email || "", phone: found.phone || "", departmentId: found.departmentId || "", specialization: found.specialization || "", experience: String(found.experience || 5), gender: "Nam" });
-                }
-            });
+                setDoctor(null);
+            })
+            .finally(() => setLoading(false));
     }, [doctorId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -88,6 +105,15 @@ export default function EditDoctorPage() {
         setSaving(false);
         router.push(`/admin/doctors/${doctorId}`);
     };
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-[#3C81C6]/20 border-t-[#3C81C6] rounded-full animate-spin mb-4" />
+                <p className="text-sm text-[#687582]">Đang tải thông tin bác sĩ...</p>
+            </div>
+        );
+    }
 
     if (!doctor) {
         return (

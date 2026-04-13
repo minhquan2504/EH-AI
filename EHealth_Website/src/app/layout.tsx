@@ -5,8 +5,16 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import { FloatingChatBox } from "@/components/shared/FloatingChatBox";
 
 export const metadata: Metadata = {
-    title: "E-Health Admin",
-    description: "Hệ thống quản trị Y tế Số",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001"),
+    title: "EHealth — Hệ thống Y tế Số",
+    description: "Nền tảng quản lý y tế toàn diện — đặt lịch khám, hồ sơ sức khỏe điện tử, tư vấn từ xa và thanh toán trực tuyến",
+    keywords: ["y tế", "đặt lịch khám", "bệnh viện", "telemedicine", "EHR", "EHealth"],
+    openGraph: {
+        title: "EHealth — Hệ thống Y tế Số",
+        description: "Nền tảng quản lý y tế toàn diện",
+        locale: "vi_VN",
+        type: "website",
+    },
 };
 
 export default function RootLayout({

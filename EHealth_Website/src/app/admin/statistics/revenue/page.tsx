@@ -2,107 +2,53 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { reportService } from "@/services/reportService";
+import { unwrap } from "@/api/response";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
 
 /* ──────────────────────────────────────────────────────────────
-   MOCK DATA — Đầy đủ theo Tháng / Quý / Năm
+   TYPES
    ────────────────────────────────────────────────────────────── */
 type Period = "month" | "quarter" | "year";
 
-// ── Doanh thu theo khoa — thay đổi theo kỳ ──
-const REVENUE_BY_DEPT = {
-    month: [
-        { dept: "Nội khoa", revenue: 280, patients: 65, icon: "cardiology", color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-        { dept: "Ngoại khoa", revenue: 240, patients: 38, icon: "surgical", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-        { dept: "Nhi khoa", revenue: 160, patients: 45, icon: "child_care", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-        { dept: "Da liễu", revenue: 120, patients: 28, icon: "dermatology", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
-        { dept: "Tim mạch", revenue: 155, patients: 20, icon: "monitor_heart", color: "text-pink-500", bg: "bg-pink-50 dark:bg-pink-500/10" },
-        { dept: "Sản khoa", revenue: 95, patients: 12, icon: "pregnant_woman", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
-    ],
-    quarter: [
-        { dept: "Nội khoa", revenue: 820, patients: 195, icon: "cardiology", color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-        { dept: "Ngoại khoa", revenue: 710, patients: 114, icon: "surgical", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-        { dept: "Nhi khoa", revenue: 480, patients: 135, icon: "child_care", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-        { dept: "Da liễu", revenue: 360, patients: 84, icon: "dermatology", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
-        { dept: "Tim mạch", revenue: 460, patients: 60, icon: "monitor_heart", color: "text-pink-500", bg: "bg-pink-50 dark:bg-pink-500/10" },
-        { dept: "Sản khoa", revenue: 280, patients: 36, icon: "pregnant_woman", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
-    ],
-    year: [
-        { dept: "Nội khoa", revenue: 3200, patients: 780, icon: "cardiology", color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-        { dept: "Ngoại khoa", revenue: 2800, patients: 450, icon: "surgical", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-        { dept: "Nhi khoa", revenue: 1900, patients: 535, icon: "child_care", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-        { dept: "Da liễu", revenue: 1500, patients: 340, icon: "dermatology", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
-        { dept: "Tim mạch", revenue: 1800, patients: 240, icon: "monitor_heart", color: "text-pink-500", bg: "bg-pink-50 dark:bg-pink-500/10" },
-        { dept: "Sản khoa", revenue: 1200, patients: 145, icon: "pregnant_woman", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
-    ],
-};
+interface DeptRevenue {
+    dept: string;
+    revenue: number;
+    patients: number;
+    icon: string;
+    color: string;
+    bg: string;
+}
 
-// ── So sánh doanh thu theo kỳ ──
-const COMPARISON_DATA = {
-    month: [
-        { label: "Tuần 1", revenue: 240, target: 260 },
-        { label: "Tuần 2", revenue: 285, target: 260 },
-        { label: "Tuần 3", revenue: 310, target: 260 },
-        { label: "Tuần 4", revenue: 215, target: 260 },
-    ],
-    quarter: [
-        { label: "Tháng 1", revenue: 850, target: 900 },
-        { label: "Tháng 2", revenue: 980, target: 900 },
-        { label: "Tháng 3", revenue: 1020, target: 900 },
-    ],
-    year: [
-        { label: "Q1", revenue: 3050, target: 3000 },
-        { label: "Q2", revenue: 3210, target: 3200 },
-        { label: "Q3", revenue: 3650, target: 3500 },
-        { label: "Q4", revenue: 2820, target: 3500 },
-    ],
-};
+interface ComparisonItem {
+    label: string;
+    revenue: number;
+    target: number;
+}
 
-// ── Top Bác sĩ theo doanh thu — thay đổi theo kỳ ──
-const TOP_DOCTORS = {
-    month: [
-        { rank: 1, name: "BS. Nguyễn Văn A", dept: "Tim mạch", revenue: 85, patients: 20 },
-        { rank: 2, name: "BS. Trần Thị B", dept: "Nội khoa", revenue: 78, patients: 24 },
-        { rank: 3, name: "BS. Lê Văn C", dept: "Ngoại khoa", revenue: 72, patients: 15 },
-        { rank: 4, name: "BS. Phạm Thị D", dept: "Da liễu", revenue: 68, patients: 28 },
-        { rank: 5, name: "BS. Hoàng Văn E", dept: "Nhi khoa", revenue: 62, patients: 22 },
-        { rank: 6, name: "BS. Vũ Thị F", dept: "Sản khoa", revenue: 58, patients: 10 },
-        { rank: 7, name: "BS. Đỗ Văn G", dept: "Tim mạch", revenue: 54, patients: 12 },
-        { rank: 8, name: "BS. Ngô Thị H", dept: "Nội khoa", revenue: 51, patients: 20 },
-        { rank: 9, name: "BS. Bùi Văn I", dept: "Ngoại khoa", revenue: 48, patients: 13 },
-        { rank: 10, name: "BS. Lý Thị K", dept: "Nhi khoa", revenue: 45, patients: 18 },
-    ],
-    quarter: [
-        { rank: 1, name: "BS. Nguyễn Văn A", dept: "Tim mạch", revenue: 250, patients: 58 },
-        { rank: 2, name: "BS. Trần Thị B", dept: "Nội khoa", revenue: 230, patients: 72 },
-        { rank: 3, name: "BS. Lê Văn C", dept: "Ngoại khoa", revenue: 215, patients: 45 },
-        { rank: 4, name: "BS. Phạm Thị D", dept: "Da liễu", revenue: 200, patients: 82 },
-        { rank: 5, name: "BS. Hoàng Văn E", dept: "Nhi khoa", revenue: 185, patients: 65 },
-        { rank: 6, name: "BS. Vũ Thị F", dept: "Sản khoa", revenue: 172, patients: 30 },
-        { rank: 7, name: "BS. Đỗ Văn G", dept: "Tim mạch", revenue: 160, patients: 36 },
-        { rank: 8, name: "BS. Ngô Thị H", dept: "Nội khoa", revenue: 150, patients: 58 },
-        { rank: 9, name: "BS. Bùi Văn I", dept: "Ngoại khoa", revenue: 142, patients: 38 },
-        { rank: 10, name: "BS. Lý Thị K", dept: "Nhi khoa", revenue: 135, patients: 52 },
-    ],
-    year: [
-        { rank: 1, name: "BS. Nguyễn Văn A", dept: "Tim mạch", revenue: 850, patients: 195 },
-        { rank: 2, name: "BS. Trần Thị B", dept: "Nội khoa", revenue: 780, patients: 245 },
-        { rank: 3, name: "BS. Lê Văn C", dept: "Ngoại khoa", revenue: 720, patients: 152 },
-        { rank: 4, name: "BS. Phạm Thị D", dept: "Da liễu", revenue: 680, patients: 280 },
-        { rank: 5, name: "BS. Hoàng Văn E", dept: "Nhi khoa", revenue: 620, patients: 220 },
-        { rank: 6, name: "BS. Vũ Thị F", dept: "Sản khoa", revenue: 580, patients: 100 },
-        { rank: 7, name: "BS. Đỗ Văn G", dept: "Tim mạch", revenue: 540, patients: 120 },
-        { rank: 8, name: "BS. Ngô Thị H", dept: "Nội khoa", revenue: 510, patients: 195 },
-        { rank: 9, name: "BS. Bùi Văn I", dept: "Ngoại khoa", revenue: 480, patients: 130 },
-        { rank: 10, name: "BS. Lý Thị K", dept: "Nhi khoa", revenue: 450, patients: 172 },
-    ],
-};
+interface TopDoctor {
+    rank: number;
+    name: string;
+    dept: string;
+    revenue: number;
+    patients: number;
+}
 
-// ── Summary thay đổi theo kỳ ──
-const SUMMARY = {
-    month: { total: 1050, totalChange: 19, avgPerDoctor: 23, avgChange: 5, totalPatients: 208, patientChange: 2 },
-    quarter: { total: 3110, totalChange: 23, avgPerDoctor: 69, avgChange: 8, totalPatients: 624, patientChange: 6 },
-    year: { total: 12400, totalChange: 12, avgPerDoctor: 276, avgChange: 5, totalPatients: 2490, patientChange: 2 },
+interface Summary {
+    total: number;
+    totalChange: number;
+    avgPerDoctor: number;
+    avgChange: number;
+    totalPatients: number;
+    patientChange: number;
+}
+
+const EMPTY_SUMMARY: Summary = {
+    total: 0,
+    totalChange: 0,
+    avgPerDoctor: 0,
+    avgChange: 0,
+    totalPatients: 0,
+    patientChange: 0,
 };
 
 /* ──────────────────────────────────────────────────────────────
@@ -111,33 +57,95 @@ const SUMMARY = {
 export default function RevenuePage() {
     usePageAIContext({ pageKey: 'statistics' });
     const [period, setPeriod] = useState<Period>("month");
-    const [summary, setSummary] = useState(SUMMARY[period]);
-    const [deptData, setDeptData] = useState(REVENUE_BY_DEPT[period]);
+    const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
+    const [deptData, setDeptData] = useState<DeptRevenue[]>([]);
+    const [comparison, setComparison] = useState<ComparisonItem[]>([]);
+    const [doctors, setDoctors] = useState<TopDoctor[]>([]);
 
     useEffect(() => {
-        setSummary(SUMMARY[period]);
-        setDeptData(REVENUE_BY_DEPT[period]);
-        reportService.getRevenue({ period })
+        // Reset state on period change
+        setSummary(EMPTY_SUMMARY);
+        setDeptData([]);
+        setComparison([]);
+        setDoctors([]);
+
+        // Build date params based on period
+        const now = new Date();
+        const dateParams: Record<string, string> = {};
+        if (period === "month") {
+            const from = new Date(now.getFullYear(), now.getMonth(), 1);
+            dateParams.from = from.toISOString().split("T")[0];
+            dateParams.to   = now.toISOString().split("T")[0];
+        } else if (period === "quarter") {
+            const q = Math.floor(now.getMonth() / 3);
+            const from = new Date(now.getFullYear(), q * 3, 1);
+            dateParams.from = from.toISOString().split("T")[0];
+            dateParams.to   = now.toISOString().split("T")[0];
+        } else {
+            dateParams.from = `${now.getFullYear()}-01-01`;
+            dateParams.to   = now.toISOString().split("T")[0];
+        }
+
+        reportService.getRevenue({ period, ...dateParams })
             .then((res: any) => {
-                const d = res?.data ?? res;
-                if (d?.total !== undefined) setSummary((prev) => ({ ...prev, total: d.total ?? prev.total, totalChange: d.growth ?? prev.totalChange, totalPatients: d.totalPatients ?? prev.totalPatients, patientChange: d.patientGrowth ?? prev.patientChange }));
-                if (Array.isArray(d?.byDepartment) && d.byDepartment.length > 0) {
+                const d = unwrap<any>(res);
+                if (!d) return;
+                const totalMillion = d.total !== undefined
+                    ? (d.total > 10_000_000 ? Math.round(d.total / 1_000_000) : d.total)
+                    : 0;
+                setSummary({
+                    total: totalMillion,
+                    totalChange: d.growth ?? d.revenueGrowth ?? 0,
+                    avgPerDoctor: d.avgPerDoctor ?? 0,
+                    avgChange: d.avgChange ?? 0,
+                    totalPatients: d.totalPatients ?? 0,
+                    patientChange: d.patientGrowth ?? 0,
+                });
+                if (Array.isArray(d.byDepartment)) {
+                    const DEPT_ICONS: { icon: string; color: string; bg: string }[] = [
+                        { icon: "cardiology",     color: "text-red-500",    bg: "bg-red-50 dark:bg-red-500/10" },
+                        { icon: "surgical",       color: "text-blue-500",   bg: "bg-blue-50 dark:bg-blue-500/10" },
+                        { icon: "child_care",     color: "text-amber-500",  bg: "bg-amber-50 dark:bg-amber-500/10" },
+                        { icon: "dermatology",    color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
+                        { icon: "monitor_heart",  color: "text-pink-500",   bg: "bg-pink-50 dark:bg-pink-500/10" },
+                        { icon: "pregnant_woman", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
+                    ];
                     setDeptData(d.byDepartment.map((x: any, i: number) => ({
-                        ...REVENUE_BY_DEPT[period][i] ?? REVENUE_BY_DEPT[period][0],
-                        dept: x.departmentName ?? x.dept ?? REVENUE_BY_DEPT[period][i]?.dept ?? "",
-                        revenue: x.revenue ?? x.amount ?? 0,
+                        dept:     x.departmentName ?? x.dept ?? "",
+                        revenue:  x.revenue > 10_000_000 ? Math.round(x.revenue / 1_000_000) : (x.revenue ?? x.amount ?? 0),
                         patients: x.patientCount ?? x.patients ?? 0,
+                        icon:     DEPT_ICONS[i % DEPT_ICONS.length]?.icon ?? "local_hospital",
+                        color:    DEPT_ICONS[i % DEPT_ICONS.length]?.color ?? "text-blue-500",
+                        bg:       DEPT_ICONS[i % DEPT_ICONS.length]?.bg ?? "bg-blue-50 dark:bg-blue-500/10",
+                    })));
+                }
+                if (Array.isArray(d.comparison)) {
+                    setComparison(d.comparison.map((c: any) => ({
+                        label:   c.label ?? "",
+                        revenue: c.revenue ?? c.actual ?? 0,
+                        target:  c.target ?? 0,
+                    })));
+                }
+                if (Array.isArray(d.topDoctors)) {
+                    setDoctors(d.topDoctors.map((doc: any, i: number) => ({
+                        rank:     i + 1,
+                        name:     doc.name ?? doc.fullName ?? "",
+                        dept:     doc.dept ?? doc.departmentName ?? "",
+                        revenue:  doc.revenue > 10_000_000 ? Math.round(doc.revenue / 1_000_000) : (doc.revenue ?? 0),
+                        patients: doc.patientCount ?? doc.patients ?? 0,
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => {
+                // API không khả dụng, hiển thị trống
+            });
     }, [period]);
 
-    const comparison = COMPARISON_DATA[period];
-    const doctors = TOP_DOCTORS[period];
-
-    const maxDeptRevenue = Math.max(...deptData.map(d => d.revenue));
-    const maxComparison = useMemo(() => Math.max(...comparison.map(q => Math.max(q.revenue, q.target))), [comparison]);
+    const maxDeptRevenue = deptData.length > 0 ? Math.max(...deptData.map(d => d.revenue)) : 0;
+    const maxComparison = useMemo(
+        () => comparison.length > 0 ? Math.max(...comparison.map(q => Math.max(q.revenue, q.target))) : 0,
+        [comparison]
+    );
 
     const periodLabel = period === "month" ? "tháng trước" : period === "quarter" ? "quý trước" : "năm trước";
     const comparisonTitle = period === "month" ? "So sánh theo tuần" : period === "quarter" ? "So sánh theo tháng" : "So sánh theo quý";
@@ -161,7 +169,7 @@ export default function RevenuePage() {
             "Kỳ,Doanh thu (Tr),Mục tiêu (Tr),Đạt",
             ...comparison.map(c => `${c.label},${c.revenue},${c.target},${c.revenue >= c.target ? "Đạt" : "Chưa đạt"}`),
             "",
-            "TOP 10 BÁC SĨ THEO DOANH THU",
+            "TOP BÁC SĨ THEO DOANH THU",
             "#,Bác sĩ,Chuyên khoa,Doanh thu (Tr),Bệnh nhân",
             ...doctors.map(d => `${d.rank},${d.name},${d.dept},${d.revenue},${d.patients}`),
         ];
@@ -233,7 +241,7 @@ export default function RevenuePage() {
                 </div>
                 <div className="bg-white dark:bg-[#1e242b] p-5 rounded-2xl border border-[#dde0e4] dark:border-[#2d353e] shadow-sm">
                     <p className="text-xs text-[#687582] dark:text-gray-400 font-medium uppercase tracking-wider mb-1">Tổng bệnh nhân</p>
-                    <p className="text-3xl font-extrabold text-[#121417] dark:text-white">{summary.totalPatients.toLocaleString()}</p>
+                    <p className="text-3xl font-extrabold text-[#121417] dark:text-white">{summary.totalPatients.toLocaleString("vi-VN")}</p>
                     <div className="flex items-center gap-1 mt-2 text-xs font-bold text-amber-600">
                         <span className="material-symbols-outlined text-[14px]">trending_flat</span>
                         +{summary.patientChange}% so với {periodLabel}
@@ -257,7 +265,12 @@ export default function RevenuePage() {
                         </span>
                     </div>
                     <div className="p-5 space-y-4">
-                        {deptData.map((d) => (
+                        {deptData.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-center">
+                                <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">inbox</span>
+                                <p className="text-sm text-[#687582] dark:text-gray-400">Chưa có dữ liệu</p>
+                            </div>
+                        ) : deptData.map((d) => (
                             <div key={d.dept} className="flex items-center gap-4">
                                 <div className={`w-9 h-9 rounded-lg ${d.bg} flex items-center justify-center flex-shrink-0`}>
                                     <span className={`material-symbols-outlined ${d.color} text-[18px]`}>{d.icon}</span>
@@ -269,7 +282,7 @@ export default function RevenuePage() {
                                     </div>
                                     <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                                         <div className="h-full bg-gradient-to-r from-[#3C81C6] to-[#60a5fa] rounded-full transition-all duration-500"
-                                            style={{ width: `${(d.revenue / maxDeptRevenue) * 100}%` }} />
+                                            style={{ width: maxDeptRevenue > 0 ? `${(d.revenue / maxDeptRevenue) * 100}%` : "0%" }} />
                                     </div>
                                     <p className="text-[10px] text-[#687582] dark:text-gray-500 mt-0.5">{d.patients} bệnh nhân</p>
                                 </div>
@@ -287,38 +300,47 @@ export default function RevenuePage() {
                         <h3 className="text-sm font-bold text-[#121417] dark:text-white">{comparisonTitle}</h3>
                     </div>
                     <div className="p-5">
-                        <div className="h-52 flex items-end gap-3">
-                            {comparison.map((q) => (
-                                <div key={q.label} className="flex-1 flex flex-col items-center gap-1 group">
-                                    <div className="w-full flex items-end gap-1 justify-center h-40">
-                                        <div className="w-5 bg-[#3C81C6]/20 rounded-t-sm relative group" style={{ height: `${(q.target / maxComparison) * 100}%` }}>
-                                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] text-[#687582] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{q.target}Tr</div>
+                        {comparison.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-16 text-center">
+                                <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 mb-2">inbox</span>
+                                <p className="text-sm text-[#687582] dark:text-gray-400">Chưa có dữ liệu</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="h-52 flex items-end gap-3">
+                                    {comparison.map((q) => (
+                                        <div key={q.label} className="flex-1 flex flex-col items-center gap-1 group">
+                                            <div className="w-full flex items-end gap-1 justify-center h-40">
+                                                <div className="w-5 bg-[#3C81C6]/20 rounded-t-sm relative group" style={{ height: `${maxComparison > 0 ? (q.target / maxComparison) * 100 : 0}%` }}>
+                                                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[8px] text-[#687582] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{q.target}Tr</div>
+                                                </div>
+                                                <div className={`w-5 rounded-t-sm ${q.revenue >= q.target ? "bg-gradient-to-t from-emerald-500 to-emerald-400" : "bg-gradient-to-t from-rose-500 to-rose-400"}`}
+                                                    style={{ height: `${maxComparison > 0 ? (q.revenue / maxComparison) * 100 : 0}%` }}>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs font-medium text-[#687582] dark:text-gray-500">{q.label}</span>
+                                            <span className={`text-[10px] font-bold ${q.revenue >= q.target ? "text-emerald-600" : "text-red-500"}`}>
+                                                {q.revenue >= q.target ? "Đạt" : "Chưa đạt"}
+                                            </span>
                                         </div>
-                                        <div className={`w-5 rounded-t-sm ${q.revenue >= q.target ? "bg-gradient-to-t from-emerald-500 to-emerald-400" : "bg-gradient-to-t from-rose-500 to-rose-400"}`}
-                                            style={{ height: `${(q.revenue / maxComparison) * 100}%` }}>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-medium text-[#687582] dark:text-gray-500">{q.label}</span>
-                                    <span className={`text-[10px] font-bold ${q.revenue >= q.target ? "text-emerald-600" : "text-red-500"}`}>
-                                        {q.revenue >= q.target ? "Đạt" : "Chưa đạt"}
-                                    </span>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#f0f1f3] dark:border-[#2d353e]">
-                            <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 rounded-sm bg-[#3C81C6]/20" />
-                                <span className="text-[11px] text-[#687582]">Mục tiêu</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-                                <span className="text-[11px] text-[#687582]">Đạt</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 rounded-sm bg-rose-500" />
-                                <span className="text-[11px] text-[#687582]">Chưa đạt</span>
-                            </div>
-                        </div>
+                                <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#f0f1f3] dark:border-[#2d353e]">
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-3 h-3 rounded-sm bg-[#3C81C6]/20" />
+                                        <span className="text-[11px] text-[#687582]">Mục tiêu</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-3 h-3 rounded-sm bg-emerald-500" />
+                                        <span className="text-[11px] text-[#687582]">Đạt</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-3 h-3 rounded-sm bg-rose-500" />
+                                        <span className="text-[11px] text-[#687582]">Chưa đạt</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -331,7 +353,7 @@ export default function RevenuePage() {
                             <span className="material-symbols-outlined text-amber-600 text-[20px]">emoji_events</span>
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-[#121417] dark:text-white">Top 10 Bác sĩ theo doanh thu</h3>
+                            <h3 className="text-sm font-bold text-[#121417] dark:text-white">Top Bác sĩ theo doanh thu</h3>
                             <p className="text-xs text-[#687582] dark:text-gray-500">
                                 {period === "month" ? "Tháng này" : period === "quarter" ? "Quý này" : "Năm nay"} — Đơn vị: Triệu VNĐ
                             </p>
@@ -351,7 +373,16 @@ export default function RevenuePage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#f0f1f3] dark:divide-[#2d353e]">
-                            {doctors.map((doc) => (
+                            {doctors.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-5 py-10 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600">inbox</span>
+                                            <p className="text-sm text-[#687582] dark:text-gray-400">Chưa có dữ liệu</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : doctors.map((doc) => (
                                 <tr key={doc.rank} className="hover:bg-[#f6f7f8] dark:hover:bg-[#13191f] transition-colors">
                                     <td className="px-5 py-3 text-center">
                                         {doc.rank <= 3 ? (
@@ -367,7 +398,7 @@ export default function RevenuePage() {
                                     <td className="px-5 py-3 text-sm font-bold text-right text-[#121417] dark:text-white">{doc.revenue} Tr</td>
                                     <td className="px-5 py-3 text-sm text-right text-[#687582] dark:text-gray-400">{doc.patients}</td>
                                     <td className="px-5 py-3 text-sm text-right text-[#687582] dark:text-gray-400">
-                                        {(doc.revenue / doc.patients).toFixed(1)} Tr
+                                        {doc.patients > 0 ? (doc.revenue / doc.patients).toFixed(1) : "0"} Tr
                                     </td>
                                 </tr>
                             ))}

@@ -41,54 +41,59 @@ export default function InventoryPage() {
     const [history, setHistory] = useState(INVENTORY_HISTORY);
 
     useEffect(() => {
-        inventoryService.getLowStock()
-            .then(res => {
-                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    setLowStockItems(items.map((d: any) => ({
-                        name: d.drugName ?? d.name ?? "",
-                        stock: d.quantity ?? d.currentStock ?? 0,
-                        min: d.minQuantity ?? d.reorderPoint ?? 0,
-                        unit: d.unit ?? "",
-                        category: d.category ?? "",
-                    })));
-                }
-            })
-            .catch(() => {/* keep mock */});
-        inventoryService.getList({ limit: 10 })
-            .then(res => {
-                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    const total = items.length;
-                    const low = items.filter((d: any) => (d.quantity ?? 0) < (d.minQuantity ?? 50)).length;
-                    const out = items.filter((d: any) => (d.quantity ?? 0) === 0).length;
-                    setStats(prev => prev.map((s, i) => {
-                        if (i === 0) return { ...s, value: String(total) };
-                        if (i === 2) return { ...s, value: String(low) };
-                        if (i === 3) return { ...s, value: String(out) };
-                        return s;
-                    }));
-                }
-            })
-            .catch(() => {/* keep mock */});
-        inventoryService.getStockInList({ limit: 20 })
-            .then(res => {
-                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    setHistory(items.map((d: any) => ({
-                        id: d.id,
-                        date: d.createdAt?.split("T")[0] ?? "",
-                        type: "import",
-                        name: d.drugName ?? d.note ?? "",
-                        qty: d.quantity ?? 0,
-                        unit: d.unit ?? "viên",
-                        supplier: d.supplierName ?? "",
-                        note: d.note ?? "",
-                        user: d.createdBy ?? "",
-                    })));
-                }
-            })
-            .catch(() => {/* keep mock */});
+        Promise.all([
+            inventoryService.getLowStock().catch(() => null),
+            inventoryService.getList({ limit: 500 }).catch(() => null),
+            inventoryService.getExpiring().catch(() => null),
+        ]).then(([lowRes, listRes, expiringRes]) => {
+            const lowItems: any[] = lowRes?.data?.data ?? lowRes?.data ?? lowRes ?? [];
+            if (Array.isArray(lowItems) && lowItems.length > 0) {
+                setLowStockItems(lowItems.map((d: any) => ({
+                    name: d.drugName ?? d.name ?? "",
+                    stock: d.quantity ?? d.currentStock ?? 0,
+                    min: d.minQuantity ?? d.reorderPoint ?? 0,
+                    unit: d.unit ?? "",
+                    category: d.category ?? "",
+                })));
+            }
+            const allItems: any[] = listRes?.data?.data ?? listRes?.data ?? listRes ?? [];
+            const expiringItems: any[] = expiringRes?.data?.data ?? expiringRes?.data ?? expiringRes ?? [];
+            if (Array.isArray(allItems) && allItems.length > 0) {
+                const total = allItems.length;
+                const low = allItems.filter((d: any) => (d.quantity ?? 0) < (d.minQuantity ?? 50) && (d.quantity ?? 0) > 0).length;
+                const out = allItems.filter((d: any) => (d.quantity ?? 0) === 0).length;
+                const exp = Array.isArray(expiringItems) ? expiringItems.length : 0;
+                setStats(prev => prev.map((s, i) => {
+                    if (i === 0) return { ...s, value: String(total) };
+                    if (i === 1) return { ...s, value: String(total - low - out) };
+                    if (i === 2) return { ...s, value: String(low + exp) };
+                    if (i === 3) return { ...s, value: String(out) };
+                    return s;
+                }));
+            }
+        });
+        Promise.all([
+            inventoryService.getStockInList({ limit: 20 }).catch(() => null),
+            inventoryService.getStockOutList({ limit: 20 }).catch(() => null),
+        ]).then(([inRes, outRes]) => {
+            const inItems: any[] = inRes?.data?.data ?? inRes?.data ?? inRes ?? [];
+            const outItems: any[] = outRes?.data?.data ?? outRes?.data ?? outRes ?? [];
+            const combined = [
+                ...inItems.map((d: any) => ({
+                    id: d.id, date: d.createdAt?.split("T")[0] ?? "",
+                    type: "import" as const, name: d.drugName ?? d.note ?? "",
+                    qty: d.quantity ?? 0, unit: d.unit ?? "viên",
+                    supplier: d.supplierName ?? "", note: d.note ?? "", user: d.createdBy ?? "",
+                })),
+                ...outItems.map((d: any) => ({
+                    id: d.id, date: d.createdAt?.split("T")[0] ?? "",
+                    type: "export" as const, name: d.drugName ?? d.note ?? "",
+                    qty: d.quantity ?? 0, unit: d.unit ?? "viên",
+                    supplier: "", note: d.note ?? d.reason ?? "", user: d.createdBy ?? "",
+                })),
+            ].sort((a, b) => b.date.localeCompare(a.date));
+            if (combined.length > 0) setHistory(combined);
+        });
     }, []);
 
     const filteredHistory = typeFilter === "all" ? history : history.filter((h) => h.type === typeFilter);
@@ -210,7 +215,7 @@ export default function InventoryPage() {
                                             </span>
                                         </td>
                                         <td className="px-5 py-3 text-sm font-medium text-[#121417] dark:text-white">{h.name}</td>
-                                        <td className="px-5 py-3 text-sm font-bold text-right text-[#121417] dark:text-white">{h.qty.toLocaleString()} {h.unit}</td>
+                                        <td className="px-5 py-3 text-sm font-bold text-right text-[#121417] dark:text-white">{h.qty.toLocaleString("vi-VN")} {h.unit}</td>
                                         <td className="px-5 py-3 text-sm text-[#687582] dark:text-gray-400">{h.supplier || "—"}</td>
                                         <td className="px-5 py-3 text-sm text-[#687582] dark:text-gray-400">{h.note}</td>
                                         <td className="px-5 py-3 text-sm text-[#687582] dark:text-gray-400">{h.user}</td>

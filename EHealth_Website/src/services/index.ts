@@ -7,7 +7,39 @@
 export * from './authService';
 
 // User management & Profile
-export * from './userService';
+// Note: Re-export explicit để tránh conflict với authService (getProfileSessions, deleteProfileSession)
+export {
+    getAccountStatuses,
+    getUsers,
+    searchUsers,
+    getUserById,
+    createUser,
+    updateUser,
+    deleteUser,
+    lockUser,
+    unlockUser,
+    updateUserStatus,
+    getUserStatusHistory,
+    adminResetPassword,
+    adminChangePassword,
+    getUserRoles,
+    assignUserRole,
+    removeUserRole,
+    getUserFacilities,
+    assignUserFacility,
+    updateUserFacility,
+    removeUserFacility,
+    validateUserImport,
+    importUsers,
+    getImportHistory,
+    exportUsers,
+    exportUsersWithFilters,
+    getProfile,
+    updateProfile,
+    changePassword,
+    logoutAllProfileSessions,
+    updateProfileSettings,
+} from './userService';
 
 // Appointments
 export * from './appointmentService';
@@ -53,3 +85,6 @@ export * from './aiService';
 
 // EHR — Electronic Health Records
 export * from './ehrService';
+
+// Master Data (ICD-10, Countries, Ethnicities, Units)
+export * from './masterDataService';

@@ -3,9 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UI_TEXT } from "@/constants/ui-text";
-import { MOCK_MEDICINES, MOCK_MEDICINE_STATS } from "@/lib/mock-data/admin";
 import { getDrugs } from "@/services/medicineService";
 import { MEDICINE_STATUS } from "@/constants/status";
+import { validateFile } from "@/utils/fileValidation";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { MedicineFormModal } from "@/features/medicines/components/medicine-form-modal";
 import { AddStockModal } from "@/features/medicines/components/add-stock-modal";
@@ -35,7 +35,7 @@ function formatCurrency(num: number): string {
 export default function MedicinesPage() {
     // State
     const router = useRouter();
-    const [medicines, setMedicines] = useState<Medicine[]>(MOCK_MEDICINES);
+    const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,7 +45,7 @@ export default function MedicinesPage() {
     const [sortField, setSortField] = useState<SortField>("name");
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
-    const [stats, setStats] = useState(MOCK_MEDICINE_STATS);
+    const [stats, setStats] = useState({ expiringSoon: 0 });
 
     useEffect(() => {
         getDrugs({ limit: 200 })
@@ -53,7 +53,6 @@ export default function MedicinesPage() {
                 const items: any[] = res?.data ?? [];
                 if (items.length > 0) {
                     setMedicines(items.map((d: any) => ({
-                        ...MOCK_MEDICINES[0],
                         id: d.id,
                         code: d.code ?? d.id,
                         name: d.name ?? "",
@@ -61,12 +60,15 @@ export default function MedicinesPage() {
                         unit: d.unit ?? "",
                         price: d.price ?? 0,
                         stock: d.quantity ?? d.stock ?? 0,
+                        stockLevel: d.stockLevel ?? "NORMAL",
                         minStock: d.minQuantity ?? d.minStock ?? 0,
                         manufacturer: d.manufacturer ?? "",
                         expiryDate: d.expiryDate ?? d.expiry_date ?? "",
                         activeIngredient: d.activeIngredient ?? d.active_ingredient ?? "",
-                        status: d.status ?? "available",
+                        status: d.status ?? "IN_BUSINESS",
                         description: d.description ?? "",
+                        createdAt: d.createdAt ?? d.created_at ?? "",
+                        updatedAt: d.updatedAt ?? d.updated_at ?? "",
                     })) as Medicine[]);
                     const total = items.length;
                     const lowStock = items.filter((d: any) => d.status === "low_stock").length;
@@ -74,7 +76,7 @@ export default function MedicinesPage() {
                     setStats(prev => ({ ...prev, totalMedicines: total, lowStockCount: lowStock, outOfStockCount: outOfStock }));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     // Filtered and sorted medicines
@@ -120,24 +122,32 @@ export default function MedicinesPage() {
     };
 
     // Export to CSV
-    const handleExport = () => {
-        const headers = ["Mã", "Tên", "Hoạt chất", "Đơn vị", "Giá", "Tồn kho", "Trạng thái"];
-        const rows = filteredMedicines.map((m) => [
-            m.code,
-            m.name,
-            m.activeIngredient,
-            m.unit,
-            m.price.toString(),
-            m.stock.toString(),
-            m.status,
-        ]);
-        const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `medicines_${new Date().toISOString().split("T")[0]}.csv`;
-        link.click();
+    const handleExport = async () => {
+        try {
+            const { exportDrugs } = await import("@/services/medicineService");
+            const blob = await exportDrugs();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `medicines_${new Date().toISOString().split("T")[0]}.xlsx`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            // fallback: CSV từ dữ liệu hiện có
+            const headers = ["Mã", "Tên", "Hoạt chất", "Đơn vị", "Giá", "Tồn kho", "Trạng thái"];
+            const rows = filteredMedicines.map((m) => [
+                m.code, m.name, m.activeIngredient, m.unit,
+                m.price.toString(), m.stock.toString(), m.status,
+            ]);
+            const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `medicines_${new Date().toISOString().split("T")[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
     };
 
     // Handlers
@@ -151,10 +161,15 @@ export default function MedicinesPage() {
         setIsModalOpen(true);
     };
 
-    const handleDeleteMedicine = (medicineId: string) => {
-        if (confirm("Bạn có chắc chắn muốn xóa thuốc này?")) {
-            setMedicines((prev) => prev.filter((m) => m.id !== medicineId));
+    const handleDeleteMedicine = async (medicineId: string) => {
+        if (!confirm("Bạn có chắc chắn muốn xóa thuốc này?")) return;
+        try {
+            const { deleteDrug } = await import("@/services/medicineService");
+            await deleteDrug(medicineId);
+        } catch {
+            // keep local even if API fails
         }
+        setMedicines((prev) => prev.filter((m) => m.id !== medicineId));
     };
 
     const handleAddStock = (medicine: Medicine) => {
@@ -162,7 +177,8 @@ export default function MedicinesPage() {
         setIsStockModalOpen(true);
     };
 
-    const handleStockSubmit = (medicineId: string, quantity: number, _note: string) => {
+    const handleStockSubmit = async (medicineId: string, quantity: number, note: string) => {
+        // Cập nhật local state ngay
         setMedicines((prev) =>
             prev.map((m) =>
                 m.id === medicineId
@@ -170,17 +186,45 @@ export default function MedicinesPage() {
                     : m
             )
         );
+        // Gọi API nhập kho
+        try {
+            const { inventoryService } = await import("@/services/inventoryService");
+            await inventoryService.createStockIn({
+                items: [{ drugId: medicineId, quantity, note: note || undefined }],
+            });
+        } catch {
+            // fallback: local state đã cập nhật rồi
+        }
     };
 
-    const handleSubmitMedicine = (medicineData: Partial<Medicine>) => {
-        if (editingMedicine) {
-            setMedicines((prev) =>
-                prev.map((m) => (m.id === editingMedicine.id ? { ...m, ...medicineData } : m))
-            );
-        } else {
+    const handleSubmitMedicine = async (medicineData: Partial<Medicine>) => {
+        try {
+            const { createDrug, updateDrug } = await import("@/services/medicineService");
+            if (editingMedicine) {
+                await updateDrug(editingMedicine.id, {
+                    name: medicineData.name,
+                    unit: medicineData.unit,
+                    price: medicineData.price,
+                    category: medicineData.category,
+                    activeIngredient: medicineData.activeIngredient,
+                } as any).catch(() => null);
+                setMedicines((prev) =>
+                    prev.map((m) => (m.id === editingMedicine.id ? { ...m, ...medicineData } : m))
+                );
+                return;
+            }
+            const created = await createDrug({
+                name: medicineData.name || "",
+                unit: medicineData.unit || "Hộp",
+                price: medicineData.price || 0,
+                category: medicineData.category,
+                activeIngredient: medicineData.activeIngredient,
+                quantity: medicineData.stock,
+                minQuantity: (medicineData as any).minStock,
+            } as any).catch(() => null);
             const newMedicine: Medicine = {
-                id: String(Date.now()),
-                code: `SP-${new Date().getFullYear()}-${String(medicines.length + 1).padStart(3, "0")}`,
+                id: (created as any)?.id ?? String(Date.now()),
+                code: (created as any)?.code ?? `SP-${new Date().getFullYear()}-${String(medicines.length + 1).padStart(3, "0")}`,
                 name: medicineData.name || "",
                 activeIngredient: medicineData.activeIngredient || "",
                 unit: medicineData.unit || "Hộp",
@@ -194,6 +238,8 @@ export default function MedicinesPage() {
                 updatedAt: new Date().toISOString().split("T")[0],
             };
             setMedicines((prev) => [newMedicine, ...prev]);
+        } catch {
+            // keep local state
         }
     };
 
@@ -251,10 +297,22 @@ export default function MedicinesPage() {
                             const input = document.createElement("input");
                             input.type = "file";
                             input.accept = ".xlsx,.xls,.csv";
-                            input.onchange = (e) => {
+                            input.onchange = async (e) => {
                                 const file = (e.target as HTMLInputElement).files?.[0];
-                                if (file) {
-                                    alert(`Đã chọn file: ${file.name}. Tính năng nhập dữ liệu sẽ được xử lý.`);
+                                if (!file) return;
+                                const validation = validateFile(file, { maxSize: 5 * 1024 * 1024, allowedTypes: ["csv", "xlsx", "xls"] });
+                                if (!validation.valid) { alert(validation.message); return; }
+                                try {
+                                    const { importDrugs } = await import("@/services/medicineService");
+                                    const result = await importDrugs(file);
+                                    alert(`Nhập thành công${result?.imported ? `: ${result.imported} thuốc` : ""}!`);
+                                    // Reload danh sách
+                                    getDrugs({ limit: 200 }).then(res => {
+                                        const items: any[] = res?.data ?? [];
+                                        if (items.length > 0) setMedicines(items.map((d: any) => ({ ...medicines[0], id: d.id, code: d.code ?? d.id, name: d.name ?? "", category: d.category ?? "", unit: d.unit ?? "", price: d.price ?? 0, stock: d.quantity ?? 0, minStock: d.minQuantity ?? 0, manufacturer: d.manufacturer ?? "", expiryDate: d.expiryDate ?? "", activeIngredient: d.activeIngredient ?? "", status: d.status ?? "available", description: d.description ?? "" })) as Medicine[]);
+                                    }).catch(() => {});
+                                } catch {
+                                    alert("Nhập file thất bại. Vui lòng thử lại.");
                                 }
                             };
                             input.click();
@@ -282,7 +340,7 @@ export default function MedicinesPage() {
                     </div>
                     <div>
                         <p className="text-sm text-[#687582] dark:text-gray-400">{UI_TEXT.ADMIN.MEDICINES.TOTAL_MEDICINES}</p>
-                        <p className="text-xl font-bold text-[#121417] dark:text-white">{dynamicStats.total.toLocaleString()}</p>
+                        <p className="text-xl font-bold text-[#121417] dark:text-white">{dynamicStats.total.toLocaleString("vi-VN")}</p>
                     </div>
                 </div>
 
@@ -444,7 +502,7 @@ export default function MedicinesPage() {
                                             </td>
                                             <td className="py-4 px-6">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${getStockStyle(medicine.stockLevel)}`}>
-                                                    {medicine.stock.toLocaleString()}
+                                                    {medicine.stock.toLocaleString("vi-VN")}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6">

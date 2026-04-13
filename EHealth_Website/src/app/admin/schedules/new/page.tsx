@@ -4,45 +4,37 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { scheduleService } from "@/services/scheduleService";
-import { staffService } from "@/services/staffService";
-import { getDepartments } from "@/services/departmentService";
-
-const FALLBACK_DOCTORS = [
-    { id: "1", name: "BS. Nguyễn Văn An" }, { id: "2", name: "BS. Trần Thị Bình" },
-    { id: "3", name: "BS. Lê Văn Cường" }, { id: "4", name: "BS. Phạm Thị Dung" },
-    { id: "5", name: "BS. Hoàng Văn Em" },
-];
-
-const FALLBACK_DEPTS = ["Khoa Nội", "Khoa Ngoại", "Khoa Nhi", "Khoa Sản", "Khoa Tim mạch", "Khoa Thần kinh", "Cấp cứu"];
+import { staffService, unwrapStaffList } from "@/services/staffService";
+import { getDepartments, unwrapDepartments } from "@/services/departmentService";
 
 export default function NewSchedulePage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
-    const [doctorList, setDoctorList] = useState(FALLBACK_DOCTORS);
-    const [deptList, setDeptList] = useState(FALLBACK_DEPTS);
+    const [doctorList, setDoctorList] = useState<{ id: string; name: string }[]>([]);
+    const [deptList, setDeptList] = useState<string[]>([]);
     const [formData, setFormData] = useState({
-        doctorId: "", department: "Khoa Nội", shift: "MORNING",
+        doctorId: "", department: "", shift: "MORNING",
         dateStart: new Date().toISOString().split("T")[0],
         dateEnd: "", repeat: "none", note: "",
     });
 
     useEffect(() => {
-        staffService.getList({ limit: 200 })
+        staffService.getList({ role: 'DOCTOR', limit: 200 })
             .then((res: any) => {
-                const items: any[] = res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    setDoctorList(items.map((d: any) => ({ id: d.id, name: d.full_name ?? d.fullName ?? d.name ?? "" })));
-                }
+                const items = unwrapStaffList(res);
+                setDoctorList(items.map(d => ({ id: d.id, name: d.fullName })));
             })
-            .catch(() => {});
-        getDepartments()
+            .catch(() => {
+                // API không khả dụng, hiển thị trống
+            });
+        getDepartments({ limit: 100 })
             .then((res: any) => {
-                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    setDeptList(items.map((d: any) => d.name ?? d));
-                }
+                const items = unwrapDepartments(res);
+                setDeptList(items.map(d => d.name));
             })
-            .catch(() => {});
+            .catch(() => {
+                // API không khả dụng, hiển thị trống
+            });
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

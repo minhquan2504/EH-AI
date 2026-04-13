@@ -1,47 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getRoles } from "@/services/permissionService";
+import { getRoles, deleteRole, toggleRoleStatus, getRolePermissions, assignPermissions, createRole } from "@/services/permissionService";
 
-// Mock data — Vai trò & Quyền hạn
-const INITIAL_ROLES = [
-    {
-        id: "ROLE_ADMIN", name: "Quản trị viên", code: "ADMIN",
-        description: "Toàn quyền quản lý hệ thống",
-        users: 3, status: "active",
-        permissions: ["user.read", "user.write", "user.delete", "doctor.read", "doctor.write", "doctor.delete", "medicine.read", "medicine.write", "medicine.delete", "report.read", "report.export", "settings.write"],
-    },
-    {
-        id: "ROLE_DOCTOR", name: "Bác sĩ", code: "DOCTOR",
-        description: "Khám bệnh, kê đơn, quản lý bệnh nhân",
-        users: 45, status: "active",
-        permissions: ["patient.read", "patient.write", "prescription.read", "prescription.write", "examination.read", "examination.write", "report.read"],
-    },
-    {
-        id: "ROLE_PHARMACIST", name: "Dược sĩ", code: "PHARMACIST",
-        description: "Quản lý thuốc, cấp phát đơn thuốc",
-        users: 12, status: "active",
-        permissions: ["medicine.read", "medicine.write", "prescription.read", "dispensing.write", "inventory.read", "inventory.write"],
-    },
-    {
-        id: "ROLE_RECEPTIONIST", name: "Lễ tân", code: "RECEPTIONIST",
-        description: "Tiếp nhận bệnh nhân, đặt lịch hẹn",
-        users: 8, status: "active",
-        permissions: ["patient.read", "patient.write", "appointment.read", "appointment.write", "billing.read", "billing.write"],
-    },
-    {
-        id: "ROLE_NURSE", name: "Y tá / Điều dưỡng", code: "NURSE",
-        description: "Hỗ trợ bác sĩ, theo dõi bệnh nhân",
-        users: 20, status: "active",
-        permissions: ["patient.read", "vital_signs.write", "examination.read", "report.read"],
-    },
-    {
-        id: "ROLE_ACCOUNTANT", name: "Kế toán", code: "ACCOUNTANT",
-        description: "Quản lý tài chính, báo cáo doanh thu",
-        users: 4, status: "inactive",
-        permissions: ["report.read", "report.export", "billing.read", "billing.write", "revenue.read"],
-    },
-];
 
 const PERMISSION_GROUPS = [
     { group: "Người dùng", permissions: [{ key: "user.read", label: "Xem" }, { key: "user.write", label: "Sửa" }, { key: "user.delete", label: "Xóa" }] },
@@ -60,17 +21,28 @@ const PERMISSION_GROUPS = [
     { group: "Cài đặt", permissions: [{ key: "settings.write", label: "Thay đổi" }] },
 ];
 
-type Role = typeof INITIAL_ROLES[number];
+interface Role {
+    id: string;
+    name: string;
+    code: string;
+    description: string;
+    users: number;
+    status: string;
+    permissions: string[];
+}
 
 export default function RolesPage() {
-    const [roles, setRoles] = useState(INITIAL_ROLES);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadingPermissions, setLoadingPermissions] = useState(false);
+    const [savingPermissions, setSavingPermissions] = useState(false);
 
-    useEffect(() => {
+    const loadRoles = () => {
+        setIsLoading(true);
         getRoles()
             .then((data) => {
                 if (Array.isArray(data) && data.length > 0) {
                     setRoles(data.map((r) => ({
-                        ...INITIAL_ROLES[0],
                         id: r.id ?? r.name,
                         name: r.displayName ?? r.name ?? "",
                         code: r.name ?? "",
@@ -81,8 +53,14 @@ export default function RolesPage() {
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ })
+            .finally(() => setIsLoading(false));
+    };
+
+    useEffect(() => {
+        loadRoles();
     }, []);
+
     const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [editedPermissions, setEditedPermissions] = useState<string[]>([]);
@@ -90,17 +68,27 @@ export default function RolesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [newRole, setNewRole] = useState({ name: "", code: "", description: "" });
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [creatingRole, setCreatingRole] = useState(false);
 
     const selected = roles.find((r) => r.id === selectedRoleId);
     const filteredRoles = roles.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()) || r.code.toLowerCase().includes(search.toLowerCase()));
 
-    const handleSelectRole = (roleId: string) => {
+    const handleSelectRole = async (roleId: string) => {
         const role = roles.find((r) => r.id === roleId);
-        if (role) {
-            setSelectedRoleId(roleId);
+        if (!role) return;
+        setSelectedRoleId(roleId);
+        setHasChanges(false);
+        setSaveSuccess(false);
+        // Thử tải permissions từ API
+        setLoadingPermissions(true);
+        try {
+            const res = await getRolePermissions(roleId);
+            const perms: string[] = Array.isArray(res?.data) ? res.data.map((p: any) => p.code ?? p.id ?? p) : (Array.isArray(role.permissions) ? role.permissions : []);
+            setEditedPermissions(perms);
+        } catch {
             setEditedPermissions([...role.permissions]);
-            setHasChanges(false);
-            setSaveSuccess(false);
+        } finally {
+            setLoadingPermissions(false);
         }
     };
 
@@ -113,12 +101,20 @@ export default function RolesPage() {
         setSaveSuccess(false);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!selectedRoleId) return;
-        setRoles((prev) => prev.map((r) => r.id === selectedRoleId ? { ...r, permissions: editedPermissions } : r));
-        setHasChanges(false);
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2000);
+        setSavingPermissions(true);
+        try {
+            await assignPermissions(selectedRoleId, editedPermissions);
+            setRoles((prev) => prev.map((r) => r.id === selectedRoleId ? { ...r, permissions: editedPermissions } : r));
+            setHasChanges(false);
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 2000);
+        } catch (err: any) {
+            alert(err?.message || "Lưu quyền thất bại. Vui lòng thử lại.");
+        } finally {
+            setSavingPermissions(false);
+        }
     };
 
     const handleCopy = () => {
@@ -137,23 +133,37 @@ export default function RolesPage() {
         setHasChanges(false);
     };
 
-    const handleAddRole = () => {
+    const handleAddRole = async () => {
         if (!newRole.name.trim() || !newRole.code.trim()) return;
-        const role: Role = {
-            id: "ROLE_" + Date.now(),
-            name: newRole.name,
-            code: newRole.code.toUpperCase(),
-            description: newRole.description,
-            users: 0,
-            status: "active",
-            permissions: [],
-        };
-        setRoles((prev) => [...prev, role]);
-        setSelectedRoleId(role.id);
-        setEditedPermissions([]);
-        setShowAddModal(false);
-        setNewRole({ name: "", code: "", description: "" });
-        setHasChanges(false);
+        setCreatingRole(true);
+        try {
+            const res = await createRole({
+                name: newRole.code.toUpperCase(),
+                displayName: newRole.name,
+                code: newRole.code.toUpperCase(),
+                description: newRole.description,
+            });
+            const newId = (res as any)?.data?.id ?? (res as any)?.id ?? "ROLE_" + Date.now();
+            const role: Role = {
+                id: newId,
+                name: newRole.name,
+                code: newRole.code.toUpperCase(),
+                description: newRole.description,
+                users: 0,
+                status: "active",
+                permissions: [],
+            };
+            setRoles((prev) => [...prev, role]);
+            setSelectedRoleId(role.id);
+            setEditedPermissions([]);
+            setShowAddModal(false);
+            setNewRole({ name: "", code: "", description: "" });
+            setHasChanges(false);
+        } catch (err: any) {
+            alert(err?.message || "Tạo vai trò thất bại. Vui lòng thử lại.");
+        } finally {
+            setCreatingRole(false);
+        }
     };
 
     return (
@@ -195,6 +205,18 @@ export default function RolesPage() {
                         </div>
                     </div>
                     <div className="divide-y divide-[#f0f1f3] dark:divide-[#2d353e]">
+                        {isLoading && (
+                            <div className="flex items-center justify-center py-8 gap-2 text-[#687582]">
+                                <div className="w-5 h-5 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
+                                <span className="text-sm">Đang tải...</span>
+                            </div>
+                        )}
+                        {!isLoading && filteredRoles.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-10 text-[#687582]">
+                                <span className="material-symbols-outlined text-4xl mb-2 opacity-30">search_off</span>
+                                <p className="text-sm">Không tìm thấy vai trò</p>
+                            </div>
+                        )}
                         {filteredRoles.map((role) => (
                             <button key={role.id} onClick={() => handleSelectRole(role.id)}
                                 className={`w-full px-5 py-4 text-left hover:bg-[#f6f7f8] dark:hover:bg-[#13191f] transition-colors ${selectedRoleId === role.id ? "bg-[#3C81C6]/5 dark:bg-[#3C81C6]/10 border-l-3 border-[#3C81C6]" : ""}`}>
@@ -228,16 +250,22 @@ export default function RolesPage() {
                                     <button onClick={handleCopy} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-[#687582] rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
                                         <span className="material-symbols-outlined text-[14px] align-middle mr-1">content_copy</span>Sao chép
                                     </button>
-                                    <button onClick={handleSave} disabled={!hasChanges}
+                                    <button onClick={handleSave} disabled={!hasChanges || savingPermissions}
                                         className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1 ${saveSuccess ? "bg-green-500 text-white" :
-                                            hasChanges ? "bg-[#3C81C6] text-white hover:bg-[#2a6da8]" :
+                                            hasChanges && !savingPermissions ? "bg-[#3C81C6] text-white hover:bg-[#2a6da8]" :
                                                 "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
                                             }`}>
-                                        <span className="material-symbols-outlined text-[14px]">{saveSuccess ? "check" : "save"}</span>
-                                        {saveSuccess ? "Đã lưu!" : "Lưu thay đổi"}
+                                        {savingPermissions ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[14px]">{saveSuccess ? "check" : "save"}</span>}
+                                        {savingPermissions ? "Đang lưu..." : saveSuccess ? "Đã lưu!" : "Lưu thay đổi"}
                                     </button>
                                 </div>
                             </div>
+                            {loadingPermissions && (
+                                <div className="flex items-center justify-center py-8 gap-2 text-[#687582]">
+                                    <div className="w-5 h-5 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-sm">Đang tải quyền hạn...</span>
+                                </div>
+                            )}
                             <div className="overflow-auto max-h-[600px]">
                                 <table className="w-full">
                                     <thead className="sticky top-0 bg-[#f6f7f8] dark:bg-[#13191f] z-10">
@@ -310,9 +338,10 @@ export default function RolesPage() {
                         </div>
                         <div className="p-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
                             <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-[#687582] rounded-xl text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Hủy</button>
-                            <button onClick={handleAddRole} disabled={!newRole.name.trim() || !newRole.code.trim()}
+                            <button onClick={handleAddRole} disabled={!newRole.name.trim() || !newRole.code.trim() || creatingRole}
                                 className="px-5 py-2.5 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-bold disabled:opacity-50 transition-colors flex items-center gap-2">
-                                <span className="material-symbols-outlined text-[18px]">add</span> Tạo vai trò
+                                {creatingRole ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[18px]">add</span>}
+                                {creatingRole ? "Đang tạo..." : "Tạo vai trò"}
                             </button>
                         </div>
                     </div>

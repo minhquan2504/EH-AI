@@ -8,7 +8,6 @@ import { PatientNavbar } from "@/components/patient/PatientNavbar";
 import { PatientFooter } from "@/components/patient/PatientFooter";
 import { TimeSlotPicker } from "@/components/patient/TimeSlotPicker";
 import { doctorService, type Doctor } from "@/services/doctorService";
-import { getMockDoctorById, MOCK_REVIEWS } from "@/data/patient-mock";
 
 const TABS = [
     { id: "about", label: "Giới thiệu", icon: "person" },
@@ -37,12 +36,10 @@ export default function DoctorDetailPage() {
             if (doc && doc.id) {
                 setDoctor(doc);
             } else {
-                // API returned empty — try mock
-                setDoctor(getMockDoctorById(id));
+                setDoctor(null);
             }
         } catch {
-            // API failed — try mock
-            setDoctor(getMockDoctorById(id));
+            setDoctor(null);
         } finally {
             setLoading(false);
         }
@@ -240,26 +237,9 @@ export default function DoctorDetailPage() {
                                                 <span className="text-xs text-amber-600">/5</span>
                                             </div>
                                         </div>
-                                        <div className="space-y-4">
-                                            {MOCK_REVIEWS.map((rev, i) => (
-                                                <div key={i} className="p-4 border border-gray-100 rounded-xl">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3C81C6]/10 to-[#60a5fa]/10 flex items-center justify-center">
-                                                                <span className="text-xs font-bold text-[#3C81C6]">{rev.name.charAt(0)}</span>
-                                                            </div>
-                                                            <span className="text-sm font-semibold text-gray-900">{rev.name}</span>
-                                                        </div>
-                                                        <span className="text-xs text-gray-400">{rev.date}</span>
-                                                    </div>
-                                                    <div className="flex gap-0.5 mb-2">
-                                                        {Array.from({ length: 5 }).map((_, j) => (
-                                                            <span key={j} className={`material-symbols-outlined ${j < rev.rating ? "text-amber-400" : "text-gray-200"}`} style={{ fontSize: "16px" }}>star</span>
-                                                        ))}
-                                                    </div>
-                                                    <p className="text-sm text-gray-600">{rev.text}</p>
-                                                </div>
-                                            ))}
+                                        <div className="text-center py-12 text-gray-400">
+                                            <span className="material-symbols-outlined mb-2" style={{ fontSize: "48px" }}>rate_review</span>
+                                            <p className="text-sm">Chưa có đánh giá nào được hiển thị</p>
                                         </div>
                                     </div>
                                 )}

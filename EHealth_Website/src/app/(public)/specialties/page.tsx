@@ -5,11 +5,11 @@ import { PatientNavbar } from "@/components/patient/PatientNavbar";
 import { PatientFooter } from "@/components/patient/PatientFooter";
 import { SpecialtyCard } from "@/components/patient/SpecialtyCard";
 import { getSpecialties, type Specialty } from "@/services/specialtyService";
-import { MOCK_SPECIALTIES, SPECIALTY_ENRICH_MAP } from "@/data/patient-mock";
 
 export default function SpecialtiesPage() {
     const [specialties, setSpecialties] = useState<Specialty[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
@@ -19,16 +19,12 @@ export default function SpecialtiesPage() {
     const loadSpecialties = async () => {
         try {
             setLoading(true);
+            setError(false);
             const res = await getSpecialties({ limit: 50 });
-            if (res.data && res.data.length > 0) {
-                setSpecialties(res.data);
-            } else {
-                // API returned empty — use mock data
-                setSpecialties(MOCK_SPECIALTIES);
-            }
+            setSpecialties(res.data ?? []);
         } catch {
-            // API failed — use mock data
-            setSpecialties(MOCK_SPECIALTIES);
+            setSpecialties([]);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -89,6 +85,15 @@ export default function SpecialtiesPage() {
                             </div>
                         ))}
                     </div>
+                            ) : error ? (
+                    <div className="text-center py-16">
+                        <span className="material-symbols-outlined text-red-300 mb-3" style={{ fontSize: "64px" }}>cloud_off</span>
+                        <p className="text-gray-700 text-lg font-medium">Không thể tải danh sách chuyên khoa</p>
+                        <p className="text-gray-400 text-sm mt-1 mb-4">Vui lòng thử lại sau</p>
+                        <button onClick={loadSpecialties} className="px-4 py-2 text-sm font-medium text-white bg-[#3C81C6] rounded-xl hover:bg-[#2a6da8] transition-colors">
+                            Thử lại
+                        </button>
+                    </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center py-16">
                         <span className="material-symbols-outlined text-gray-300 mb-3" style={{ fontSize: "64px" }}>search_off</span>
@@ -97,20 +102,14 @@ export default function SpecialtiesPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filtered.map(spec => {
-                            const enrich = SPECIALTY_ENRICH_MAP[spec.name];
-                            return (
-                                <SpecialtyCard
-                                    key={spec.id}
-                                    id={spec.id}
-                                    name={spec.name}
-                                    description={spec.description || enrich?.longDesc}
-                                    icon={enrich?.icon}
-                                    color={enrich?.color}
-                                    commonDiseases={enrich?.diseases}
-                                />
-                            );
-                        })}
+                        {filtered.map(spec => (
+                            <SpecialtyCard
+                                key={spec.id}
+                                id={spec.id}
+                                name={spec.name}
+                                description={spec.description}
+                            />
+                        ))}
                     </div>
                 )}
             </section>

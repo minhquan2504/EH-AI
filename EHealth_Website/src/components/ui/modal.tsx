@@ -25,6 +25,7 @@ export function Modal({
     size = "md",
 }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     // Close on Escape key
     useEffect(() => {
@@ -35,6 +36,10 @@ export function Modal({
         if (isOpen) {
             document.addEventListener("keydown", handleEscape);
             document.body.style.overflow = "hidden";
+            // Focus vào nút close khi modal mở
+            setTimeout(() => {
+                closeButtonRef.current?.focus();
+            }, 50);
         }
 
         return () => {
@@ -59,14 +64,19 @@ export function Modal({
         >
             <div
                 ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
                 className={`${sizeClasses[size]} w-full bg-white dark:bg-[#1e242b] rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-[#dde0e4] dark:border-[#2d353e]">
-                    <h2 className="text-xl font-bold text-[#121417] dark:text-white">
+                    <h2 id="modal-title" className="text-xl font-bold text-[#121417] dark:text-white">
                         {title}
                     </h2>
                     <button
+                        ref={closeButtonRef}
+                        aria-label="Đóng"
                         onClick={onClose}
                         className="p-2 text-[#687582] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                     >

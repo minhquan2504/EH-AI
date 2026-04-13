@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
-import { MOCK_PATIENT_PROFILES, RELATIONSHIP_OPTIONS, type PatientProfile } from "@/data/patient-profiles-mock";
+import { RELATIONSHIP_OPTIONS, type PatientProfile } from "@/types/patient-profile";
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from "@/utils/localStorage";
 import { validateName, validatePhone, validateDob, validateIdNumber, validateBHYT } from "@/utils/validation";
 
@@ -28,16 +28,10 @@ export default function PatientProfilesPage() {
     const [detailProfile, setDetailProfile] = useState<PatientProfile | null>(null);
     const [detailTab, setDetailTab] = useState("info");
 
-    // Load data on mount — dùng tất cả profiles (mock data cũng chỉ có 1 user)
+    // Load data on mount — từ localStorage
     useEffect(() => {
         const stored = loadFromStorage<PatientProfile[]>(STORAGE_KEYS.PATIENT_PROFILES, []);
-        if (stored.length > 0) {
-            setProfiles(stored);
-        } else {
-            // First load: seed from mock data
-            setProfiles(MOCK_PATIENT_PROFILES);
-            saveToStorage(STORAGE_KEYS.PATIENT_PROFILES, MOCK_PATIENT_PROFILES);
-        }
+        setProfiles(stored);
         setLoaded(true);
     }, []);
 

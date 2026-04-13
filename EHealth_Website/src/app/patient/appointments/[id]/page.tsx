@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { AppointmentStatusBadge } from "@/components/patient/AppointmentStatusBadge";
 import { getAppointmentById, cancelAppointment, type Appointment } from "@/services/appointmentService";
-import { getMockAppointmentById } from "@/data/patient-mock";
 
 const STATUS_TIMELINE = [
     { status: "pending", label: "Đã đặt lịch", icon: "edit_calendar" },
@@ -35,13 +34,9 @@ export default function AppointmentDetailPage() {
         try {
             setLoading(true);
             const apt = await getAppointmentById(id);
-            if (apt && apt.id) {
-                setAppointment(apt);
-            } else {
-                setAppointment(getMockAppointmentById(id));
-            }
+            setAppointment(apt && apt.id ? apt : null);
         } catch {
-            setAppointment(getMockAppointmentById(id));
+            setAppointment(null);
         } finally {
             setLoading(false);
         }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createRole } from "@/services/permissionService";
+import { createRole, assignPermissions } from "@/services/permissionService";
 
 // Permission groups — Tương ứng bảng `permissions` (module, code, description)
 const PERMISSION_MODULES = [
@@ -142,6 +142,7 @@ const ROLE_TEMPLATES = [
 export default function NewRolePage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
     const [fd, setFd] = useState({ name: "", code: "", description: "", isSystem: false });
     const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
     const [expandedModules, setExpandedModules] = useState<string[]>(PERMISSION_MODULES.map((m) => m.module));
@@ -178,17 +179,28 @@ export default function NewRolePage() {
         e.preventDefault();
         if (!fd.name.trim() || !fd.code.trim()) { alert("Vui lòng nhập tên và mã vai trò"); return; }
         setSaving(true);
+        setApiError(null);
         try {
-            await createRole({
-                name: fd.code,
+            const res = await createRole({
+                name: fd.code.toUpperCase(),
                 displayName: fd.name,
+                code: fd.code.toUpperCase(),
                 description: fd.description,
-                permissions: selectedPermissions,
                 isSystem: fd.isSystem,
-            });
+            } as any);
+            // Lấy id của role vừa tạo và gán permissions
+            const roleId = (res as any)?.data?.id ?? (res as any)?.id;
+            if (roleId && selectedPermissions.length > 0) {
+                try {
+                    await assignPermissions(roleId, selectedPermissions);
+                } catch (permErr: any) {
+                    // Gán quyền thất bại nhưng role đã tạo — vẫn redirect nhưng báo lỗi
+                    console.warn("Gán quyền thất bại:", permErr?.message);
+                }
+            }
             router.push("/admin/users/roles");
-        } catch {
-            alert("Tạo vai trò thất bại. Vui lòng thử lại.");
+        } catch (err: any) {
+            setApiError(err?.message || "Tạo vai trò thất bại. Vui lòng thử lại.");
         } finally {
             setSaving(false);
         }
@@ -208,6 +220,12 @@ export default function NewRolePage() {
             </div>
 
             <form onSubmit={handleSubmit}>
+                {apiError && (
+                    <div className="flex items-center gap-3 px-4 py-3 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                        <span className="material-symbols-outlined text-[18px] text-red-600">error</span>
+                        <p className="text-sm text-red-700 dark:text-red-400">{apiError}</p>
+                    </div>
+                )}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left: Role info */}
                     <div className="space-y-6">
@@ -220,20 +238,20 @@ export default function NewRolePage() {
                             <div className="p-5 space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Tên vai trò *</label>
-                                    <input type="text" name="name" value={fd.name} onChange={handleChange} placeholder="VD: Kỹ thuật viên xét nghiệm" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
+                                    <input type="text" name="name" value={fd.name} onChange={handleChange} aria-label="Tên vai trò" placeholder="VD: Kỹ thuật viên xét nghiệm" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Mã vai trò (code) *</label>
-                                    <input type="text" name="code" value={fd.code} onChange={(e) => setFd((p) => ({ ...p, code: e.target.value.toUpperCase().replace(/\s+/g, '_') }))} placeholder="VD: LAB_TECHNICIAN" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white font-mono" />
+                                    <input type="text" name="code" value={fd.code} onChange={(e) => setFd((p) => ({ ...p, code: e.target.value.toUpperCase().replace(/\s+/g, '_') }))} aria-label="Mã vai trò" placeholder="VD: LAB_TECHNICIAN" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white font-mono" />
                                     <p className="text-xs text-[#687582] mt-1">Mã duy nhất, viết hoa, dùng dấu _</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Mô tả</label>
-                                    <textarea name="description" value={fd.description} onChange={handleChange} rows={3} placeholder="Mô tả chức năng và phạm vi của vai trò..." className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white resize-none" />
+                                    <textarea name="description" value={fd.description} onChange={handleChange} rows={3} aria-label="Mô tả vai trò" placeholder="Mô tả chức năng và phạm vi của vai trò..." className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white resize-none" />
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl">
                                     <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" className="sr-only peer" checked={fd.isSystem} onChange={(e) => setFd((p) => ({ ...p, isSystem: e.target.checked }))} />
+                                        <input type="checkbox" className="sr-only peer" aria-label="Vai trò hệ thống" checked={fd.isSystem} onChange={(e) => setFd((p) => ({ ...p, isSystem: e.target.checked }))} />
                                         <div className="w-9 h-5 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-amber-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full" />
                                     </label>
                                     <div>

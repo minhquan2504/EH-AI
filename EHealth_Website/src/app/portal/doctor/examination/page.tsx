@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { MOCK_PATIENT_QUEUE } from "@/lib/mock-data/doctor";
 import { emrService } from "@/services/emrService";
+import { encounterService } from "@/services/encounterService";
+import { prescriptionService } from "@/services/prescriptionService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { validateBloodPressure, validateVitalSign } from "@/utils/validation";
@@ -48,24 +49,35 @@ const LAB_TESTS = [
 
 const PAIN_LOCATIONS = ["Đầu", "Ngực", "Bụng", "Lưng", "Tay", "Chân", "Khớp", "Cổ", "Họng", "Toàn thân"];
 
+/* ──────── Types ──────── */
+type PatientInfo = {
+    id: string; fullName: string; phone: string; gender: string;
+    dob: string; age: number; reason: string; priority: string;
+    queueNumber: number; checkInTime: string; allergies?: string[]; avatar?: string;
+    birthDate?: string;
+    medicalHistory?: string[];
+};
+
 /* ──────── Component ──────── */
 export default function ExaminationPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const patientId = searchParams.get("patient");
     const appointmentId = searchParams.get("appointment");
+    const encounterId = searchParams.get("encounter");
     const { user } = useAuth();
     const toast = useToast();
 
-    // Try real API first, fall back to mock
-    const [patient, setPatient] = useState<typeof MOCK_PATIENT_QUEUE[0] | null>(() => {
-        if (!patientId) return null;
-        return MOCK_PATIENT_QUEUE.find(p => p.id === patientId) || null;
-    });
+    // Patient state — load từ API
+    const [patient, setPatient] = useState<PatientInfo | null>(null);
+    const [patientLoading, setPatientLoading] = useState(false);
     const [emrId, setEmrId] = useState<string | null>(null);
+    const [currentEncounterId, setCurrentEncounterId] = useState<string | null>(encounterId);
+    const encounterInitRef = useRef(false);
 
     const [activeStep, setActiveStep] = useState(0);
     const [saving, setSaving] = useState(false);
+    const [stepLoading, setStepLoading] = useState(false);
     const [vitalErrors, setVitalErrors] = useState<Record<string, string>>({});
 
     // Form state
@@ -82,6 +94,9 @@ export default function ExaminationPage() {
     const [labResults, setLabResults] = useState<Record<string, string>>({});
     const [diagnosis, setDiagnosis] = useState("");
     const [icdCode, setIcdCode] = useState("");
+    const [icdQuery, setIcdQuery] = useState("");
+    const [icdResults, setIcdResults] = useState<{ code: string; description: string }[]>([]);
+    const [icdSearching, setIcdSearching] = useState(false);
     const [treatment, setTreatment] = useState("");
     const [meds, setMeds] = useState<{ name: string; dosage: string; frequency: string; duration: string; note: string }[]>([]);
     const [newMed, setNewMed] = useState({ name: "", dosage: "", frequency: "", duration: "", note: "" });
@@ -116,6 +131,79 @@ export default function ExaminationPage() {
         setDoctorNote(summary);
         addAuditEntry("Kết luận", "AI tạo tóm tắt SOAP", "accepted");
     };
+
+    // Load patient info từ API (fallback về mock nếu thất bại)
+    useEffect(() => {
+        if (!patientId) return;
+        setPatientLoading(true);
+        encounterService.getPatient(patientId)
+            .then(data => {
+                if (data) {
+                    setPatient(prev => ({
+                        ...(prev ?? {}),
+                        id: data.id ?? patientId,
+                        fullName: data.fullName ?? data.name ?? prev?.fullName ?? '',
+                        gender: data.gender ?? prev?.gender ?? '',
+                        age: data.age ?? prev?.age ?? 0,
+                        birthDate: data.birthDate ?? data.dateOfBirth ?? prev?.birthDate ?? '',
+                        phone: data.phone ?? data.phoneNumber ?? prev?.phone ?? '',
+                        allergies: data.allergies ?? prev?.allergies ?? [],
+                        medicalHistory: data.medicalHistory ?? prev?.medicalHistory ?? [],
+                        reason: data.chiefComplaint ?? prev?.reason ?? '',
+                        queueNumber: data.queueNumber ?? prev?.queueNumber ?? '',
+                        avatar: data.avatar ?? prev?.avatar ?? null,
+                    } as any));
+                }
+            })
+            .catch(() => { setPatient(null); })
+            .finally(() => setPatientLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [patientId]);
+
+    // Tạo / load encounter khi vào trang
+    useEffect(() => {
+        if (encounterInitRef.current) return;
+        encounterInitRef.current = true;
+
+        // Nếu đã có encounterId từ query, dùng luôn
+        if (encounterId) {
+            setCurrentEncounterId(encounterId);
+            return;
+        }
+
+        // Nếu có appointmentId → tạo encounter từ appointment
+        if (appointmentId) {
+            encounterService.createFromAppointment(appointmentId)
+                .then(data => { if (data?.id) setCurrentEncounterId(data.id); })
+                .catch(() => {/* không block UI */});
+            return;
+        }
+
+        // Nếu có patientId → tạo encounter mới
+        if (patientId && user?.id) {
+            encounterService.create({
+                patientId,
+                doctorId: user.id,
+                status: 'IN_PROGRESS',
+            })
+                .then(data => { if (data?.id) setCurrentEncounterId(data.id); })
+                .catch(() => {/* không block UI */});
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [patientId, appointmentId, encounterId, user?.id]);
+
+    // ICD-10 search với debounce
+    useEffect(() => {
+        if (!icdQuery || icdQuery.length < 2) { setIcdResults([]); return; }
+        const timer = setTimeout(() => {
+            setIcdSearching(true);
+            encounterService.searchICD(icdQuery)
+                .then(data => setIcdResults(Array.isArray(data) ? data : []))
+                .catch(() => setIcdResults([]))
+                .finally(() => setIcdSearching(false));
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [icdQuery]);
 
     // AI Copilot context — push state to copilot sidebar
     const { updateContext, registerAutoFill: regAutoFill } = usePageAIContext({
@@ -192,7 +280,6 @@ export default function ExaminationPage() {
         setNewMed({ name: "", dosage: "", frequency: "", duration: "", note: "" });
     };
     const removeMed = (idx: number) => setMeds(prev => prev.filter((_, i) => i !== idx));
-    const goNext = () => { if (canProceed && activeStep < STEPS.length - 1) setActiveStep(prev => prev + 1); };
     const goBack = () => { if (activeStep > 0) setActiveStep(prev => prev - 1); };
 
     const toggleLab = (labId: string) => {
@@ -224,6 +311,76 @@ export default function ExaminationPage() {
         sendToPharmacy,
     });
 
+    // Lưu vitals step 0 lên API
+    const handleSaveVitals = async (eid: string) => {
+        try {
+            await encounterService.saveVitals(eid, {
+                bloodPressure: vitals.bloodPressure,
+                heartRate: vitals.heartRate ? parseFloat(vitals.heartRate) : undefined,
+                temperature: vitals.temperature ? parseFloat(vitals.temperature) : undefined,
+                spO2: vitals.spO2 ? parseFloat(vitals.spO2) : undefined,
+                respiratoryRate: vitals.respiratoryRate ? parseFloat(vitals.respiratoryRate) : undefined,
+                weight: vitals.weight ? parseFloat(vitals.weight) : undefined,
+                height: vitals.height ? parseFloat(vitals.height) : undefined,
+            });
+        } catch { /* không block — data vẫn giữ local */ }
+    };
+
+    // Lưu lab orders step 2 lên API
+    const handleSaveLabOrders = async (eid: string) => {
+        if (selectedLabs.length === 0) return;
+        try {
+            await encounterService.createMedicalOrder(eid, {
+                encounterId: eid,
+                items: selectedLabs.map(labId => ({
+                    serviceId: labId,
+                    note: labNote || undefined,
+                })),
+                note: labNote || undefined,
+            });
+        } catch { /* không block */ }
+    };
+
+    // Lưu chẩn đoán step 3 lên API
+    const handleSaveDiagnosis = async (eid: string) => {
+        if (!diagnosis.trim()) return;
+        try {
+            await encounterService.addDiagnosis(eid, {
+                encounterId: eid,
+                icdCode: icdCode || undefined,
+                description: diagnosis,
+                type: 'PRIMARY',
+                treatment: treatment || undefined,
+            });
+        } catch { /* không block */ }
+    };
+
+    // Xử lý Next button — lưu data của step hiện tại trước khi chuyển
+    const handleGoNext = async () => {
+        if (!canProceed || activeStep >= STEPS.length - 1) return;
+        const eid = currentEncounterId;
+        if (eid) {
+            setStepLoading(true);
+            try {
+                if (activeStep === 0) await handleSaveVitals(eid);
+                else if (activeStep === 1) {
+                    // Lưu symptoms vào encounter status/notes
+                    await encounterService.updateStatus(eid, 'IN_PROGRESS', {
+                        chiefComplaint: symptoms,
+                        painLevel,
+                        painLocations,
+                        onsetTime,
+                    });
+                }
+                else if (activeStep === 2) await handleSaveLabOrders(eid);
+                else if (activeStep === 3) await handleSaveDiagnosis(eid);
+            } catch { /* không block */ } finally {
+                setStepLoading(false);
+            }
+        }
+        setActiveStep(prev => prev + 1);
+    };
+
     const handleSaveDraft = async () => {
         setSaving(true);
         try {
@@ -232,11 +389,12 @@ export default function ExaminationPage() {
                 await emrService.saveDraft(emrId, payload);
             } else {
                 const res = await emrService.create({ ...payload, status: "DRAFT" });
-                if (res?.data?.id) setEmrId(res.data.id);
+                const newId = (res as any)?.id;
+                if (newId) setEmrId(newId);
             }
             toast.success("Đã lưu nháp thành công!");
         } catch {
-            // API thất bại — giữ nguyên dữ liệu local, không báo sai
+            // API thất bại — giữ nguyên dữ liệu local
         } finally {
             setSaving(false);
         }
@@ -246,26 +404,50 @@ export default function ExaminationPage() {
         if (!confirm("Xác nhận hoàn thành khám bệnh và ký kết quả?")) return;
         setSaving(true);
         try {
-            const payload = buildEmrPayload();
-            let currentEmrId = emrId;
-            if (!currentEmrId) {
-                const res = await emrService.create({ ...payload, status: "COMPLETED" });
-                currentEmrId = res?.data?.id || null;
-                if (currentEmrId) setEmrId(currentEmrId);
+            const eid = currentEncounterId;
+
+            // 1. Kê đơn thuốc nếu có
+            if (meds.length > 0) {
+                await prescriptionService.create({
+                    encounterId: eid ?? undefined,
+                    patientId,
+                    doctorId: user?.id,
+                    diagnosis,
+                    icdCode: icdCode || undefined,
+                    notes: doctorNote || undefined,
+                    medications: meds.map(m => ({
+                        name: m.name,
+                        dosage: m.dosage,
+                        frequency: m.frequency,
+                        duration: m.duration,
+                        note: m.note || undefined,
+                    })),
+                    sendToPharmacy,
+                });
+            }
+
+            // 2. Sign-off nếu có encounter
+            if (eid) {
+                await encounterService.draftSign(eid).catch(() => {});
+                await encounterService.officialSign(eid).catch(() => {});
+                await encounterService.updateStatus(eid, 'COMPLETED', {
+                    followUpDate: followUp || undefined,
+                    doctorNote: doctorNote || undefined,
+                });
             } else {
-                await emrService.update(currentEmrId, { ...payload, status: "COMPLETED" });
-            }
-            if (currentEmrId) {
-                await emrService.sign(currentEmrId);
-                if (sendToPharmacy && meds.length > 0) {
-                    await emrService.createPrescription({
-                        emrId: currentEmrId,
-                        patientId,
-                        doctorId: user?.id,
-                        items: meds,
-                    });
+                // Fallback: dùng emrService tạo record
+                const payload = buildEmrPayload();
+                let currentEmrId = emrId;
+                if (!currentEmrId) {
+                    const res = await emrService.create({ ...payload, status: "COMPLETED" });
+                    currentEmrId = (res as any)?.id ?? null;
+                    if (currentEmrId) setEmrId(currentEmrId);
+                } else {
+                    await emrService.update(currentEmrId, { ...payload, status: "COMPLETED" });
                 }
+                if (currentEmrId) await emrService.sign(currentEmrId).catch(() => {});
             }
+
             if (sendToPharmacy && meds.length > 0) {
                 toast.success("Đã hoàn thành khám bệnh và gửi đơn thuốc đến quầy dược!");
             } else {
@@ -299,6 +481,17 @@ export default function ExaminationPage() {
         });
         setLabResults(mockResults);
     };
+
+    if (patientLoading && !patient) {
+        return (
+            <div className="p-6 md:p-8">
+                <div className="max-w-2xl mx-auto text-center py-20">
+                    <div className="w-16 h-16 border-4 border-[#3C81C6] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm text-[#687582]">Đang tải thông tin bệnh nhân...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!patient) {
         return (
@@ -460,6 +653,7 @@ export default function ExaminationPage() {
                                                         setVitalErrors(prev => ({ ...prev, [f.key]: res.valid ? "" : res.message }));
                                                     }
                                                 }}
+                                                    aria-label={f.label}
                                                     placeholder={f.placeholder} className={`w-full text-lg font-bold text-[#121417] dark:text-white bg-transparent outline-none placeholder:text-gray-300 dark:placeholder:text-gray-600 ${vitalErrors[f.key] ? "text-red-500" : ""}`} />
                                                 <span className="text-xs text-[#b0b8c1] flex-shrink-0">{f.unit}</span>
                                             </div>
@@ -609,14 +803,15 @@ export default function ExaminationPage() {
                                         <div>
                                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Ghi chú chỉ định</label>
                                             <input type="text" value={labNote} onChange={(e) => setLabNote(e.target.value)}
+                                                aria-label="Ghi chú chỉ định"
                                                 placeholder="VD: Nhịn ăn sáng trước khi lấy máu..."
                                                 className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <button onClick={simulateLabResults}
-                                                className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-bold transition-colors shadow-md shadow-teal-200 dark:shadow-none">
-                                                <span className="material-symbols-outlined text-[18px]">science</span>
-                                                Mô phỏng kết quả XN
+                                            <button disabled
+                                                className="flex items-center gap-2 px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed opacity-60">
+                                                <span className="material-symbols-outlined text-[18px]">hourglass_empty</span>
+                                                Chưa có kết quả, vui lòng chờ phòng xét nghiệm
                                             </button>
                                             <span className="text-xs text-[#687582]">Đã chọn {selectedLabs.length} xét nghiệm</span>
                                         </div>
@@ -629,14 +824,33 @@ export default function ExaminationPage() {
                         {activeStep === 3 && (
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Mã ICD-10</label>
-                                        <input type="text" value={icdCode} onChange={(e) => setIcdCode(e.target.value)} placeholder="VD: I10, J06.9..."
-                                            className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
+                                    <div className="relative">
+                                        <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Tìm ICD-10</label>
+                                        <div className="relative">
+                                            <input type="text" value={icdQuery}
+                                                onChange={(e) => setIcdQuery(e.target.value)}
+                                                aria-label="Tìm ICD-10"
+                                                placeholder="Gõ để tìm mã ICD-10..."
+                                                className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white pr-8" />
+                                            {icdSearching && <div className="absolute right-3 top-3 w-4 h-4 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />}
+                                        </div>
+                                        {icdCode && <p className="text-xs text-[#3C81C6] font-mono mt-1">Đã chọn: {icdCode}</p>}
+                                        {icdResults.length > 0 && (
+                                            <div className="absolute z-20 mt-1 w-full bg-white dark:bg-[#1e242b] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                                {icdResults.map((r) => (
+                                                    <button key={r.code} type="button"
+                                                        onClick={() => { setIcdCode(r.code); setDiagnosis(r.description); setIcdQuery(""); setIcdResults([]); }}
+                                                        className="w-full text-left px-4 py-2.5 hover:bg-[#f8f9fa] dark:hover:bg-[#13191f] text-sm border-b border-[#f0f0f0] dark:border-[#2d353e] last:border-0">
+                                                        <span className="font-mono text-[#3C81C6] text-xs mr-2">{r.code}</span>
+                                                        <span className="text-[#121417] dark:text-white">{r.description}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Chẩn đoán *</label>
-                                        <input type="text" value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} placeholder="Tên bệnh / chẩn đoán..."
+                                        <input type="text" value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} aria-label="Chẩn đoán" placeholder="Tên bệnh / chẩn đoán..."
                                             className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                     </div>
                                 </div>
@@ -683,7 +897,7 @@ export default function ExaminationPage() {
                                                     <p className="text-sm font-semibold text-[#121417] dark:text-white">{m.name}</p>
                                                     <p className="text-xs text-[#687582] truncate">{[m.dosage, m.frequency, m.duration, m.note].filter(Boolean).join(" • ")}</p>
                                                 </div>
-                                                <button onClick={() => removeMed(i)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all">
+                                                <button onClick={() => removeMed(i)} aria-label="Xóa thuốc" className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all">
                                                     <span className="material-symbols-outlined text-[18px]">delete</span>
                                                 </button>
                                             </div>
@@ -699,15 +913,15 @@ export default function ExaminationPage() {
                                 <div className="p-4 border-2 border-dashed border-[#dde0e4] dark:border-[#2d353e] rounded-xl space-y-3">
                                     <p className="text-xs font-bold text-[#687582] uppercase tracking-wide">Thêm thuốc mới</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        <input type="text" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="Tên thuốc *"
+                                        <input type="text" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} aria-label="Tên thuốc" placeholder="Tên thuốc *"
                                             className="px-3 py-2 bg-white dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-lg text-sm outline-none focus:border-[#3C81C6] dark:text-white" />
-                                        <input type="text" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="Liều lượng"
+                                        <input type="text" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} aria-label="Liều lượng" placeholder="Liều lượng"
                                             className="px-3 py-2 bg-white dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-lg text-sm outline-none focus:border-[#3C81C6] dark:text-white" />
-                                        <input type="text" value={newMed.frequency} onChange={(e) => setNewMed(p => ({ ...p, frequency: e.target.value }))} placeholder="Tần suất"
+                                        <input type="text" value={newMed.frequency} onChange={(e) => setNewMed(p => ({ ...p, frequency: e.target.value }))} aria-label="Tần suất dùng thuốc" placeholder="Tần suất"
                                             className="px-3 py-2 bg-white dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-lg text-sm outline-none focus:border-[#3C81C6] dark:text-white" />
-                                        <input type="text" value={newMed.duration} onChange={(e) => setNewMed(p => ({ ...p, duration: e.target.value }))} placeholder="Số ngày"
+                                        <input type="text" value={newMed.duration} onChange={(e) => setNewMed(p => ({ ...p, duration: e.target.value }))} aria-label="Số ngày dùng thuốc" placeholder="Số ngày"
                                             className="px-3 py-2 bg-white dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-lg text-sm outline-none focus:border-[#3C81C6] dark:text-white" />
-                                        <input type="text" value={newMed.note} onChange={(e) => setNewMed(p => ({ ...p, note: e.target.value }))} placeholder="Ghi chú"
+                                        <input type="text" value={newMed.note} onChange={(e) => setNewMed(p => ({ ...p, note: e.target.value }))} aria-label="Ghi chú thuốc" placeholder="Ghi chú"
                                             className="px-3 py-2 bg-white dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-lg text-sm outline-none focus:border-[#3C81C6] dark:text-white" />
                                         <button onClick={addMed} className="px-4 py-2 bg-[#3C81C6] text-white rounded-lg text-sm font-medium hover:bg-[#2a6da8] flex items-center justify-center gap-1.5 transition-colors">
                                             <span className="material-symbols-outlined text-[16px]">add</span>Thêm thuốc
@@ -774,7 +988,7 @@ export default function ExaminationPage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Lời dặn bác sĩ</label>
-                                        <input type="text" value={doctorNote} onChange={(e) => setDoctorNote(e.target.value)} placeholder="Chế độ ăn, sinh hoạt..."
+                                        <input type="text" value={doctorNote} onChange={(e) => setDoctorNote(e.target.value)} aria-label="Lời dặn bác sĩ" placeholder="Chế độ ăn, sinh hoạt..."
                                             className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                     </div>
                                 </div>
@@ -807,19 +1021,19 @@ export default function ExaminationPage() {
 
                 {/* Bottom Actions */}
                 <div className="flex items-center justify-between bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e] p-4">
-                    <button onClick={goBack} disabled={activeStep === 0}
+                    <button onClick={goBack} disabled={activeStep === 0 || stepLoading}
                         className="flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-[#687582] disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <span className="material-symbols-outlined text-[18px]">chevron_left</span>Quay lại
                     </button>
                     <div className="flex items-center gap-2.5">
-                        <button onClick={handleSaveDraft} disabled={saving}
+                        <button onClick={handleSaveDraft} disabled={saving || stepLoading}
                             className="flex items-center gap-1.5 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-[#687582] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
                             <span className="material-symbols-outlined text-[18px]">save</span>Lưu nháp
                         </button>
                         {activeStep < STEPS.length - 1 ? (
-                            <button onClick={goNext} disabled={!canProceed}
+                            <button onClick={handleGoNext} disabled={!canProceed || stepLoading}
                                 className="flex items-center gap-1.5 px-5 py-2.5 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-bold transition-colors disabled:opacity-40 shadow-md shadow-blue-200 dark:shadow-none">
-                                Tiếp theo<span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                                {stepLoading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Đang lưu...</> : <>Tiếp theo<span className="material-symbols-outlined text-[18px]">chevron_right</span></>}
                             </button>
                         ) : (
                             <button onClick={handleComplete} disabled={saving}

@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function ReceptionistSettings() {
     const { user: authUser, updateUser } = useAuth();
     const [profile, setProfile] = useState({
-        name: "Nguyễn Thị Hoa", email: "reception@ehealth.vn", phone: "0901234567", role: "Lễ tân"
+        name: authUser?.fullName || "", email: authUser?.email || "", phone: authUser?.phone || "", role: "Lễ tân"
     });
     const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
     const [notifications, setNotifications] = useState({ newAppointment: true, reminderCheckin: true, billing: false });
@@ -20,11 +20,15 @@ export default function ReceptionistSettings() {
         axiosClient.get(PROFILE_ENDPOINTS.ME)
             .then(res => {
                 const d = res?.data?.data ?? res?.data;
-                if (d) setProfile({ name: d.fullName ?? d.name ?? profile.name, email: d.email ?? profile.email, phone: d.phone ?? profile.phone, role: d.role ?? profile.role });
+                if (d) setProfile({ name: d.fullName ?? d.name ?? "", email: d.email ?? "", phone: d.phone ?? "", role: d.role ?? "Lễ tân" });
             })
-            .catch(() => {/* keep mock */});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+            .catch(() => {
+                // Sử dụng thông tin từ AuthContext nếu API fail
+                if (authUser) {
+                    setProfile({ name: authUser.fullName ?? "", email: authUser.email ?? "", phone: authUser.phone ?? "", role: "Lễ tân" });
+                }
+            });
+    }, [authUser]);
 
     const handleSaveProfile = async () => {
         setSaving(true);

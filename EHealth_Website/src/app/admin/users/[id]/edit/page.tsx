@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { MOCK_USERS } from "@/lib/mock-data/admin";
 import { ROLES, ROLE_LABELS, type Role } from "@/constants/roles";
 import type { User } from "@/types";
 import { getUserById, updateUser } from "@/services/userService";
@@ -14,6 +13,9 @@ export default function EditUserPage() {
     const userId = params.id as string;
 
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
@@ -21,34 +23,48 @@ export default function EditUserPage() {
         phone: "",
         gender: "Nam",
         birthDate: "",
+        address: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (!userId) return;
+        setIsLoading(true);
+        setLoadError(null);
         getUserById(userId)
             .then((res) => {
                 const d = (res as any)?.data ?? res as any;
                 if (d) {
-                    setUser({ ...MOCK_USERS[0], ...d, id: d.id ?? userId, fullName: d.full_name ?? d.fullName ?? "", email: d.email ?? "", role: d.role ?? ROLES.STAFF, status: d.status?.toLowerCase() ?? "active" } as User);
-                    setFormData({
-                        fullName: d.full_name ?? d.fullName ?? "",
+                    const roleVal = Array.isArray(d.roles) && d.roles.length > 0
+                        ? d.roles[0].toLowerCase()
+                        : (d.role?.toLowerCase() ?? ROLES.STAFF);
+                    setUser({
+                        id: d.users_id ?? d.id ?? userId,
+                        fullName: d.profile?.full_name ?? d.full_name ?? d.fullName ?? "",
                         email: d.email ?? "",
-                        role: d.role ?? ROLES.STAFF,
-                        phone: d.phone_number ?? d.phoneNumber ?? "",
+                        role: roleVal,
+                        status: (d.status ?? "ACTIVE") as User["status"],
+                        avatar: d.profile?.avatar_url ?? d.avatar ?? "",
+                        createdAt: d.created_at ?? d.createdAt ?? "",
+                    } as User);
+                    setFormData({
+                        fullName: d.profile?.full_name ?? d.full_name ?? d.fullName ?? "",
+                        email: d.email ?? "",
+                        role: roleVal,
+                        phone: d.phone ?? d.phone_number ?? d.phoneNumber ?? "",
                         gender: d.gender === "MALE" ? "Nam" : d.gender === "FEMALE" ? "Nữ" : "Nam",
-                        birthDate: d.date_of_birth ?? d.birthDate ?? "",
+                        birthDate: d.dob ?? d.date_of_birth ?? d.birthDate ?? "",
+                        address: d.address ?? "",
                     });
+                } else {
+                    setLoadError("Không tìm thấy người dùng");
                 }
             })
-            .catch(() => {
-                const found = MOCK_USERS.find((u) => u.id === userId);
-                if (found) {
-                    setUser(found);
-                    setFormData({ fullName: found.fullName || "", email: found.email || "", role: found.role || ROLES.STAFF, phone: "0901 234 567", gender: "Nam", birthDate: "1990-06-15" });
-                }
-            });
+            .catch((err: any) => {
+                setLoadError(err?.message || "Lấy thông tin người dùng thất bại");
+            })
+            .finally(() => setIsLoading(false));
     }, [userId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -73,23 +89,39 @@ export default function EditUserPage() {
         e.preventDefault();
         if (!validate()) return;
         setSaving(true);
+        setApiError(null);
         try {
             await updateUser(userId, {
                 fullName: formData.fullName,
                 email: formData.email,
                 role: formData.role as Role,
                 phoneNumber: formData.phone,
+                gender: formData.gender === "Nam" ? "MALE" : formData.gender === "Nữ" ? "FEMALE" : undefined,
+                dob: formData.birthDate || undefined,
+                address: formData.address || undefined,
             } as any);
-        } catch { /* keep going */ }
-        setSaving(false);
-        router.push(`/admin/users/${userId}`);
+            router.push(`/admin/users/${userId}`);
+        } catch (err: any) {
+            setApiError(err?.message || "Cập nhật người dùng thất bại. Vui lòng thử lại.");
+        } finally {
+            setSaving(false);
+        }
     };
 
-    if (!user) {
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-[#3C81C6] border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-[#687582]">Đang tải thông tin người dùng...</p>
+            </div>
+        );
+    }
+
+    if (loadError || !user) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">person_off</span>
-                <p className="text-lg text-gray-500 mb-4">Không tìm thấy người dùng</p>
+                <p className="text-lg text-gray-500 mb-4">{loadError || "Không tìm thấy người dùng"}</p>
                 <button onClick={() => router.back()} className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors">
                     Quay lại
                 </button>
@@ -118,6 +150,12 @@ export default function EditUserPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {apiError && (
+                        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                            <span className="material-symbols-outlined text-[18px] text-red-600">error</span>
+                            <p className="text-sm text-red-700 dark:text-red-400">{apiError}</p>
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Full Name */}
                         <div>
@@ -176,6 +214,14 @@ export default function EditUserPage() {
                             <label className="block text-sm font-medium text-[#121417] dark:text-white mb-2">Ngày sinh</label>
                             <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange}
                                 className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 transition-all dark:text-white" />
+                        </div>
+
+                        {/* Address */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-[#121417] dark:text-white mb-2">Địa chỉ</label>
+                            <input type="text" name="address" value={formData.address} onChange={handleChange}
+                                className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 transition-all dark:text-white"
+                                placeholder="Nhập địa chỉ" />
                         </div>
                     </div>
 

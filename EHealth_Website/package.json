@@ -1,6 +1,9 @@
 {
-  "name": "e-health-admin",
-  "version": "0.1.0",
+  "name": "ehealth-website",
+  "version": "1.0.0",
+  "description": "EHealth Hospital Management System — Nền tảng quản lý y tế đa vai trò (Bệnh nhân, Bác sĩ, Dược sĩ, Lễ tân, Quản trị viên) — đồ án tốt nghiệp",
+  "author": "Nguyễn Minh Quân",
+  "license": "MIT",
   "private": true,
   "engines": {
     "node": ">=22.0.0",

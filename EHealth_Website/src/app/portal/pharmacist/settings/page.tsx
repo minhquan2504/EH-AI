@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function PharmacistSettings() {
     const { user: authUser, updateUser } = useAuth();
     const [profile, setProfile] = useState({
-        name: "Trần Văn Dược", email: "pharma@ehealth.vn", phone: "0987654321", role: "Dược sĩ"
+        name: authUser?.fullName ?? "", email: authUser?.email ?? "", phone: authUser?.phone ?? "", role: "Dược sĩ"
     });
     const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
     const [notifications, setNotifications] = useState({ newPrescription: true, stockAlert: true, dailyReport: false });
@@ -22,7 +22,7 @@ export default function PharmacistSettings() {
                 const d = res?.data?.data ?? res?.data;
                 if (d) setProfile({ name: d.fullName ?? d.name ?? profile.name, email: d.email ?? profile.email, phone: d.phone ?? profile.phone, role: d.role ?? profile.role });
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => {/* profile empty state */});
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

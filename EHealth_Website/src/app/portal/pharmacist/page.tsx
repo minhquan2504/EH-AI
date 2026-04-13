@@ -6,39 +6,10 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { prescriptionService } from "@/services/prescriptionService";
 import { getDrugs } from "@/services/medicineService";
+import { dispensingService } from "@/services/dispensingService";
+import { inventoryService } from "@/services/inventoryService";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
 import { AIInventoryPredictor } from "@/components/portal/ai";
-
-// ==================== MOCK DATA ====================
-const STATS = [
-    { label: "Đơn chờ cấp phát", value: "15", icon: "pending_actions", bg: "bg-amber-50 dark:bg-amber-900/20", color: "text-amber-600", badge: "Cần xử lý", badgeColor: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
-    { label: "Đã cấp hôm nay", value: "42", icon: "check_circle", bg: "bg-emerald-50 dark:bg-emerald-900/20", color: "text-emerald-600", badge: "+8 so với hôm qua", badgeColor: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
-    { label: "Thuốc sắp hết", value: "07", icon: "warning", bg: "bg-red-50 dark:bg-red-900/20", color: "text-red-500", badge: "Cần nhập thêm", badgeColor: "text-red-600 bg-red-50 dark:bg-red-900/20" },
-    { label: "Tổng thuốc trong kho", value: "1,247", icon: "inventory_2", bg: "bg-blue-50 dark:bg-blue-900/20", color: "text-blue-600", badge: "98% đạt chuẩn", badgeColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
-];
-
-const PENDING_PRESCRIPTIONS = [
-    { id: "DT001", patient: "Nguyễn Văn An", doctor: "BS. Trần Minh", dept: "Nội khoa", time: "08:45", medicines: 3, urgent: false },
-    { id: "DT002", patient: "Lê Thị Bình", doctor: "BS. Phạm Hoa", dept: "Da liễu", time: "09:00", medicines: 2, urgent: false },
-    { id: "DT003", patient: "Trần Văn Cường", doctor: "BS. Ngô Đức", dept: "Tim mạch", time: "09:10", medicines: 5, urgent: true },
-    { id: "DT004", patient: "Phạm Thị Dung", doctor: "BS. Trần Minh", dept: "Nội khoa", time: "09:20", medicines: 2, urgent: false },
-    { id: "DT005", patient: "Hoàng Văn Em", doctor: "BS. Lý Thanh", dept: "Nhi khoa", time: "09:35", medicines: 4, urgent: true },
-];
-
-const LOW_STOCK = [
-    { name: "Amoxicillin 500mg", stock: 45, min: 100, unit: "viên" },
-    { name: "Paracetamol 500mg", stock: 30, min: 200, unit: "viên" },
-    { name: "Vitamin C 1000mg", stock: 12, min: 50, unit: "viên" },
-    { name: "Omeprazole 20mg", stock: 25, min: 80, unit: "viên" },
-    { name: "Cefuroxime 500mg", stock: 18, min: 60, unit: "viên" },
-];
-
-const RECENT_DISPENSES = [
-    { id: "CP001", patient: "Trần Minh Thủy", medicines: 3, time: "08:30", total: "125,000₫" },
-    { id: "CP002", patient: "Nguyễn Hoàng Long", medicines: 2, time: "08:15", total: "89,000₫" },
-    { id: "CP003", patient: "Phạm Thị Hương", medicines: 4, time: "08:00", total: "210,000₫" },
-    { id: "CP004", patient: "Lê Văn Tân", medicines: 1, time: "07:45", total: "45,000₫" },
-];
 
 // ==================== HELPERS ====================
 function getGreeting(): string {
@@ -54,14 +25,28 @@ function getCurrentDate(): string {
     return `${days[now.getDay()]}, ${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
 }
 
+// ==================== TYPES ====================
+type PendingRx = { id: string; patient: string; doctor: string; dept: string; time: string; medicines: number; urgent: boolean };
+type LowStockItem = { name: string; stock: number; min: number; unit: string };
+type RecentDispense = { id: string; patient: string; medicines: number; time: string; total: string };
+type StatItem = { label: string; value: string; icon: string; bg: string; color: string; badge: string; badgeColor: string };
+
+const DEFAULT_STATS: StatItem[] = [
+        { label: "Đơn chờ cấp phát", value: "0", icon: "pending_actions", bg: "bg-amber-50 dark:bg-amber-900/20", color: "text-amber-600", badge: "Cần xử lý", badgeColor: "text-amber-600 bg-amber-50 dark:bg-amber-900/20" },
+        { label: "Đã cấp hôm nay", value: "0", icon: "check_circle", bg: "bg-emerald-50 dark:bg-emerald-900/20", color: "text-emerald-600", badge: "—", badgeColor: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
+        { label: "Thuốc sắp hết", value: "0", icon: "warning", bg: "bg-red-50 dark:bg-red-900/20", color: "text-red-500", badge: "Cần nhập thêm", badgeColor: "text-red-600 bg-red-50 dark:bg-red-900/20" },
+    { label: "Tổng thuốc trong kho", value: "0", icon: "inventory_2", bg: "bg-blue-50 dark:bg-blue-900/20", color: "text-blue-600", badge: "—", badgeColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
+];
+
 // ==================== PAGE ====================
 export default function PharmacistDashboard() {
     const router = useRouter();
     usePageAIContext({ pageKey: 'dashboard' });
     const [filter, setFilter] = useState<"all" | "urgent">("all");
-    const [pendingPrescriptions, setPendingPrescriptions] = useState(PENDING_PRESCRIPTIONS);
-    const [lowStock, setLowStock] = useState(LOW_STOCK);
-    const [stats, setStats] = useState(STATS);
+    const [pendingPrescriptions, setPendingPrescriptions] = useState<PendingRx[]>([]);
+    const [lowStock, setLowStock] = useState<LowStockItem[]>([]);
+    const [stats, setStats] = useState<StatItem[]>(DEFAULT_STATS);
+    const [recentDispenses, setRecentDispenses] = useState<RecentDispense[]>([]);
 
     useEffect(() => {
         prescriptionService.getList({ status: "pending", limit: 20 })
@@ -85,6 +70,30 @@ export default function PharmacistDashboard() {
                     setLowStock(items.map((d: any) => ({ name: d.name, stock: d.quantity, min: d.minQuantity, unit: d.unit })));
                     setStats(prev => prev.map((s, i) => i === 2 ? { ...s, value: String(items.length) } : s));
                 }
+            })
+            .catch(() => {});
+        // Lịch sử cấp phát gần đây
+        dispensingService.getHistory({ limit: 4 })
+            .then(res => {
+                const items: any[] = res?.data?.data ?? res?.data ?? [];
+                if (Array.isArray(items) && items.length > 0) {
+                    setRecentDispenses(items.map((d: any) => ({
+                        id: d.id,
+                        patient: d.patientName ?? "",
+                        medicines: d.itemCount ?? d.items?.length ?? 0,
+                        time: d.dispensedAt?.split("T")[1]?.slice(0, 5) ?? d.createdAt?.split("T")[1]?.slice(0, 5) ?? "",
+                        total: d.totalAmount ? `${Number(d.totalAmount).toLocaleString("vi-VN")}₫` : "",
+                    })));
+                    setStats(prev => prev.map((s, i) => i === 1 ? { ...s, value: String(items.length) } : s));
+                }
+            })
+            .catch(() => {});
+        // Tổng thuốc trong kho
+        inventoryService.getList({ limit: 500 })
+            .then(res => {
+                const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
+                const total = res?.pagination?.total ?? res?.data?.pagination?.total ?? items.length;
+                if (total) setStats(prev => prev.map((s, i) => i === 3 ? { ...s, value: Number(total).toLocaleString("vi-VN") } : s));
             })
             .catch(() => {});
     }, []);
@@ -118,7 +127,7 @@ export default function PharmacistDashboard() {
 
                 {/* ===== STATS ===== */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-                    {STATS.map((s) => (
+                    {stats.map((s) => (
                         <div key={s.label} className="bg-white dark:bg-[#1e242b] p-5 rounded-2xl border border-[#dde0e4] dark:border-[#2d353e] shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-[#3C81C6]/40 dark:hover:border-[#3C81C6]/30 transition-all cursor-pointer">
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
@@ -210,7 +219,7 @@ export default function PharmacistDashboard() {
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-[#121417] dark:text-white">Thuốc sắp hết</h3>
-                                        <p className="text-xs text-[#687582] dark:text-gray-500">{LOW_STOCK.length} loại cần nhập</p>
+                                        <p className="text-xs text-[#687582] dark:text-gray-500">{lowStock.length} loại cần nhập</p>
                                     </div>
                                 </div>
                                 <Link href={ROUTES.PORTAL.PHARMACIST.INVENTORY} className="text-xs text-[#3C81C6] hover:underline font-medium">
@@ -218,7 +227,7 @@ export default function PharmacistDashboard() {
                                 </Link>
                             </div>
                             <div className="divide-y divide-[#f0f1f3] dark:divide-[#2d353e]">
-                                {LOW_STOCK.map((med) => (
+                                {lowStock.map((med) => (
                                     <div key={med.name} className="px-5 py-3">
                                         <div className="flex items-center justify-between mb-1.5">
                                             <p className="text-sm font-medium text-[#121417] dark:text-white">{med.name}</p>
@@ -248,7 +257,7 @@ export default function PharmacistDashboard() {
                                 </div>
                             </div>
                             <div className="divide-y divide-[#f0f1f3] dark:divide-[#2d353e]">
-                                {RECENT_DISPENSES.map((d) => (
+                                {recentDispenses.map((d) => (
                                     <div key={d.id} className="px-5 py-3 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">

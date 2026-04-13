@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { UI_TEXT } from "@/constants/ui-text";
-import { MOCK_DOCTORS } from "@/lib/mock-data/admin";
 
 interface TimeSlot {
     id: string;

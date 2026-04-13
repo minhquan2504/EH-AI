@@ -5,16 +5,6 @@ import Link from "next/link";
 import { getAppointments } from "@/services/appointmentService";
 import { appointmentStatusService } from "@/services/appointmentStatusService";
 
-const MOCK_QUEUE = [
-    { id: 1, number: "A001", patient: "Nguyễn Văn An", age: 45, checkInTime: "08:25", doctor: "BS. Trần Minh", dept: "Nội khoa", room: "P.101", status: "examining", waitTime: "5p" },
-    { id: 2, number: "A002", patient: "Lê Thị Bình", age: 32, checkInTime: "08:38", doctor: "BS. Phạm Hoa", dept: "Da liễu", room: "P.205", status: "waiting", waitTime: "12p" },
-    { id: 3, number: "A003", patient: "Trần Văn Cường", age: 58, checkInTime: "08:45", doctor: "BS. Ngô Đức", dept: "Tim mạch", room: "P.302", status: "waiting", waitTime: "20p" },
-    { id: 4, number: "A004", patient: "Phạm Thị Dung", age: 28, checkInTime: "08:52", doctor: "BS. Trần Minh", dept: "Nội khoa", room: "P.101", status: "waiting", waitTime: "25p" },
-    { id: 5, number: "A005", patient: "Hoàng Văn Em", age: 5, checkInTime: "09:00", doctor: "BS. Lý Thanh", dept: "Nhi khoa", room: "P.401", status: "checked_in", waitTime: "—" },
-    { id: 6, number: "A006", patient: "Vũ Thị Fương", age: 40, checkInTime: "09:10", doctor: "BS. Phạm Hoa", dept: "Da liễu", room: "P.205", status: "checked_in", waitTime: "—" },
-    { id: 7, number: "A007", patient: "Đỗ Quang Giang", age: 52, checkInTime: "08:10", doctor: "BS. Ngô Đức", dept: "Tim mạch", room: "P.302", status: "completed", waitTime: "15p" },
-    { id: 8, number: "A008", patient: "Bùi Thị Hằng", age: 3, checkInTime: "08:05", doctor: "BS. Lý Thanh", dept: "Nhi khoa", room: "P.401", status: "completed", waitTime: "10p" },
-];
 
 const STATUS_CFG: Record<string, { label: string; cls: string; icon: string }> = {
     checked_in: { label: "Đã tiếp nhận", cls: "bg-blue-50 dark:bg-blue-500/10 text-blue-600", icon: "how_to_reg" },
@@ -23,11 +13,8 @@ const STATUS_CFG: Record<string, { label: string; cls: string; icon: string }> =
     completed: { label: "Hoàn thành", cls: "bg-gray-100 dark:bg-gray-500/10 text-gray-500", icon: "check_circle" },
 };
 
-const DOCTORS_LIST = ["BS. Trần Minh", "BS. Phạm Hoa", "BS. Ngô Đức", "BS. Lý Thanh", "BS. Vũ Nam"];
-const DEPTS_LIST = ["Nội khoa", "Da liễu", "Tim mạch", "Nhi khoa", "Tai mũi họng"];
-
 export default function ReceptionistQueue() {
-    const [queue, setQueue] = useState(MOCK_QUEUE);
+    const [queue, setQueue] = useState<any[]>([]);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
@@ -41,7 +28,7 @@ export default function ReceptionistQueue() {
         appointmentStatusService.getQueueToday()
             .then(res => {
                 const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
+                if (Array.isArray(items)) {
                     setQueue(items.map((a: any, idx: number) => ({
                         id: a.id ?? idx + 1,
                         number: a.queueNumber ?? `A${String(idx + 1).padStart(3, "0")}`,
@@ -61,37 +48,45 @@ export default function ReceptionistQueue() {
                 getAppointments({ date: today, status: "confirmed", limit: 100 })
                     .then(res => {
                         const items: any[] = res?.data ?? [];
-                        if (items.length > 0) {
-                            setQueue(items.map((a: any, idx: number) => ({
-                                id: a.id ?? idx + 1,
-                                number: `A${String(idx + 1).padStart(3, "0")}`,
-                                patient: a.patientName ?? "",
-                                age: a.age ?? 0,
-                                checkInTime: a.checkInTime ?? a.time ?? "",
-                                doctor: a.doctorName ?? "",
-                                dept: a.departmentName ?? "",
-                                room: a.room ?? "—",
-                                status: a.status === "confirmed" ? "checked_in" : a.status,
-                                waitTime: "—",
-                            })));
-                        }
+                        setQueue(items.map((a: any, idx: number) => ({
+                            id: a.id ?? idx + 1,
+                            number: `A${String(idx + 1).padStart(3, "0")}`,
+                            patient: a.patientName ?? "",
+                            age: a.age ?? 0,
+                            checkInTime: a.checkInTime ?? a.time ?? "",
+                            doctor: a.doctorName ?? "",
+                            dept: a.departmentName ?? "",
+                            room: a.room ?? "—",
+                            status: a.status === "confirmed" ? "checked_in" : a.status,
+                            waitTime: "—",
+                        })));
                     })
-                    .catch(() => {/* keep mock */});
+                    .catch(() => setQueue([]));
             });
     }, []);
     const [filter, setFilter] = useState("all");
     const [transferModal, setTransferModal] = useState<{ id: number; type: "doctor" | "dept" } | null>(null);
     const [transferTarget, setTransferTarget] = useState("");
 
-    const handleCall = (id: number) => setQueue(prev => prev.map(q => q.id === id ? { ...q, status: "examining" } : q));
-    const handleCancel = (id: number) => { if (confirm("Bạn có chắc muốn hủy lượt khám này?")) setQueue(prev => prev.filter(q => q.id !== id)); };
+    const handleCall = async (id: number) => {
+        const q = queue.find(q => q.id === id);
+        if (!q) return;
+        try {
+            await appointmentStatusService.recall(String(id));
+        } catch { /* local update anyway */ }
+        setQueue(prev => prev.map(q => q.id === id ? { ...q, status: "examining" } : q));
+    };
+    const handleCancel = async (id: number) => {
+        if (!confirm("Bạn có chắc muốn hủy lượt khám này?")) return;
+        try {
+            await appointmentStatusService.markNoShow(String(id));
+        } catch { /* local update anyway */ }
+        setQueue(prev => prev.filter(q => q.id !== id));
+    };
 
     const handleTransfer = () => {
         if (!transferModal || !transferTarget) return;
-        setQueue(prev => prev.map(q => {
-            if (q.id !== transferModal.id) return q;
-            return transferModal.type === "doctor" ? { ...q, doctor: transferTarget } : { ...q, dept: transferTarget };
-        }));
+        alert("Chức năng chuyển bác sĩ/khoa đang phát triển");
         setTransferModal(null);
         setTransferTarget("");
     };
@@ -164,6 +159,12 @@ export default function ReceptionistQueue() {
                             ))}
                         </tr></thead>
                         <tbody>
+                            {filtered.length === 0 && (
+                                <tr><td colSpan={7} className="px-4 py-12 text-center text-[#687582]">
+                                    <span className="material-symbols-outlined text-[40px] mb-2 block">event_busy</span>
+                                    <p className="text-sm">Hàng đợi trống</p>
+                                </td></tr>
+                            )}
                             {filtered.map(q => {
                                 const isPriority = q.age >= 60 || q.age <= 6;
                                 return (
@@ -216,15 +217,15 @@ export default function ReceptionistQueue() {
                             <p className="text-xs text-[#687582] mt-1">BN: {queue.find(q => q.id === transferModal.id)?.patient}</p>
                         </div>
                         <div className="p-5 space-y-3">
-                            {(transferModal.type === "doctor" ? DOCTORS_LIST : DEPTS_LIST).map(item => (
-                                <button key={item} onClick={() => setTransferTarget(item)}
-                                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${transferTarget === item ? "border-[#3C81C6] bg-[#3C81C6]/5" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"}`}>
-                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${transferTarget === item ? "bg-[#3C81C6] text-white" : "bg-gray-100 dark:bg-gray-800 text-[#687582]"}`}>
-                                        <span className="material-symbols-outlined text-[18px]">{transferModal.type === "doctor" ? "person" : "local_hospital"}</span>
-                                    </div>
-                                    <span className={`text-sm font-medium ${transferTarget === item ? "text-[#3C81C6]" : "text-[#121417] dark:text-white"}`}>{item}</span>
-                                </button>
-                            ))}
+                            <div className="px-4 py-3">
+                                <input
+                                    type="text"
+                                    value={transferTarget}
+                                    onChange={e => setTransferTarget(e.target.value)}
+                                    placeholder={transferModal.type === "doctor" ? "Nhập tên bác sĩ..." : "Nhập tên khoa..."}
+                                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-[#121417] dark:text-white bg-white dark:bg-[#13191f] focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/30"
+                                />
+                            </div>
                         </div>
                         <div className="p-5 border-t border-[#dde0e4] dark:border-[#2d353e] flex justify-end gap-3">
                             <button onClick={() => setTransferModal(null)} className="px-4 py-2 text-sm text-[#687582] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">Huỷ</button>

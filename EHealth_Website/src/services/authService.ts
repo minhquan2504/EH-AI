@@ -6,7 +6,7 @@
  */
 
 import axiosClient from '@/api/axiosClient';
-import { AUTH_ENDPOINTS } from '@/api/endpoints';
+import { AUTH_ENDPOINTS, PROFILE_ENDPOINTS } from '@/api/endpoints';
 import { AUTH_CONFIG } from '@/config';
 
 // ============================================
@@ -192,7 +192,9 @@ export const logout = async (): Promise<void> => {
             await axiosClient.post(AUTH_ENDPOINTS.LOGOUT, { refreshToken });
         }
     } catch (error) {
-        console.error('Lỗi khi đăng xuất:', error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
     } finally {
         localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
         localStorage.removeItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
@@ -340,4 +342,31 @@ export const isAuthenticated = (): boolean => {
     if (typeof window === 'undefined') return false;
     const token = localStorage.getItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
     return !!token;
+};
+
+// ============================================
+// Profile Session Management
+// GET /api/profile/sessions — lấy danh sách phiên
+// DELETE /api/profile/sessions/:id — thu hồi phiên
+// ============================================
+
+export const getProfileSessions = async (): Promise<any> => {
+    try {
+        const response = await axiosClient.get(PROFILE_ENDPOINTS.SESSIONS);
+        return response.data;
+    } catch (error: any) {
+        return { success: false, data: [] };
+    }
+};
+
+export const deleteProfileSession = async (sessionId: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+        await axiosClient.delete(PROFILE_ENDPOINTS.SESSION_DELETE(sessionId));
+        return { success: true };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Thu hồi phiên thất bại',
+        };
+    }
 };

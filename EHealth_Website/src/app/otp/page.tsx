@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
+import { resetPassword } from "@/services/authService";
 
 const OTP_LENGTH = 6;
 
@@ -12,6 +13,8 @@ function OTPContent() {
     const email = searchParams.get("email") || "";
 
     const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(""));
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [resendTimer, setResendTimer] = useState(60);
@@ -33,27 +36,24 @@ function OTPContent() {
 
     // Xử lý nhập OTP
     const handleChange = (index: number, value: string) => {
-        if (!/^\d*$/.test(value)) return; // Chỉ cho phép số
+        if (!/^\d*$/.test(value)) return;
 
         const newOtp = [...otp];
-        newOtp[index] = value.slice(-1); // Chỉ lấy ký tự cuối
+        newOtp[index] = value.slice(-1);
         setOtp(newOtp);
         setError("");
 
-        // Auto focus input tiếp theo
         if (value && index < OTP_LENGTH - 1) {
             inputRefs.current[index + 1]?.focus();
         }
     };
 
-    // Xử lý phím Backspace
     const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
         if (e.key === "Backspace" && !otp[index] && index > 0) {
             inputRefs.current[index - 1]?.focus();
         }
     };
 
-    // Xử lý paste OTP
     const handlePaste = (e: React.ClipboardEvent) => {
         e.preventDefault();
         const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
@@ -62,16 +62,23 @@ function OTPContent() {
             newOtp[i] = pastedData[i];
         }
         setOtp(newOtp);
-        // Focus input cuối cùng được điền
         const lastIndex = Math.min(pastedData.length, OTP_LENGTH) - 1;
         inputRefs.current[lastIndex]?.focus();
     };
 
-    // Xác thực OTP
+    // Xác thực OTP + đặt lại mật khẩu
     const handleVerify = async () => {
         const otpCode = otp.join("");
         if (otpCode.length !== OTP_LENGTH) {
             setError("Vui lòng nhập đầy đủ mã xác thực");
+            return;
+        }
+        if (!newPassword || newPassword.length < 6) {
+            setError("Mật khẩu mới tối thiểu 6 ký tự");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setError("Mật khẩu xác nhận không khớp");
             return;
         }
 
@@ -79,21 +86,26 @@ function OTPContent() {
         setError("");
 
         try {
-            // Giả lập gọi API
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            setIsVerified(true);
+            const result = await resetPassword(otpCode, newPassword);
+            if (result.success) {
+                setIsVerified(true);
+            } else {
+                setError(result.message || "Mã xác thực không đúng. Vui lòng thử lại.");
+            }
         } catch {
-            setError("Mã xác thực không đúng. Vui lòng thử lại.");
+            setError("Đã xảy ra lỗi. Vui lòng thử lại.");
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Gửi lại OTP
-    const handleResend = async () => {
+    // Gửi lại OTP — quay về trang forgot-password để nhập lại email
+    const handleResend = () => {
         setResendTimer(60);
         setOtp(new Array(OTP_LENGTH).fill(""));
         setError("");
+        setNewPassword("");
+        setConfirmPassword("");
         inputRefs.current[0]?.focus();
     };
 
@@ -133,7 +145,7 @@ function OTPContent() {
                                             verified_user
                                         </span>
                                     </div>
-                                    <h2 className="text-2xl font-bold text-white mb-1">Xác thực OTP</h2>
+                                    <h2 className="text-2xl font-bold text-white mb-1">Đặt lại mật khẩu</h2>
                                     <p className="text-[#94a3b8] text-sm">
                                         Nhập mã {OTP_LENGTH} số đã gửi đến
                                         {email && (
@@ -151,7 +163,7 @@ function OTPContent() {
                                 )}
 
                                 {/* OTP Inputs */}
-                                <div className="flex items-center justify-center gap-3 mb-6">
+                                <div className="flex items-center justify-center gap-3 mb-5">
                                     {otp.map((digit, index) => (
                                         <input
                                             key={index}
@@ -174,6 +186,40 @@ function OTPContent() {
                                     ))}
                                 </div>
 
+                                {/* New password fields */}
+                                <div className="space-y-3 mb-5">
+                                    <div>
+                                        <label className="block text-[#94a3b8] text-xs font-semibold uppercase tracking-wider mb-1.5">
+                                            Mật khẩu mới
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#64748b]" style={{ fontSize: "20px" }}>lock</span>
+                                            <input
+                                                type="password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                placeholder="Tối thiểu 6 ký tự"
+                                                className="w-full pl-11 pr-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/50 focus:border-[#3C81C6]/50 transition-all text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[#94a3b8] text-xs font-semibold uppercase tracking-wider mb-1.5">
+                                            Xác nhận mật khẩu mới
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#64748b]" style={{ fontSize: "20px" }}>lock</span>
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                placeholder="Nhập lại mật khẩu mới"
+                                                className="w-full pl-11 pr-4 py-3 bg-white/[0.05] border border-white/[0.1] rounded-xl text-white placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/50 focus:border-[#3C81C6]/50 transition-all text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Verify button */}
                                 <button
                                     onClick={handleVerify}
@@ -186,11 +232,11 @@ function OTPContent() {
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                             </svg>
-                                            <span>Đang xác thực...</span>
+                                            <span>Đang xử lý...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span>Xác thực</span>
+                                            <span>Đặt lại mật khẩu</span>
                                             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>check_circle</span>
                                         </>
                                     )}
@@ -221,15 +267,15 @@ function OTPContent() {
                                         check_circle
                                     </span>
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Xác thực thành công!</h3>
+                                <h3 className="text-xl font-bold text-white mb-2">Đặt lại thành công!</h3>
                                 <p className="text-[#94a3b8] text-sm mb-6">
-                                    Tài khoản đã được xác thực. Bạn có thể đặt lại mật khẩu mới.
+                                    Mật khẩu mới đã được cập nhật. Hãy đăng nhập lại.
                                 </p>
                                 <button
                                     onClick={() => router.push(ROUTES.PUBLIC.LOGIN)}
                                     className="w-full py-3 bg-gradient-to-r from-[#3C81C6] to-[#2563eb] text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#3C81C6]/25"
                                 >
-                                    <span>Tiếp tục đăng nhập</span>
+                                    <span>Đăng nhập ngay</span>
                                     <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
                                 </button>
                             </div>

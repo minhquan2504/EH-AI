@@ -5,14 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import axiosClient from "@/api/axiosClient";
 import { PROFILE_ENDPOINTS, PATIENT_ENDPOINTS } from "@/api/endpoints";
+import { getProfileSessions, deleteProfileSession } from "@/services/authService";
 import { validateName, validatePhone, validateDob, validateIdNumber, validateBHYT } from "@/utils/validation";
 
 const TABS = [
     { id: "personal", label: "Thông tin cá nhân", icon: "person" },
     { id: "family", label: "Người thân", icon: "group" },
-    { id: "history", label: "Lịch sử khám", icon: "history" },
     { id: "insurance", label: "Bảo hiểm", icon: "health_and_safety" },
-    { id: "results", label: "Kết quả", icon: "lab_profile" },
     { id: "security", label: "Bảo mật", icon: "lock" },
 ];
 
@@ -61,6 +60,10 @@ export default function ProfilePage() {
     const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    // Sessions
+    const [sessions, setSessions] = useState<any[]>([]);
+    const [sessionsLoading, setSessionsLoading] = useState(false);
+
     const validateProfile = (): boolean => {
         const errs: Record<string, string> = {};
         const nameRes = validateName(profile.fullName);
@@ -88,6 +91,40 @@ export default function ProfilePage() {
     useEffect(() => {
         loadProfile();
     }, []);
+
+    // Load sessions khi chuyển sang tab security
+    useEffect(() => {
+        if (activeTab === "security") {
+            loadSessions();
+        }
+    }, [activeTab]);
+
+    const loadSessions = async () => {
+        setSessionsLoading(true);
+        try {
+            const res = await getProfileSessions();
+            const data = res?.data || res?.sessions || [];
+            setSessions(Array.isArray(data) ? data : []);
+        } catch {
+            setSessions([]);
+        } finally {
+            setSessionsLoading(false);
+        }
+    };
+
+    const handleRevokeSession = async (sessionId: string) => {
+        try {
+            const result = await deleteProfileSession(sessionId);
+            if (result.success) {
+                setSessions(prev => prev.filter(s => (s.id || s.sessionId) !== sessionId));
+                showToast("Đã thu hồi phiên đăng nhập", "success");
+            } else {
+                showToast(result.message || "Thu hồi thất bại", "error");
+            }
+        } catch {
+            showToast("Đã xảy ra lỗi. Vui lòng thử lại.", "error");
+        }
+    };
 
     const loadProfile = async () => {
         try {
@@ -352,18 +389,6 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* ===== Medical History ===== */}
-                {activeTab === "history" && (
-                    <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Lịch sử khám bệnh</h3>
-                        <div className="text-center py-12">
-                            <span className="material-symbols-outlined text-gray-300 mb-3" style={{ fontSize: "56px" }}>history</span>
-                            <p className="text-gray-500 font-medium">Lịch sử khám sẽ được cập nhật tự động</p>
-                            <p className="text-gray-400 text-sm mt-1">Sau mỗi lần khám tại EHealth, kết quả sẽ được lưu tại đây</p>
-                        </div>
-                    </div>
-                )}
-
                 {/* ===== Insurance ===== */}
                 {activeTab === "insurance" && (
                     <div>
@@ -390,33 +415,81 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* ===== Results ===== */}
-                {activeTab === "results" && (
-                    <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Kết quả khám & xét nghiệm</h3>
-                        <div className="text-center py-12">
-                            <span className="material-symbols-outlined text-gray-300 mb-3" style={{ fontSize: "56px" }}>lab_profile</span>
-                            <p className="text-gray-500 font-medium">Chưa có kết quả xét nghiệm</p>
-                            <p className="text-gray-400 text-sm mt-1">Kết quả sẽ được cập nhật sau mỗi lần khám</p>
-                        </div>
-                    </div>
-                )}
-
                 {/* ===== Security ===== */}
                 {activeTab === "security" && (
-                    <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-6">Bảo mật tài khoản</h3>
-                        <div className="max-w-md space-y-4">
-                            <ProfileField label="Mật khẩu hiện tại" icon="lock" value={passwords.current} onChange={v => setPasswords(p => ({ ...p, current: v }))} type="password" />
-                            <ProfileField label="Mật khẩu mới" icon="lock" value={passwords.new} onChange={v => setPasswords(p => ({ ...p, new: v }))} type="password" />
-                            <ProfileField label="Xác nhận mật khẩu mới" icon="lock" value={passwords.confirm} onChange={v => setPasswords(p => ({ ...p, confirm: v }))} type="password" />
-                            {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
-                                <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
+                    <div className="space-y-8">
+                        {/* Đổi mật khẩu */}
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">Đổi mật khẩu</h3>
+                            <div className="max-w-md space-y-4">
+                                <ProfileField label="Mật khẩu hiện tại" icon="lock" value={passwords.current} onChange={v => setPasswords(p => ({ ...p, current: v }))} type="password" />
+                                <ProfileField label="Mật khẩu mới" icon="lock" value={passwords.new} onChange={v => setPasswords(p => ({ ...p, new: v }))} type="password" />
+                                <ProfileField label="Xác nhận mật khẩu mới" icon="lock" value={passwords.confirm} onChange={v => setPasswords(p => ({ ...p, confirm: v }))} type="password" />
+                                {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
+                                    <p className="text-xs text-red-500">Mật khẩu xác nhận không khớp</p>
+                                )}
+                                <button onClick={handleChangePassword} disabled={!passwords.current || !passwords.new || passwords.new !== passwords.confirm || saving}
+                                    className="px-5 py-2.5 text-sm font-semibold text-white bg-[#3C81C6] rounded-xl hover:bg-[#2a6da8] disabled:opacity-50 transition-colors">
+                                    {saving ? "Đang xử lý..." : "Đổi mật khẩu"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Phiên đăng nhập */}
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-gray-900">Phiên đăng nhập</h3>
+                                <button onClick={loadSessions} disabled={sessionsLoading}
+                                    className="p-2 rounded-lg text-gray-400 hover:text-[#3C81C6] hover:bg-[#3C81C6]/[0.06] transition-colors">
+                                    <span className={`material-symbols-outlined ${sessionsLoading ? "animate-spin" : ""}`} style={{ fontSize: "18px" }}>refresh</span>
+                                </button>
+                            </div>
+
+                            {sessionsLoading ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <div className="w-6 h-6 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
+                                </div>
+                            ) : sessions.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <span className="material-symbols-outlined text-gray-300 mb-2" style={{ fontSize: "48px" }}>devices</span>
+                                    <p className="text-gray-500 text-sm">Không có phiên đăng nhập nào khác</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {sessions.map((session: any) => {
+                                        const sessionId = session.id || session.sessionId;
+                                        return (
+                                            <div key={sessionId} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-[#3C81C6]/20 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center">
+                                                        <span className="material-symbols-outlined text-gray-400" style={{ fontSize: "20px" }}>
+                                                            {session.deviceName?.toLowerCase().includes("mobile") ? "phone_android" : "computer"}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-900">
+                                                            {session.deviceName || session.clientInfo?.deviceName || "Thiết bị không xác định"}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            {session.ipAddress || session.ip || "IP không xác định"}
+                                                            {session.lastActive && ` • ${new Date(session.lastActive).toLocaleDateString("vi-VN")}`}
+                                                            {session.isCurrent && <span className="ml-2 text-green-600 font-medium">• Phiên hiện tại</span>}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {!session.isCurrent && (
+                                                    <button
+                                                        onClick={() => handleRevokeSession(sessionId)}
+                                                        className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                                                    >
+                                                        Thu hồi
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             )}
-                            <button onClick={handleChangePassword} disabled={!passwords.current || !passwords.new || passwords.new !== passwords.confirm || saving}
-                                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#3C81C6] rounded-xl hover:bg-[#2a6da8] disabled:opacity-50 transition-colors">
-                                {saving ? "Đang xử lý..." : "Đổi mật khẩu"}
-                            </button>
                         </div>
                     </div>
                 )}

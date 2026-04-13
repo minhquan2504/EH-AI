@@ -1,7 +1,7 @@
 /**
  * Authentication Context
  * Quản lý trạng thái đăng nhập toàn ứng dụng
- * 
+ *
  * @description
  * - Theo dõi trạng thái user đang đăng nhập
  * - Cung cấp hàm login, logout
@@ -23,7 +23,9 @@ export interface User {
     id: string;
     email: string;
     fullName: string;
-    role: 'admin' | 'doctor' | 'nurse' | 'pharmacist' | 'staff' | 'patient';
+    /** @deprecated dùng roles[] thay thế */
+    role: string;
+    roles: string[];
     avatar?: string;
     phone?: string;
 }
@@ -33,11 +35,17 @@ interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    menus: any[];
+    permissions: string[];
 
     // Actions
     login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
     updateUser: (userData: Partial<User>) => void;
+
+    // Role helpers
+    hasRole: (role: string) => boolean;
+    hasAnyRole: (roles: string[]) => boolean;
 }
 
 // ============================================
@@ -58,6 +66,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [menus, setMenus] = useState<any[]>([]);
+    const [permissions, setPermissions] = useState<string[]>([]);
 
     // Kiểm tra token khi app khởi động
     useEffect(() => {
@@ -67,12 +77,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const userStr = localStorage.getItem(AUTH_CONFIG.USER_KEY);
 
                 if (token && userStr) {
-                    // Có token trong localStorage -> đặt user
-                    setUser(JSON.parse(userStr));
+                    const parsed = JSON.parse(userStr);
+                    // Đảm bảo roles luôn là array
+                    if (!parsed.roles) {
+                        parsed.roles = parsed.role ? [parsed.role] : [];
+                    }
+                    setUser(parsed);
                 }
             } catch (error) {
-                console.error('Lỗi khởi tạo auth:', error);
-                // Xóa dữ liệu không hợp lệ
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Lỗi khởi tạo auth:', error);
+                }
                 localStorage.removeItem(AUTH_CONFIG.ACCESS_TOKEN_KEY);
                 localStorage.removeItem(AUTH_CONFIG.REFRESH_TOKEN_KEY);
                 localStorage.removeItem(AUTH_CONFIG.USER_KEY);
@@ -84,7 +99,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         initAuth();
 
         // Lắng nghe sự kiện force-logout từ axiosClient (refresh token thất bại)
-        const handleForceLogout = () => setUser(null);
+        const handleForceLogout = () => {
+            setUser(null);
+            setMenus([]);
+            setPermissions([]);
+        };
         window.addEventListener('auth:logout', handleForceLogout);
         return () => window.removeEventListener('auth:logout', handleForceLogout);
     }, []);
@@ -100,14 +119,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (response.success && response.data) {
                 // Swagger: { accessToken, refreshToken, user: { userId, name, avatar, email, phone, roles[] } }
                 const { accessToken, refreshToken, user: apiUser } = response.data;
-                const primaryRole = (apiUser.roles?.[0] || 'patient').toLowerCase();
+                const rolesRaw: string[] = (apiUser.roles || []).map((r: string) => r.toLowerCase());
+                const primaryRole = rolesRaw[0] || 'patient';
 
                 const userData: User = {
                     id: apiUser.userId,
                     email: apiUser.email || email,
                     fullName: apiUser.name || email.split('@')[0],
-                    role: primaryRole as User['role'],
+                    role: primaryRole,
+                    roles: rolesRaw,
                     avatar: apiUser.avatar,
+                    phone: apiUser.phone,
                 };
 
                 localStorage.setItem(AUTH_CONFIG.ACCESS_TOKEN_KEY, accessToken || '');
@@ -115,6 +137,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(userData));
 
                 setUser(userData);
+
+                // Lấy roles/menus/permissions sau khi đăng nhập
+                try {
+                    const [rolesRes, menusRes, permsRes] = await Promise.allSettled([
+                        authService.getMyRoles(),
+                        authService.getMyMenus(),
+                        authService.getMyPermissions(),
+                    ]);
+
+                    if (rolesRes.status === 'fulfilled' && rolesRes.value?.data) {
+                        const serverRoles: string[] = (rolesRes.value.data || []).map((r: any) =>
+                            (typeof r === 'string' ? r : r.name || r.code || '').toLowerCase()
+                        ).filter(Boolean);
+                        if (serverRoles.length > 0) {
+                            const updatedUser = { ...userData, roles: serverRoles, role: serverRoles[0] };
+                            setUser(updatedUser);
+                            localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(updatedUser));
+                        }
+                    }
+
+                    if (menusRes.status === 'fulfilled' && menusRes.value?.data) {
+                        setMenus(menusRes.value.data || []);
+                    }
+
+                    if (permsRes.status === 'fulfilled' && permsRes.value?.data) {
+                        const permsArr: string[] = (permsRes.value.data || []).map((p: any) =>
+                            typeof p === 'string' ? p : p.code || p.name || ''
+                        ).filter(Boolean);
+                        setPermissions(permsArr);
+                    }
+                } catch {
+                    // Không block login nếu lấy thêm thông tin thất bại
+                }
 
                 const redirectUrl = getRedirectUrl(primaryRole);
                 router.push(redirectUrl);
@@ -141,6 +196,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setIsLoading(true);
             await authService.logout();
             setUser(null);
+            setMenus([]);
+            setPermissions([]);
             router.push('/login');
         } finally {
             setIsLoading(false);
@@ -156,6 +213,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(updatedUser);
             localStorage.setItem(AUTH_CONFIG.USER_KEY, JSON.stringify(updatedUser));
         }
+    };
+
+    // ============================================
+    // Helper: Kiểm tra role
+    // ============================================
+    const hasRole = (role: string): boolean => {
+        if (!user?.roles) return false;
+        return user.roles.map(r => r.toLowerCase()).includes(role.toLowerCase());
+    };
+
+    const hasAnyRole = (roles: string[]): boolean => {
+        if (!user?.roles) return false;
+        const userRolesLower = user.roles.map(r => r.toLowerCase());
+        return roles.some(r => userRolesLower.includes(r.toLowerCase()));
     };
 
     // ============================================
@@ -175,7 +246,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             case 'patient':
                 return '/patient';
             default:
-                return '/login';
+                return '/patient';
         }
     };
 
@@ -186,9 +257,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        menus,
+        permissions,
         login,
         logout,
         updateUser,
+        hasRole,
+        hasAnyRole,
     };
 
     return (

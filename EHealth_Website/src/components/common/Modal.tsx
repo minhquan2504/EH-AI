@@ -58,6 +58,7 @@ export function Modal({
     children,
 }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     // Đóng modal khi nhấn Escape
     useEffect(() => {
@@ -70,6 +71,10 @@ export function Modal({
         if (isOpen) {
             document.addEventListener('keydown', handleEscape);
             document.body.style.overflow = 'hidden';
+            // Focus vào nút close khi modal mở
+            setTimeout(() => {
+                closeButtonRef.current?.focus();
+            }, 50);
         }
 
         return () => {
@@ -95,6 +100,9 @@ export function Modal({
         >
             <div
                 ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={title ? "modal-title" : undefined}
                 className={cn(
                     'w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl',
                     'animate-scale-in',
@@ -106,12 +114,14 @@ export function Modal({
                 {(title || showCloseButton) && (
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         {title && (
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
                                 {title}
                             </h2>
                         )}
                         {showCloseButton && (
                             <button
+                                ref={closeButtonRef}
+                                aria-label="Đóng"
                                 onClick={onClose}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >

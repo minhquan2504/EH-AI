@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { MOCK_USERS } from "@/lib/mock-data/admin";
 import { ROLE_LABELS, ROLE_COLORS, type Role } from "@/constants/roles";
 import { USER_STATUS } from "@/constants/status";
 import type { User } from "@/types";
+import * as userService from "@/services/userService";
 
 const TABS = [
     { key: "overview", label: "Tổng quan", icon: "person" },
@@ -23,17 +23,88 @@ export default function UserDetailPage() {
 
     const [user, setUser] = useState<User | null>(null);
     const [activeTab, setActiveTab] = useState("overview");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     useEffect(() => {
-        const found = MOCK_USERS.find((u) => u.id === userId);
-        setUser(found || null);
+        if (!userId) return;
+        setIsLoading(true);
+        setError(null);
+        userService.getUserById(userId)
+            .then((data: any) => {
+                const d = data?.data ?? data;
+                if (d) {
+                    setUser({
+                        id: d.users_id ?? d.id ?? userId,
+                        fullName: d.profile?.full_name ?? d.full_name ?? d.fullName ?? d.email ?? "",
+                        email: d.email ?? "",
+                        phone: d.phone ?? d.phone_number ?? "",
+                        role: Array.isArray(d.roles) && d.roles.length > 0 ? d.roles[0].toLowerCase() : (d.role ?? "staff"),
+                        status: (d.status ?? "ACTIVE") as User["status"],
+                        avatar: d.profile?.avatar_url ?? d.avatar ?? "",
+                        createdAt: d.created_at ?? d.createdAt ?? "",
+                        gender: d.gender,
+                        dob: d.dob ?? d.date_of_birth,
+                        address: d.address,
+                        phoneNumber: d.phone ?? d.phone_number,
+                    } as unknown as User);
+                } else {
+                    setError("Không tìm thấy người dùng");
+                }
+            })
+            .catch((err: any) => {
+                setError(err?.message || "Lấy thông tin người dùng thất bại");
+            })
+            .finally(() => setIsLoading(false));
     }, [userId]);
 
-    if (!user) {
+    const handleLockToggle = async () => {
+        if (!user) return;
+        const isLocked = user.status === USER_STATUS.LOCKED;
+        setActionLoading(isLocked ? "unlock" : "lock");
+        try {
+            if (isLocked) {
+                await userService.unlockUser(user.id);
+            } else {
+                await userService.lockUser(user.id);
+            }
+            setUser((prev) => prev ? { ...prev, status: isLocked ? USER_STATUS.ACTIVE as User["status"] : USER_STATUS.LOCKED as User["status"] } : prev);
+        } catch (err: any) {
+            alert(err?.message || "Thao tác thất bại. Vui lòng thử lại.");
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleResetPassword = async () => {
+        if (!user) return;
+        if (!confirm("Reset mật khẩu về EHealth@123 cho người dùng này?")) return;
+        setActionLoading("reset");
+        try {
+            await userService.adminResetPassword(user.id);
+            alert("Đã reset mật khẩu thành công. Mật khẩu mới: EHealth@123");
+        } catch (err: any) {
+            alert(err?.message || "Reset mật khẩu thất bại.");
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-[#3C81C6] border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-[#687582]">Đang tải thông tin người dùng...</p>
+            </div>
+        );
+    }
+
+    if (error || !user) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">person_off</span>
-                <p className="text-lg text-gray-500 mb-4">Không tìm thấy người dùng</p>
+                <p className="text-lg text-gray-500 mb-2">{error || "Không tìm thấy người dùng"}</p>
                 <button
                     onClick={() => router.back()}
                     className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors"
@@ -58,7 +129,23 @@ export default function UserDetailPage() {
                     <span className="material-symbols-outlined text-[16px]">chevron_right</span>
                     <span className="text-[#121417] dark:text-white font-medium">{user.fullName}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={handleResetPassword}
+                        disabled={actionLoading === "reset"}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-amber-200 dark:shadow-none disabled:opacity-50"
+                    >
+                        {actionLoading === "reset" ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[18px]">lock_reset</span>}
+                        Reset mật khẩu
+                    </button>
+                    <button
+                        onClick={handleLockToggle}
+                        disabled={actionLoading === "lock" || actionLoading === "unlock"}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${user.status === USER_STATUS.LOCKED ? "bg-green-500 hover:bg-green-600 text-white shadow-md shadow-green-200 dark:shadow-none" : "bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-200 dark:shadow-none"}`}
+                    >
+                        {(actionLoading === "lock" || actionLoading === "unlock") ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[18px]">{user.status === USER_STATUS.LOCKED ? "lock_open" : "lock"}</span>}
+                        {user.status === USER_STATUS.LOCKED ? "Mở khóa" : "Khóa tài khoản"}
+                    </button>
                     <button
                         onClick={() => router.push(`/admin/users/${userId}/edit`)}
                         className="flex items-center gap-2 px-4 py-2 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-all shadow-md shadow-blue-200 dark:shadow-none"
@@ -144,6 +231,13 @@ export default function UserDetailPage() {
 
 /* ─── Tab: Tổng quan ─── */
 function OverviewTab({ user, roleColor, isActive }: { user: User; roleColor: { bg: string; text: string; dot: string }; isActive: boolean }) {
+    const u = user as any;
+    const genderLabel = u.gender === "MALE" ? "Nam" : u.gender === "FEMALE" ? "Nữ" : (u.gender || "—");
+    const dobFormatted = u.dob ? new Date(u.dob).toLocaleDateString("vi-VN") : (u.date_of_birth ? new Date(u.date_of_birth).toLocaleDateString("vi-VN") : "—");
+    const phoneDisplay = u.phoneNumber ?? u.phone ?? u.phone_number ?? "—";
+    const createdAtFormatted = user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "—";
+    const lastAccessFormatted = (user as any).lastAccess ? new Date((user as any).lastAccess).toLocaleDateString("vi-VN") : "—";
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-[#1e242b] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl shadow-sm p-6">
@@ -152,12 +246,13 @@ function OverviewTab({ user, roleColor, isActive }: { user: User; roleColor: { b
                     Thông tin cá nhân
                 </h2>
                 <div className="space-y-4">
-                    <InfoRow label="Họ và tên" value={user.fullName} icon="person" />
-                    <InfoRow label="Email" value={user.email} icon="email" />
-                    <InfoRow label="Vai trò" value={ROLE_LABELS[user.role as Role] || user.role} icon="shield_person" />
-                    <InfoRow label="Số điện thoại" value="0901 234 567" icon="phone" />
-                    <InfoRow label="Giới tính" value="Nam" icon="wc" />
-                    <InfoRow label="Ngày sinh" value="15/06/1990" icon="cake" />
+                    <InfoRow label="Họ và tên" value={user.fullName || "—"} icon="person" />
+                    <InfoRow label="Email" value={user.email || "—"} icon="email" />
+                    <InfoRow label="Vai trò" value={ROLE_LABELS[user.role as Role] || user.role || "—"} icon="shield_person" />
+                    <InfoRow label="Số điện thoại" value={phoneDisplay} icon="phone" />
+                    <InfoRow label="Giới tính" value={genderLabel} icon="wc" />
+                    <InfoRow label="Ngày sinh" value={dobFormatted} icon="cake" />
+                    {u.address && <InfoRow label="Địa chỉ" value={u.address} icon="location_on" />}
                 </div>
             </div>
 
@@ -167,12 +262,12 @@ function OverviewTab({ user, roleColor, isActive }: { user: User; roleColor: { b
                     Thông tin tài khoản
                 </h2>
                 <div className="space-y-4">
-                    <InfoRow label="Mã nhân viên" value={`NV${user.id.padStart(5, "0")}`} icon="fingerprint" />
-                    <InfoRow label="Ngày tạo tài khoản" value={user.createdAt} icon="event" />
-                    <InfoRow label="Truy cập cuối" value={user.lastAccess || "—"} icon="schedule" />
-                    <InfoRow label="Trạng thái" value={isActive ? "Đang hoạt động" : "Đã khóa"} icon="toggle_on" />
-                    <InfoRow label="Khoa / Phòng ban" value="Khoa Nội Tổng Quát" icon="domain" />
-                    <InfoRow label="Chi nhánh" value="E-Health Quận 1" icon="location_city" />
+                    <InfoRow label="Mã người dùng" value={user.id || "—"} icon="fingerprint" />
+                    <InfoRow label="Ngày tạo tài khoản" value={createdAtFormatted} icon="event" />
+                    <InfoRow label="Truy cập cuối" value={lastAccessFormatted} icon="schedule" />
+                    <InfoRow label="Trạng thái" value={isActive ? "Đang hoạt động" : (user.status === "LOCKED" ? "Đã khóa" : user.status || "—")} icon="toggle_on" />
+                    {u.department && <InfoRow label="Khoa / Phòng ban" value={u.department} icon="domain" />}
+                    {u.facility && <InfoRow label="Chi nhánh" value={u.facility} icon="location_city" />}
                 </div>
             </div>
         </div>

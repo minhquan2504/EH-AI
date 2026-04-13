@@ -1,17 +1,8 @@
 "use client";
 
-"use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
-import {
-    MOCK_DOCTOR_DASHBOARD_STATS,
-    MOCK_WEEKLY_EXAM_STATS,
-    MOCK_TODAY_SCHEDULE,
-    MOCK_HOSPITAL_ANNOUNCEMENTS,
-    MOCK_PATIENT_QUEUE,
-} from "@/lib/mock-data/doctor";
 import { getAppointments } from "@/services/appointmentService";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -35,13 +26,23 @@ const QUICK_ACTIONS = [
     { icon: "event_available", label: "Lịch hẹn", desc: "Quản lý", color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-500/10", href: ROUTES.PORTAL.DOCTOR.APPOINTMENTS },
 ];
 
+const DEFAULT_STATS = {
+    todayExams: 0,
+    totalExamsToday: 0,
+    waitingPatients: 0,
+    avgWaitTime: 0,
+    progressPercent: 0,
+    personalRevenue: 0,
+    revenueChange: 0,
+};
+
 export default function DoctorDashboard() {
     const { user } = useAuth();
-    const [stats, setStats] = useState(MOCK_DOCTOR_DASHBOARD_STATS);
-    const weeklyStats = MOCK_WEEKLY_EXAM_STATS;
-    const schedule = MOCK_TODAY_SCHEDULE;
-    const announcements = MOCK_HOSPITAL_ANNOUNCEMENTS;
-    const [waitingPatients, setWaitingPatients] = useState(MOCK_PATIENT_QUEUE.filter((p) => p.status === "waiting"));
+    const [stats, setStats] = useState(DEFAULT_STATS);
+    const weeklyStats: any[] = [];
+    const schedule: any[] = [];
+    const announcements: any[] = [];
+    const [waitingPatients, setWaitingPatients] = useState<any[]>([]);
 
     // AI Copilot context
     usePageAIContext({ pageKey: "dashboard", extra: { doctorId: user?.id } });
@@ -62,15 +63,17 @@ export default function DoctorDashboard() {
                         waitingPatients: waiting.length,
                     }));
                     setWaitingPatients(waiting.map((a: any) => ({
-                        ...MOCK_PATIENT_QUEUE[0],
                         id: a.id, fullName: a.patientName ?? "", status: "waiting",
                         phone: a.phone ?? "", gender: a.gender ?? "", dob: a.dob ?? "",
                         reason: a.reason ?? "", priority: "normal", waitTime: "—",
                         appointmentTime: a.time ?? "",
-                    })) as typeof MOCK_PATIENT_QUEUE);
+                        age: a.age ?? 0, queueNumber: a.queueNumber ?? 0,
+                        checkInTime: a.checkInTime ?? "", allergies: a.allergies ?? [],
+                        avatar: a.avatar ?? "",
+                    })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { setWaitingPatients([]); });
     }, [user?.id]);
 
     const nextPatient = waitingPatients[0];
@@ -79,6 +82,7 @@ export default function DoctorDashboard() {
 
     return (
         <div className="p-6 md:p-8">
+            <h1 className="sr-only">Bảng điều khiển bác sĩ</h1>
             <div className="max-w-7xl mx-auto space-y-5">
                 {/* Page Header */}
                 <DoctorPageHeader />

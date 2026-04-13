@@ -17,18 +17,10 @@ interface StockItem {
     stockLevel: "HIGH" | "NORMAL" | "LOW" | "OUT";
 }
 
-const MOCK_STOCK: StockItem[] = [
-    { id: "1", code: "TH-001", name: "Paracetamol 500mg", unit: "Viên", currentStock: 2500, minStock: 500, maxStock: 5000, batchNumber: "LOT-2026-0312", expiryDate: "2027-03-10", stockLevel: "NORMAL" },
-    { id: "2", code: "TH-002", name: "Amoxicillin 250mg", unit: "Viên", currentStock: 800, minStock: 200, maxStock: 3000, batchNumber: "LOT-2026-0287", expiryDate: "2027-09-08", stockLevel: "NORMAL" },
-    { id: "3", code: "TH-003", name: "Vitamin C 1000mg", unit: "Viên", currentStock: 120, minStock: 200, maxStock: 2000, batchNumber: "LOT-2026-0410", expiryDate: "2027-06-12", stockLevel: "LOW" },
-    { id: "4", code: "TH-004", name: "Omeprazol 20mg", unit: "Viên", currentStock: 3200, minStock: 300, maxStock: 4000, batchNumber: "LOT-2026-0189", expiryDate: "2028-03-05", stockLevel: "HIGH" },
-    { id: "5", code: "TH-005", name: "Losartan 50mg", unit: "Viên", currentStock: 0, minStock: 100, maxStock: 1000, batchNumber: "LOT-2025-0823", expiryDate: "2026-08-23", stockLevel: "OUT" },
-    { id: "6", code: "TH-006", name: "Metformin 850mg", unit: "Viên", currentStock: 1500, minStock: 300, maxStock: 3000, batchNumber: "LOT-2026-0156", expiryDate: "2027-12-01", stockLevel: "NORMAL" },
-];
 
 export default function MedicineStockPage() {
     const router = useRouter();
-    const [stock, setStock] = useState<StockItem[]>(MOCK_STOCK);
+    const [stock, setStock] = useState<StockItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [levelFilter, setLevelFilter] = useState("all");
 
@@ -56,7 +48,7 @@ export default function MedicineStockPage() {
                     }));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filtered = stock.filter((s) => {
@@ -152,7 +144,14 @@ export default function MedicineStockPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#dde0e4] dark:divide-[#2d353e]">
-                            {filtered.map((item) => {
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-12 text-center text-[#687582] dark:text-gray-400">
+                                        <span className="material-symbols-outlined text-4xl mb-2 block">inbox</span>
+                                        Chưa có dữ liệu
+                                    </td>
+                                </tr>
+                            ) : filtered.map((item) => {
                                 const style = getStockStyle(item.stockLevel);
                                 const pct = Math.min(100, Math.round((item.currentStock / item.maxStock) * 100));
                                 return (
@@ -161,8 +160,8 @@ export default function MedicineStockPage() {
                                         <td className="py-3 px-6 text-sm text-[#121417] dark:text-white">{item.name}</td>
                                         <td className="py-3 px-6">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-[#121417] dark:text-white">{item.currentStock.toLocaleString()}</span>
-                                                <span className="text-xs text-[#687582]">/ {item.maxStock.toLocaleString()}</span>
+                                                <span className="text-sm font-bold text-[#121417] dark:text-white">{item.currentStock.toLocaleString("vi-VN")}</span>
+                                                <span className="text-xs text-[#687582]">/ {item.maxStock.toLocaleString("vi-VN")}</span>
                                             </div>
                                             <div className="w-20 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1">
                                                 <div className={`h-full rounded-full ${style.bar}`} style={{ width: `${pct}%` }} />
@@ -175,7 +174,7 @@ export default function MedicineStockPage() {
                                     </tr>
                                 );
                             })}
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>

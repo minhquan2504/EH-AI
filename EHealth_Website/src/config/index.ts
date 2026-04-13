@@ -12,8 +12,8 @@
 // Cấu hình kết nối API Backend
 // ============================================
 export const API_CONFIG = {
-    // URL của Backend API (lấy từ env hoặc dùng giá trị mặc định)
-    BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://160.250.186.97:3000',
+    // URL của Backend API (bắt buộc khai báo trong .env.local)
+    BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
 
     // Thời gian timeout cho mỗi request (30 giây)
     TIMEOUT: 30000,

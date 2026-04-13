@@ -31,18 +31,6 @@ interface ExportItem {
     note: string;
 }
 
-const MOCK_DETAIL: ExportDetail = {
-    id: "1", code: "XK-2026-003", status: "pending",
-    createdAt: "2026-03-12 14:20", createdBy: "DS. Trần Dược",
-    destination: "Khoa Tim mạch", reason: "Bổ sung kho khoa",
-    warehouseName: "Kho chính", note: "Bổ sung thuốc cho khoa Tim mạch tháng 3",
-    totalItems: 2, approvedBy: "", approvedAt: "", cancelReason: "",
-};
-
-const MOCK_ITEMS: ExportItem[] = [
-    { id: "1", drugName: "Vitamin C 1000mg", quantity: 30, unit: "Viên", lotNumber: "LOT-2026-0410", expiryDate: "2027-06-12", note: "" },
-    { id: "2", drugName: "Atorvastatin 20mg", quantity: 50, unit: "Viên", lotNumber: "LOT-2026-0389", expiryDate: "2027-12-01", note: "Thuốc tim mạch" },
-];
 
 const STATUS_MAP = {
     pending: { label: "Chờ duyệt", bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-700 dark:text-yellow-400", icon: "pending" },
@@ -55,8 +43,8 @@ export default function StockOutDetailPage() {
     const params = useParams();
     const orderId = params.id as string;
 
-    const [detail, setDetail] = useState<ExportDetail>(MOCK_DETAIL);
-    const [items, setItems] = useState<ExportItem[]>(MOCK_ITEMS);
+    const [detail, setDetail] = useState<ExportDetail | null>(null);
+    const [items, setItems] = useState<ExportItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -73,17 +61,19 @@ export default function StockOutDetailPage() {
                     id: detailRes.id ?? orderId,
                     code: detailRes.code ?? detailRes.order_code ?? `XK-${orderId}`,
                     status: detailRes.status?.toLowerCase() === "completed" ? "completed" : detailRes.status?.toLowerCase() === "cancelled" ? "cancelled" : "pending",
-                    createdAt: detailRes.created_at ?? detailRes.createdAt ?? MOCK_DETAIL.createdAt,
-                    createdBy: detailRes.created_by_name ?? detailRes.createdBy ?? MOCK_DETAIL.createdBy,
-                    destination: detailRes.destination ?? detailRes.department ?? MOCK_DETAIL.destination,
-                    reason: detailRes.reason ?? detailRes.note ?? MOCK_DETAIL.reason,
-                    warehouseName: detailRes.warehouse?.name ?? detailRes.warehouseName ?? MOCK_DETAIL.warehouseName,
-                    note: detailRes.note ?? MOCK_DETAIL.note,
-                    totalItems: detailRes.total_items ?? detailRes.totalItems ?? MOCK_DETAIL.totalItems,
+                    createdAt: detailRes.created_at ?? detailRes.createdAt ?? "",
+                    createdBy: detailRes.created_by_name ?? detailRes.createdBy ?? "",
+                    destination: detailRes.destination ?? detailRes.department ?? "",
+                    reason: detailRes.reason ?? detailRes.note ?? "",
+                    warehouseName: detailRes.warehouse?.name ?? detailRes.warehouseName ?? "",
+                    note: detailRes.note ?? "",
+                    totalItems: detailRes.total_items ?? detailRes.totalItems ?? 0,
                     approvedBy: detailRes.approved_by_name ?? detailRes.approvedBy ?? "",
                     approvedAt: detailRes.approved_at ?? detailRes.approvedAt ?? "",
                     cancelReason: detailRes.cancel_reason ?? detailRes.cancelReason ?? "",
                 });
+            } else {
+                setDetail(null);
             }
             if (Array.isArray(itemsRes) && itemsRes.length > 0) {
                 setItems(itemsRes.map((x: Record<string, unknown>, i: number) => ({
@@ -103,7 +93,7 @@ export default function StockOutDetailPage() {
         setActionLoading("confirm");
         try {
             await inventoryService.confirmStockOut(orderId);
-            setDetail(prev => ({ ...prev, status: "completed", approvedAt: new Date().toISOString() }));
+            setDetail(prev => prev ? { ...prev, status: "completed", approvedAt: new Date().toISOString() } : prev);
         } catch {
             alert("Duyệt phiếu xuất thất bại. Vui lòng thử lại.");
         } finally {
@@ -116,18 +106,16 @@ export default function StockOutDetailPage() {
         setActionLoading("cancel");
         try {
             await inventoryService.cancelStockOut(orderId, cancelReason);
-            setDetail(prev => ({ ...prev, status: "cancelled", cancelReason }));
+            setDetail(prev => prev ? { ...prev, status: "cancelled", cancelReason } : prev);
         } catch {
             alert("Đã hủy phiếu xuất.");
-            setDetail(prev => ({ ...prev, status: "cancelled", cancelReason }));
+            setDetail(prev => prev ? { ...prev, status: "cancelled", cancelReason } : prev);
         } finally {
             setActionLoading("");
             setShowCancelModal(false);
             setCancelReason("");
         }
     };
-
-    const status = STATUS_MAP[detail.status];
 
     if (loading) {
         return (
@@ -136,6 +124,18 @@ export default function StockOutDetailPage() {
             </div>
         );
     }
+
+    if (!detail) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">outbox</span>
+                <p className="text-lg text-gray-500 mb-4">Không tìm thấy phiếu xuất</p>
+                <button onClick={() => router.back()} className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors">Quay lại</button>
+            </div>
+        );
+    }
+
+    const status = STATUS_MAP[detail.status];
 
     return (
         <div className="space-y-6">
@@ -249,7 +249,7 @@ export default function StockOutDetailPage() {
                                 <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                     <td className="py-3 px-5 text-sm text-[#687582]">{idx + 1}</td>
                                     <td className="py-3 px-5 text-sm font-medium text-[#121417] dark:text-white">{item.drugName}</td>
-                                    <td className="py-3 px-5 text-sm font-bold text-[#121417] dark:text-white text-right">{item.quantity.toLocaleString()}</td>
+                                    <td className="py-3 px-5 text-sm font-bold text-[#121417] dark:text-white text-right">{item.quantity.toLocaleString("vi-VN")}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.unit}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.lotNumber || "—"}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.expiryDate || "—"}</td>

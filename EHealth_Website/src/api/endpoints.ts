@@ -780,4 +780,1278 @@ export const SIGN_OFF_ENDPOINTS = {
     VERIFY: (encounterId: string) => `/api/sign-off/${encounterId}/verify`,
     SIGNATURES: (encounterId: string) => `/api/sign-off/${encounterId}/signatures`,
     AUDIT_LOG: (encounterId: string) => `/api/sign-off/${encounterId}/audit-log`,
+    LOCK_STATUS: (encounterId: string) => `/api/sign-off/${encounterId}/lock-status`, // GET: trạng thái khóa
+};
+
+// ============================================
+// USER NOTIFICATION Endpoints (Hộp thư thông báo người dùng)
+// ✅ Swagger: /api/notifications/inbox/*
+// ============================================
+export const USER_NOTIFICATION_ENDPOINTS = {
+    INBOX: '/api/notifications/inbox',                                                   // GET: danh sách thông báo
+    MARK_READ: (id: string) => `/api/notifications/inbox/${id}/read`,                    // PUT: đánh dấu đã đọc
+    MARK_ALL_READ: '/api/notifications/inbox/read-all',                                  // PUT: đánh dấu tất cả đã đọc
+    ADMIN_BROADCAST: '/api/notifications/inbox/admin-broadcast',                         // POST: gửi broadcast thủ công
+};
+
+// ============================================
+// Patient Management — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// Bổ sung PATIENT_ENDPOINTS với các method còn thiếu
+// (Giữ const gốc, thêm const mới để không break)
+export const PATIENT_ENDPOINTS_EXT = {
+    // Từ patient.routes.ts mounted tại /api/patients
+    WITH_INSURANCE: '/api/patients/with-insurance',                                    // GET
+    WITHOUT_INSURANCE: '/api/patients/without-insurance',                              // GET
+    FILTER_BY_TAGS: '/api/patients/filter-by-tags',                                   // GET
+    ACCOUNT: (accountId: string) => `/api/patients/account/${accountId}`,              // GET
+    SEARCH: '/api/patients/search',                                                    // GET: tìm kiếm nâng cao
+    QUICK_SEARCH: '/api/patients/quick-search',                                        // GET: tìm nhanh
+    SUMMARY: (id: string) => `/api/patients/${id}/summary`,                            // GET
+    EMERGENCY_CONTACTS: (patientId: string) => `/api/patients/${patientId}/emergency-contacts`, // GET
+    LEGAL_REPRESENTATIVE: (patientId: string) => `/api/patients/${patientId}/legal-representative`, // GET
+    ALL_RELATIONS: (patientId: string) => `/api/patients/${patientId}/relations`,      // GET
+    RELATIVES: (patientId: string) => `/api/patients/${patientId}/relatives`,          // GET
+    GUARDIANS: (patientId: string) => `/api/patients/${patientId}/guardians`,          // GET
+    AUDIT_LOGS: (id: string) => `/api/patients/${id}/audit-logs`,                      // GET
+    INSURANCES: (patientId: string) => `/api/patients/${patientId}/insurances`,        // GET
+    ADD_INSURANCE: (patientId: string) => `/api/patients/${patientId}/insurances`,     // POST
+    DELETE: (id: string) => `/api/patients/${id}`,                                     // DELETE
+    LINK_ACCOUNT: (id: string) => `/api/patients/${id}/link-account`,                  // PATCH
+    UNLINK_ACCOUNT: (id: string) => `/api/patients/${id}/unlink-account`,              // PATCH
+    INSURANCE_STATUS: (id: string) => `/api/patients/${id}/insurance-status`,          // PATCH
+    PATIENT_TAGS: (patientId: string) => `/api/patients/${patientId}/tags`,            // GET
+    ASSIGN_TAG: (patientId: string) => `/api/patients/${patientId}/tags`,              // POST
+    REMOVE_TAG: (patientId: string, tagId: string) => `/api/patients/${patientId}/tags/${tagId}`, // DELETE
+    PATIENT_APPOINTMENTS: (patientId: string) => `/api/patients/${patientId}/appointments`, // GET
+    CREATE_APPOINTMENT: (patientId: string) => `/api/patients/${patientId}/appointments`, // POST
+    PATIENT_DOCUMENTS: (patientId: string) => `/api/patients/${patientId}/documents`,   // GET
+    UPLOAD_DOCUMENT: (patientId: string) => `/api/patients/${patientId}/documents`,     // POST
+};
+
+// ============================================
+// 2.4.1 Patient Contact (Người thân bệnh nhân)
+// ✅ Swagger: /api/patient-relations/*
+// ============================================
+export const PATIENT_CONTACT_ENDPOINTS = {
+    LIST: '/api/patient-relations',                                                          // GET
+    CREATE: '/api/patient-relations',                                                        // POST
+    DETAIL: (id: string) => `/api/patient-relations/${id}`,                                  // GET
+    UPDATE: (id: string) => `/api/patient-relations/${id}`,                                  // PUT
+    DELETE: (id: string) => `/api/patient-relations/${id}`,                                  // DELETE
+    SET_EMERGENCY: (id: string) => `/api/patient-relations/${id}/set-emergency`,             // PATCH
+    SET_LEGAL_REPRESENTATIVE: (id: string) => `/api/patient-relations/${id}/set-legal-representative`, // PATCH
+    MEDICAL_DECISION_NOTE: (id: string) => `/api/patient-relations/${id}/medical-decision-note`, // GET/PATCH
+};
+
+// ============================================
+// 2.5 Patient Document (Tài liệu bệnh nhân)
+// ✅ Swagger: /api/patient-documents/*
+// ============================================
+export const PATIENT_DOCUMENT_ENDPOINTS = {
+    LIST: '/api/patient-documents',                                                             // GET
+    UPLOAD: '/api/patient-documents',                                                           // POST (multipart)
+    DETAIL: (id: string) => `/api/patient-documents/${id}`,                                     // GET
+    UPDATE: (id: string) => `/api/patient-documents/${id}`,                                     // PUT
+    DELETE: (id: string) => `/api/patient-documents/${id}`,                                     // DELETE
+    UPLOAD_VERSION: (id: string) => `/api/patient-documents/${id}/versions`,                    // POST
+    LIST_VERSIONS: (id: string) => `/api/patient-documents/${id}/versions`,                     // GET
+    GET_VERSION: (id: string, versionId: string) => `/api/patient-documents/${id}/versions/${versionId}`, // GET
+    VIEW: (id: string) => `/api/patient-documents/${id}/view`,                                  // GET: xem file
+    DOWNLOAD: (id: string) => `/api/patient-documents/${id}/download`,                          // GET: tải file
+};
+
+// ============================================
+// 2.6 Patient Tag (Nhãn bệnh nhân)
+// ✅ Swagger: /api/patient-tags/*
+// ============================================
+export const PATIENT_TAG_ENDPOINTS = {
+    LIST: '/api/patient-tags',                                          // GET
+    CREATE: '/api/patient-tags',                                        // POST
+    DETAIL: (id: string) => `/api/patient-tags/${id}`,                  // GET
+    UPDATE: (id: string) => `/api/patient-tags/${id}`,                  // PUT
+    DELETE: (id: string) => `/api/patient-tags/${id}`,                  // DELETE
+};
+
+// ============================================
+// 2.2 Medical History — Patient Management
+// ✅ Swagger: /api/medical-history/*
+// ============================================
+export const MEDICAL_HISTORY_ENDPOINTS = {
+    LIST: '/api/medical-history',                                                              // GET: danh sách encounter
+    PATIENT_LATEST: (patientId: string) => `/api/medical-history/patient/${patientId}/latest`, // GET
+    PATIENT_TIMELINE: (patientId: string) => `/api/medical-history/patient/${patientId}/timeline`, // GET
+    PATIENT_SUMMARY: (patientId: string) => `/api/medical-history/patient/${patientId}/summary`, // GET
+    MY_HISTORY: '/api/medical-history/my-history',                                             // GET: lịch sử của tôi
+    ENCOUNTER_DETAIL: (encounterId: string) => `/api/medical-history/${encounterId}`,          // GET
+};
+
+// ============================================
+// 2.3 Insurance Provider (Nhà cung cấp bảo hiểm)
+// ✅ Swagger: /api/insurance-providers/*
+// ============================================
+export const INSURANCE_PROVIDER_ENDPOINTS = {
+    LIST: '/api/insurance-providers',                                               // GET
+    CREATE: '/api/insurance-providers',                                             // POST
+    DETAIL: (id: string) => `/api/insurance-providers/${id}`,                       // GET
+    UPDATE: (id: string) => `/api/insurance-providers/${id}`,                       // PUT
+    DELETE: (id: string) => `/api/insurance-providers/${id}`,                       // DELETE
+};
+
+// ============================================
+// 2.3 Insurance Coverage (Phạm vi bảo hiểm)
+// ✅ Swagger: /api/insurance-coverage/*
+// ============================================
+export const INSURANCE_COVERAGE_ENDPOINTS = {
+    LIST: '/api/insurance-coverage',                                                // GET
+    CREATE: '/api/insurance-coverage',                                              // POST
+    UPDATE: (id: string) => `/api/insurance-coverage/${id}`,                        // PUT
+    DELETE: (id: string) => `/api/insurance-coverage/${id}`,                        // DELETE
+};
+
+// Bổ sung thêm method vào PATIENT_INSURANCE (bản gốc giữ nguyên)
+export const PATIENT_INSURANCE_EXT_ENDPOINTS = {
+    CREATE: '/api/patient-insurances',                                              // POST
+    UPDATE: (id: string) => `/api/patient-insurances/${id}`,                        // PUT
+    DELETE: (id: string) => `/api/patient-insurances/${id}`,                        // DELETE
+    EXPIRED: '/api/patient-insurances/expired',                                     // GET: bảo hiểm hết hạn
+};
+
+// ============================================
+// 2.4 Relation Type (Loại quan hệ)
+// ✅ Swagger: /api/relation-types/*
+// ============================================
+export const RELATION_TYPE_ENDPOINTS = {
+    LIST: '/api/relation-types',                                                    // GET
+    CREATE: '/api/relation-types',                                                  // POST
+    UPDATE: (id: string) => `/api/relation-types/${id}`,                            // PUT
+    DELETE: (id: string) => `/api/relation-types/${id}`,                            // DELETE
+};
+
+// ============================================
+// 2.5 Document Type (Loại tài liệu)
+// ✅ Swagger: /api/document-types/*
+// ============================================
+export const DOCUMENT_TYPE_ENDPOINTS = {
+    LIST: '/api/document-types',                                                    // GET
+    CREATE: '/api/document-types',                                                  // POST
+    UPDATE: (id: string) => `/api/document-types/${id}`,                            // PUT
+    DELETE: (id: string) => `/api/document-types/${id}`,                            // DELETE
+};
+
+// ============================================
+// 2.6.5 Patient Classification Rule (Quy tắc phân loại)
+// ✅ Swagger: /api/patient-classification-rules/*
+// ============================================
+export const PATIENT_CLASSIFICATION_RULE_ENDPOINTS = {
+    LIST: '/api/patient-classification-rules',                                      // GET
+    CREATE: '/api/patient-classification-rules',                                    // POST
+    DETAIL: (id: string) => `/api/patient-classification-rules/${id}`,              // GET
+    UPDATE: (id: string) => `/api/patient-classification-rules/${id}`,              // PUT
+    DELETE: (id: string) => `/api/patient-classification-rules/${id}`,              // DELETE
+};
+
+// ============================================
+// Appointment Management — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 3.9 Appointment Coordination (Điều phối lịch khám)
+// ✅ Swagger: /api/appointment-coordination/*
+// ============================================
+export const APPOINTMENT_COORDINATION_ENDPOINTS = {
+    DOCTOR_LOAD: '/api/appointment-coordination/doctor-load',                       // GET: phân tích tải bác sĩ
+    SUGGEST_SLOTS: '/api/appointment-coordination/suggest-slots',                   // GET: gợi ý slot tốt nhất
+    BALANCE_OVERVIEW: '/api/appointment-coordination/balance-overview',             // GET: tổng quan cân bằng
+    AUTO_ASSIGN: '/api/appointment-coordination/auto-assign',                       // POST: tự động phân công
+    AI_DATASET: '/api/appointment-coordination/ai-dataset',                         // GET: dataset cho AI
+    PRIORITY: (appointmentId: string) => `/api/appointment-coordination/${appointmentId}/priority`, // PATCH
+    REASSIGN_DOCTOR: (appointmentId: string) => `/api/appointment-coordination/${appointmentId}/reassign-doctor`, // PATCH
+};
+
+// ============================================
+// 3.3 Doctor Availability (Lịch làm việc bác sĩ)
+// ✅ Swagger: /api/doctor-availability/*
+// ============================================
+export const DOCTOR_AVAILABILITY_ENDPOINTS = {
+    BY_SPECIALTY: (specialtyId: string) => `/api/doctor-availability/by-specialty/${specialtyId}`, // GET
+    BY_DATE: (date: string) => `/api/doctor-availability/by-date/${date}`,          // GET
+    DOCTOR: (doctorId: string) => `/api/doctor-availability/${doctorId}`,           // GET
+    CONFLICTS: (doctorId: string) => `/api/doctor-availability/${doctorId}/conflicts`, // GET
+    FACILITIES: (doctorId: string) => `/api/doctor-availability/${doctorId}/facilities`, // GET
+};
+
+// ============================================
+// 3.3 Doctor Absence (Lịch vắng bác sĩ)
+// ✅ Swagger: /api/doctor-absences/*
+// ============================================
+export const DOCTOR_ABSENCE_ENDPOINTS = {
+    AFFECTED_APPOINTMENTS: '/api/doctor-absences/affected-appointments',            // GET
+    LIST: '/api/doctor-absences',                                                   // GET
+    CREATE: '/api/doctor-absences',                                                 // POST
+    DETAIL: (absenceId: string) => `/api/doctor-absences/${absenceId}`,             // GET/PUT/DELETE
+};
+
+// ============================================
+// 3.8 Appointment Change (Dời/Hủy lịch)
+// ✅ Swagger: /api/appointment-changes/*
+// ============================================
+export const APPOINTMENT_CHANGE_ENDPOINTS = {
+    STATS: '/api/appointment-changes/stats',                                                    // GET: thống kê
+    RECENT: '/api/appointment-changes/recent',                                                  // GET: thay đổi gần đây
+    HISTORY: (appointmentId: string) => `/api/appointment-changes/${appointmentId}/history`,    // GET
+    CHECK_CANCEL_POLICY: (appointmentId: string) => `/api/appointment-changes/${appointmentId}/check-cancel-policy`, // GET
+    CAN_RESCHEDULE: (appointmentId: string) => `/api/appointment-changes/${appointmentId}/can-reschedule`, // GET
+};
+
+// ============================================
+// 3.2 Locked Slot (Slot bị khóa)
+// ✅ Swagger: /api/locked-slots/*
+// ============================================
+export const LOCKED_SLOT_ENDPOINTS = {
+    LOCK: '/api/locked-slots/lock',                                                 // POST: khóa slot
+    LOCKED: '/api/locked-slots/locked',                                             // GET: danh sách slot bị khóa
+    UNLOCK: (lockedSlotId: string) => `/api/locked-slots/lock/${lockedSlotId}`,     // DELETE: mở khóa
+    LOCK_BY_SHIFT: '/api/locked-slots/lock-by-shift',                               // POST: khóa theo ca
+    UNLOCK_BY_SHIFT: '/api/locked-slots/unlock-by-shift',                           // POST: mở khóa theo ca
+};
+
+// ============================================
+// 3.2 Shift Service (Dịch vụ theo ca khám)
+// ✅ Swagger: /api/shift-services/*
+// ============================================
+export const SHIFT_SERVICE_ENDPOINTS = {
+    LIST: '/api/shift-services',                                                             // GET
+    CREATE: '/api/shift-services',                                                           // POST
+    BY_SHIFT: (shiftId: string) => `/api/shift-services/by-shift/${shiftId}`,               // GET
+    BY_SERVICE: (facilityServiceId: string) => `/api/shift-services/by-service/${facilityServiceId}`, // GET
+    DETAIL: (id: string) => `/api/shift-services/${id}`,                                     // GET/PUT/DELETE
+    TOGGLE: (id: string) => `/api/shift-services/${id}/toggle`,                              // PATCH
+};
+
+// ============================================
+// 3.2 Consultation Duration (Thời lượng khám)
+// ✅ Swagger: /api/facilities/:facilityId/service-durations (mount vào /api/facilities)
+// ============================================
+export const CONSULTATION_DURATION_ENDPOINTS = {
+    LIST: (facilityId: string) => `/api/facilities/${facilityId}/service-durations`,         // GET
+    CREATE: (facilityId: string) => `/api/facilities/${facilityId}/service-durations`,       // POST
+    UPDATE: (facilityId: string, serviceId: string) => `/api/facilities/${facilityId}/service-durations/${serviceId}`, // PUT
+};
+
+// ============================================
+// EMR — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 4.7 Treatment Progress (Tiến trình điều trị)
+// ✅ Swagger: /api/treatment-plans/*
+// ============================================
+export const TREATMENT_PROGRESS_ENDPOINTS = {
+    BY_PATIENT: (patientId: string) => `/api/treatment-plans/by-patient/${patientId}`,  // GET
+    LIST: '/api/treatment-plans',                                                        // GET
+    CREATE: '/api/treatment-plans',                                                      // POST
+    DETAIL: (planId: string) => `/api/treatment-plans/${planId}`,                        // GET/PUT
+    STATUS: (planId: string) => `/api/treatment-plans/${planId}/status`,                 // PATCH
+    NOTES: (planId: string) => `/api/treatment-plans/${planId}/notes`,                   // GET/POST
+    NOTE_DETAIL: (planId: string, noteId: string) => `/api/treatment-plans/${planId}/notes/${noteId}`, // GET/PUT
+    FOLLOW_UPS: (planId: string) => `/api/treatment-plans/${planId}/follow-ups`,         // GET/POST
+    FOLLOW_UP_CHAIN: (planId: string) => `/api/treatment-plans/${planId}/follow-up-chain`, // GET
+    SUMMARY: (planId: string) => `/api/treatment-plans/${planId}/summary`,               // GET
+};
+
+// ============================================
+// EHR — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 6.1 Health Profile (Hồ sơ sức khỏe tổng hợp)
+// ✅ Swagger: /api/ehr/patients/:patientId/*
+// ============================================
+export const HEALTH_PROFILE_ENDPOINTS = {
+    PROFILE: (patientId: string) => `/api/ehr/patients/${patientId}/profile`,               // GET: hồ sơ sức khỏe
+    HEALTH_SUMMARY: (patientId: string) => `/api/ehr/patients/${patientId}/health-summary`, // GET: tóm tắt sức khỏe
+    LATEST_VITALS: (patientId: string) => `/api/ehr/patients/${patientId}/latest-vitals`,   // GET
+    ACTIVE_CONDITIONS: (patientId: string) => `/api/ehr/patients/${patientId}/active-conditions`, // GET
+    ALLERGY_LIST: (patientId: string) => `/api/ehr/patients/${patientId}/allergy-list`,     // GET
+    CURRENT_MEDICATIONS: (patientId: string) => `/api/ehr/patients/${patientId}/current-medications`, // GET
+    DIAGNOSIS_HISTORY: (patientId: string) => `/api/ehr/patients/${patientId}/diagnosis-history`, // GET
+    INSURANCE_STATUS: (patientId: string) => `/api/ehr/patients/${patientId}/insurance-status`, // GET
+    ALERTS: (patientId: string) => `/api/ehr/patients/${patientId}/alerts`,                 // GET/POST
+    ALERT_DETAIL: (patientId: string, alertId: string) => `/api/ehr/patients/${patientId}/alerts/${alertId}`, // GET/PUT
+    NOTES: (patientId: string) => `/api/ehr/patients/${patientId}/notes`,                   // GET
+};
+
+// ============================================
+// 6.3 Medical History EHR (Tiền sử bệnh & yếu tố nguy cơ)
+// ✅ Swagger: /api/ehr/patients/:patientId/medical-histories
+// ============================================
+export const MEDICAL_HISTORY_EHR_ENDPOINTS = {
+    LIST: (patientId: string) => `/api/ehr/patients/${patientId}/medical-histories`,         // GET
+    DETAIL: (patientId: string, historyId: string) => `/api/ehr/patients/${patientId}/medical-histories/${historyId}`, // GET
+    CREATE: (patientId: string) => `/api/ehr/patients/${patientId}/medical-histories`,        // POST
+    UPDATE: (patientId: string, historyId: string) => `/api/ehr/patients/${patientId}/medical-histories/${historyId}`, // PUT
+    STATUS: (patientId: string, historyId: string) => `/api/ehr/patients/${patientId}/medical-histories/${historyId}/status`, // PATCH
+    DELETE: (patientId: string, historyId: string) => `/api/ehr/patients/${patientId}/medical-histories/${historyId}`, // DELETE
+    ALLERGIES: (patientId: string) => `/api/ehr/patients/${patientId}/allergies`,             // GET/POST
+    ALLERGY_DETAIL: (patientId: string, allergyId: string) => `/api/ehr/patients/${patientId}/allergies/${allergyId}`, // GET/PUT
+};
+
+// ============================================
+// 6.6 Vital Signs (Chỉ số sinh hiệu)
+// ✅ Swagger: /api/ehr/patients/:patientId/vitals
+// ============================================
+export const VITAL_SIGNS_ENDPOINTS = {
+    LIST: (patientId: string) => `/api/ehr/patients/${patientId}/vitals`,                    // GET
+    LATEST: (patientId: string) => `/api/ehr/patients/${patientId}/vitals/latest`,           // GET
+    TRENDS: (patientId: string) => `/api/ehr/patients/${patientId}/vitals/trends`,           // GET
+    ABNORMAL: (patientId: string) => `/api/ehr/patients/${patientId}/vitals/abnormal`,       // GET
+    SUMMARY: (patientId: string) => `/api/ehr/patients/${patientId}/vitals/summary`,         // GET
+    HEALTH_METRICS: (patientId: string) => `/api/ehr/patients/${patientId}/health-metrics`,  // GET/POST
+    HEALTH_METRICS_TIMELINE: (patientId: string) => `/api/ehr/patients/${patientId}/health-metrics/timeline`, // GET
+};
+
+// ============================================
+// 6.5 Medication Treatment (Hồ sơ thuốc & điều trị)
+// ✅ Swagger: /api/ehr/patients/:patientId/medication-records
+// ============================================
+export const MEDICATION_TREATMENT_ENDPOINTS = {
+    LIST: (patientId: string) => `/api/ehr/patients/${patientId}/medication-records`,         // GET
+    CURRENT: (patientId: string) => `/api/ehr/patients/${patientId}/medication-records/current`, // GET
+    INTERACTION_CHECK: (patientId: string) => `/api/ehr/patients/${patientId}/medication-records/interaction-check`, // GET
+    TIMELINE: (patientId: string) => `/api/ehr/patients/${patientId}/medication-records/timeline`, // GET
+    DETAIL: (patientId: string, prescriptionId: string) => `/api/ehr/patients/${patientId}/medication-records/${prescriptionId}`, // GET
+    TREATMENT_RECORDS: (patientId: string) => `/api/ehr/patients/${patientId}/treatment-records`, // GET
+    TREATMENT_RECORD_DETAIL: (patientId: string, planId: string) => `/api/ehr/patients/${patientId}/treatment-records/${planId}`, // GET
+    ADHERENCE: (patientId: string) => `/api/ehr/patients/${patientId}/medication-adherence`,  // GET/POST
+};
+
+// ============================================
+// 6.4 Clinical Results (Kết quả xét nghiệm)
+// ✅ Swagger: /api/ehr/patients/:patientId/clinical-results
+// ============================================
+export const CLINICAL_RESULTS_ENDPOINTS = {
+    LIST: (patientId: string) => `/api/ehr/patients/${patientId}/clinical-results`,           // GET
+    TRENDS: (patientId: string) => `/api/ehr/patients/${patientId}/clinical-results/trends`,  // GET
+    SUMMARY: (patientId: string) => `/api/ehr/patients/${patientId}/clinical-results/summary`, // GET
+    ATTACHMENTS: (patientId: string) => `/api/ehr/patients/${patientId}/clinical-results/attachments`, // GET
+    ABNORMAL: (patientId: string) => `/api/ehr/patients/${patientId}/clinical-results/abnormal`, // GET
+    BY_ENCOUNTER: (patientId: string, encounterId: string) => `/api/ehr/patients/${patientId}/clinical-results/by-encounter/${encounterId}`, // GET
+    DETAIL: (patientId: string, orderId: string) => `/api/ehr/patients/${patientId}/clinical-results/${orderId}`, // GET
+};
+
+// ============================================
+// 6.2 Health Timeline (Dòng thời gian sức khỏe)
+// ✅ Swagger: /api/ehr/patients/:patientId/timeline
+// ============================================
+export const HEALTH_TIMELINE_ENDPOINTS = {
+    LIST: (patientId: string) => `/api/ehr/patients/${patientId}/timeline`,                  // GET
+    SUMMARY: (patientId: string) => `/api/ehr/patients/${patientId}/timeline/summary`,       // GET
+    BY_ENCOUNTER: (patientId: string, encounterId: string) => `/api/ehr/patients/${patientId}/timeline/by-encounter/${encounterId}`, // GET
+    TRACK_CONDITION: (patientId: string) => `/api/ehr/patients/${patientId}/timeline/track-condition`, // GET
+    EVENTS: (patientId: string) => `/api/ehr/patients/${patientId}/timeline/events`,         // GET/POST
+    EVENT_DETAIL: (patientId: string, eventId: string) => `/api/ehr/patients/${patientId}/timeline/events/${eventId}`, // GET/PUT
+};
+
+// ============================================
+// 6.8 Data Integration (Đồng bộ dữ liệu)
+// ✅ Swagger: /api/ehr/patients/:patientId/data-sources
+// ============================================
+export const DATA_INTEGRATION_ENDPOINTS = {
+    DATA_SOURCES: (patientId: string) => `/api/ehr/patients/${patientId}/data-sources`,       // GET
+    CREATE_DATA_SOURCE: (patientId: string) => `/api/ehr/patients/${patientId}/data-sources`, // POST
+    DATA_SOURCE_DETAIL: (patientId: string, sourceId: string) => `/api/ehr/patients/${patientId}/data-sources/${sourceId}`, // PUT
+    EXTERNAL_RECORDS: (patientId: string) => `/api/ehr/patients/${patientId}/external-records`, // GET/POST
+    EXTERNAL_RECORD_DETAIL: (patientId: string, recordId: string) => `/api/ehr/patients/${patientId}/external-records/${recordId}`, // GET/PUT
+    EXTERNAL_RECORD_STATUS: (patientId: string, recordId: string) => `/api/ehr/patients/${patientId}/external-records/${recordId}/status`, // PATCH
+    DEVICE_SYNC: (patientId: string) => `/api/ehr/patients/${patientId}/device-sync`,         // GET/POST
+    INTEGRATION_SUMMARY: (patientId: string) => `/api/ehr/patients/${patientId}/integration-summary`, // GET
+};
+
+// ============================================
+// Medication Management — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 5.1 Drug Category (Danh mục thuốc)
+// ✅ Swagger: /api/pharmacy/categories/*
+// Alias tách riêng DRUG_CATEGORY_ENDPOINTS
+// ============================================
+export const DRUG_CATEGORY_ENDPOINTS = {
+    LIST: '/api/pharmacy/categories',                                              // GET
+    CREATE: '/api/pharmacy/categories',                                            // POST
+    EXPORT: '/api/pharmacy/categories/export',                                     // GET
+    IMPORT: '/api/pharmacy/categories/import',                                     // POST
+    DETAIL: (id: string) => `/api/pharmacy/categories/${id}`,                      // GET
+    UPDATE: (id: string) => `/api/pharmacy/categories/${id}`,                      // PUT
+    DELETE: (id: string) => `/api/pharmacy/categories/${id}`,                      // DELETE
+};
+
+// ============================================
+// 5.10 Medication Instructions (Hướng dẫn dùng thuốc)
+// ✅ Swagger: /api/medication-instructions/*
+// ============================================
+export const MED_INSTRUCTION_ENDPOINTS = {
+    TEMPLATES: '/api/medication-instructions/templates',                           // GET
+    CREATE_TEMPLATE: '/api/medication-instructions/templates',                     // POST
+    UPDATE_TEMPLATE: (id: string) => `/api/medication-instructions/templates/${id}`, // PATCH
+    DELETE_TEMPLATE: (id: string) => `/api/medication-instructions/templates/${id}`, // DELETE
+    DRUG_DEFAULTS: '/api/medication-instructions/drugs',                           // GET: tất cả mặc định
+    DRUG_DEFAULT: (drugId: string) => `/api/medication-instructions/drugs/${drugId}`, // GET
+    UPSERT_DRUG_DEFAULT: (drugId: string) => `/api/medication-instructions/drugs/${drugId}`, // PUT
+    DELETE_DRUG_DEFAULT: (drugId: string) => `/api/medication-instructions/drugs/${drugId}`, // DELETE
+};
+
+// ============================================
+// Facility Management — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// Bổ sung FACILITY_ENDPOINTS (const gốc chỉ có LIST)
+export const FACILITY_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/facilities',                                                        // GET
+    DROPDOWN: '/api/facilities/dropdown',                                           // GET
+    DETAIL: (id: string) => `/api/facilities/${id}`,                                // GET
+    CREATE: '/api/facilities',                                                      // POST (multipart logo)
+    UPDATE: (id: string) => `/api/facilities/${id}`,                                // PUT
+    STATUS: (id: string) => `/api/facilities/${id}/status`,                         // PATCH
+    DELETE: (id: string) => `/api/facilities/${id}`,                                // DELETE
+};
+
+// Bổ sung BRANCH_ENDPOINTS (const gốc có cơ bản)
+export const BRANCH_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/branches',                                                          // GET
+    DROPDOWN: '/api/branches/dropdown',                                             // GET
+    DETAIL: (id: string) => `/api/branches/${id}`,                                  // GET
+    CREATE: '/api/branches',                                                        // POST
+    UPDATE: (id: string) => `/api/branches/${id}`,                                  // PUT
+    STATUS: (id: string) => `/api/branches/${id}/status`,                           // PATCH
+    DELETE: (id: string) => `/api/branches/${id}`,                                  // DELETE
+};
+
+// Bổ sung DEPARTMENT_ENDPOINTS (const gốc có cơ bản)
+export const DEPARTMENT_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/departments',                                                        // GET
+    DROPDOWN: '/api/departments/dropdown',                                           // GET
+    DETAIL: (id: string) => `/api/departments/${id}`,                                // GET
+    CREATE: '/api/departments',                                                      // POST
+    UPDATE: (id: string) => `/api/departments/${id}`,                                // PUT
+    STATUS: (id: string) => `/api/departments/${id}/status`,                         // PATCH
+    DELETE: (id: string) => `/api/departments/${id}`,                                // DELETE
+};
+
+// ============================================
+// 2.10 Medical Equipment (Thiết bị y tế)
+// ✅ Swagger: /api/equipments/*
+// ============================================
+export const MEDICAL_EQUIPMENT_ENDPOINTS = {
+    LIST: '/api/equipments',                                                              // GET
+    DETAIL: (id: string) => `/api/equipments/${id}`,                                      // GET
+    CREATE: '/api/equipments',                                                            // POST
+    UPDATE: (id: string) => `/api/equipments/${id}`,                                      // PUT
+    STATUS: (id: string) => `/api/equipments/${id}/status`,                               // PUT
+    ASSIGN_ROOM: (id: string) => `/api/equipments/${id}/assign-room`,                     // PUT
+    DELETE: (id: string) => `/api/equipments/${id}`,                                      // DELETE
+    MAINTENANCE_LOGS: (id: string) => `/api/equipments/${id}/maintenance`,                // GET
+    CREATE_MAINTENANCE: (id: string) => `/api/equipments/${id}/maintenance`,              // POST
+    UPDATE_MAINTENANCE: (logId: string) => `/api/equipments/maintenance/${logId}`,        // PUT
+    DELETE_MAINTENANCE: (logId: string) => `/api/equipments/maintenance/${logId}`,        // DELETE
+};
+
+// ============================================
+// License (Giấy phép hành nghề)
+// ✅ Swagger: /api/licenses/*
+// ============================================
+export const LICENSE_ENDPOINTS = {
+    LIST: '/api/licenses',                                                          // GET
+    CREATE: '/api/licenses',                                                        // POST
+    EXPIRING: '/api/licenses/dashboard/expiring',                                   // GET: sắp hết hạn
+    EXPIRED: '/api/licenses/dashboard/expired',                                     // GET: đã hết hạn
+    DETAIL: (id: string) => `/api/licenses/${id}`,                                  // GET
+    UPDATE: (id: string) => `/api/licenses/${id}`,                                  // PUT
+    DELETE: (id: string) => `/api/licenses/${id}`,                                  // DELETE
+    UPLOAD_FILE: (id: string) => `/api/licenses/${id}/upload`,                      // POST: upload file
+    GET_FILE: (id: string) => `/api/licenses/${id}/file`,                           // GET
+    DELETE_FILE: (id: string) => `/api/licenses/${id}/file`,                        // DELETE
+};
+
+// ============================================
+// 2.11 Bed (Giường bệnh)
+// ✅ Swagger: /api/beds/*
+// ============================================
+export const BED_ENDPOINTS = {
+    LIST: '/api/beds',                                                              // GET
+    DETAIL: (id: string) => `/api/beds/${id}`,                                      // GET
+    CREATE: '/api/beds',                                                            // POST
+    UPDATE: (id: string) => `/api/beds/${id}`,                                      // PUT
+    ASSIGN: (id: string) => `/api/beds/${id}/assign`,                               // PUT
+    STATUS: (id: string) => `/api/beds/${id}/status`,                               // PUT
+    DELETE: (id: string) => `/api/beds/${id}`,                                      // DELETE
+};
+
+// ============================================
+// Shift (Ca làm việc)
+// ✅ Swagger: /api/shifts/*
+// ============================================
+export const SHIFT_ENDPOINTS = {
+    LIST: '/api/shifts',                                                            // GET
+    DETAIL: (id: string) => `/api/shifts/${id}`,                                    // GET
+    CREATE: '/api/shifts',                                                          // POST
+    UPDATE: (id: string) => `/api/shifts/${id}`,                                    // PUT
+    DELETE: (id: string) => `/api/shifts/${id}`,                                    // DELETE
+};
+
+// ============================================
+// Appointment Slot (Khung giờ khám)
+// ✅ Swagger: /api/slots/*
+// ============================================
+export const APPOINTMENT_SLOT_ENDPOINTS = {
+    LIST: '/api/slots',                                                             // GET
+    DETAIL: (id: string) => `/api/slots/${id}`,                                     // GET
+    CREATE: '/api/slots',                                                           // POST
+    UPDATE: (id: string) => `/api/slots/${id}`,                                     // PUT
+    DELETE: (id: string) => `/api/slots/${id}`,                                     // DELETE
+};
+
+// ============================================
+// Doctor Service (Dịch vụ của bác sĩ)
+// ✅ Swagger: /api/doctor-services/*
+// ============================================
+export const DOCTOR_SERVICE_ENDPOINTS = {
+    ACTIVE_DOCTORS: '/api/doctor-services/active-doctors',                          // GET
+    SERVICES_BY_DOCTOR: (doctorId: string) => `/api/doctor-services/${doctorId}/services`, // GET
+    DOCTORS_BY_SERVICE: (facilityServiceId: string) => `/api/doctor-services/by-facility-service/${facilityServiceId}`, // GET
+    ASSIGN_SERVICES: (doctorId: string) => `/api/doctor-services/${doctorId}/services`, // POST
+    REMOVE_SERVICE: (doctorId: string, facilityServiceId: string) => `/api/doctor-services/${doctorId}/services/${facilityServiceId}`, // DELETE
+};
+
+// ============================================
+// Shift Swap (Đổi ca)
+// ✅ Swagger: /api/shift-swaps/*
+// ============================================
+export const SHIFT_SWAP_ENDPOINTS = {
+    LIST: '/api/shift-swaps',                                                       // GET
+    CREATE: '/api/shift-swaps',                                                     // POST
+    DETAIL: (id: string) => `/api/shift-swaps/${id}`,                               // GET
+    APPROVE: (id: string) => `/api/shift-swaps/${id}/approve`,                      // PATCH
+    REJECT: (id: string) => `/api/shift-swaps/${id}/reject`,                        // PATCH
+};
+
+// ============================================
+// Operating Hour (Giờ hoạt động)
+// ✅ Swagger: /api/operating-hours/*
+// ============================================
+export const OPERATING_HOUR_ENDPOINTS = {
+    LIST: '/api/operating-hours',                                                   // GET
+    CREATE: '/api/operating-hours',                                                 // POST
+    DETAIL: (id: string) => `/api/operating-hours/${id}`,                           // GET
+    UPDATE: (id: string) => `/api/operating-hours/${id}`,                           // PUT
+    DELETE: (id: string) => `/api/operating-hours/${id}`,                           // DELETE
+};
+
+// ============================================
+// Room Maintenance (Bảo trì phòng)
+// ✅ Swagger: /api/room-maintenance/*
+// ============================================
+export const ROOM_MAINTENANCE_ENDPOINTS = {
+    ACTIVE: '/api/room-maintenance/active',                                                 // GET
+    BY_ROOM: (roomId: string) => `/api/room-maintenance/${roomId}`,                         // GET/POST
+    SCHEDULE_DETAIL: (maintenanceId: string) => `/api/room-maintenance/schedule/${maintenanceId}`, // GET/PUT
+};
+
+// ============================================
+// 2.12 Booking Config (Cấu hình đặt lịch)
+// ✅ Swagger: /api/booking-configs/*
+// ============================================
+export const BOOKING_CONFIG_ENDPOINTS = {
+    BY_BRANCH: (branchId: string) => `/api/booking-configs/branch/${branchId}`,    // GET
+    BY_BRANCH_RAW: (branchId: string) => `/api/booking-configs/branch/${branchId}/raw`, // GET
+    UPDATE_BRANCH: (branchId: string) => `/api/booking-configs/branch/${branchId}`, // PUT
+};
+
+// ============================================
+// Facility Status (Trạng thái hoạt động cơ sở)
+// ✅ Swagger: /api/facility-status/*
+// ============================================
+export const FACILITY_STATUS_ENDPOINTS = {
+    TODAY: '/api/facility-status/today',                                            // GET
+    BY_DATE: (date: string) => `/api/facility-status/date/${date}`,                 // GET
+    CALENDAR: '/api/facility-status/calendar',                                      // GET
+};
+
+// ============================================
+// Closed Day (Ngày nghỉ đặc biệt)
+// ✅ Swagger: /api/closed-days/*
+// ============================================
+export const CLOSED_DAY_ENDPOINTS = {
+    LIST: '/api/closed-days',                                                       // GET
+    CREATE: '/api/closed-days',                                                     // POST
+    DELETE: (id: string) => `/api/closed-days/${id}`,                               // DELETE
+};
+
+// ============================================
+// Holiday (Ngày lễ)
+// ✅ Swagger: /api/holidays/*
+// ============================================
+export const HOLIDAY_ENDPOINTS = {
+    LIST: '/api/holidays',                                                          // GET
+    CREATE: '/api/holidays',                                                        // POST
+    DETAIL: (id: string) => `/api/holidays/${id}`,                                  // GET
+    UPDATE: (id: string) => `/api/holidays/${id}`,                                  // PUT
+    DELETE: (id: string) => `/api/holidays/${id}`,                                  // DELETE
+};
+
+// ============================================
+// Specialty Service (Dịch vụ theo chuyên khoa)
+// ✅ Swagger: /api/specialty-services/*
+// ============================================
+export const SPECIALTY_SERVICE_ENDPOINTS = {
+    SERVICES_BY_SPECIALTY: (specialtyId: string) => `/api/specialty-services/${specialtyId}/services`, // GET
+    SPECIALTIES_BY_SERVICE: (serviceId: string) => `/api/specialty-services/by-service/${serviceId}`,  // GET
+    ASSIGN_SERVICES: (specialtyId: string) => `/api/specialty-services/${specialtyId}/services`,         // POST
+    REMOVE_SERVICE: (specialtyId: string, serviceId: string) => `/api/specialty-services/${specialtyId}/services/${serviceId}`, // DELETE
+};
+
+// ============================================
+// Department Specialty (Chuyên khoa - Phòng ban)
+// ✅ Swagger: /api/department-specialties/*
+// ============================================
+export const DEPARTMENT_SPECIALTY_ENDPOINTS = {
+    BY_DEPARTMENT: (departmentId: string) => `/api/department-specialties/${departmentId}/specialties`, // GET
+    BY_BRANCH: (branchId: string) => `/api/department-specialties/by-branch/${branchId}`,               // GET
+    BY_FACILITY: (facilityId: string) => `/api/department-specialties/by-facility/${facilityId}`,       // GET
+    ASSIGN: (departmentId: string) => `/api/department-specialties/${departmentId}/specialties`,         // POST
+    REMOVE: (departmentId: string, specialtyId: string) => `/api/department-specialties/${departmentId}/specialties/${specialtyId}`, // DELETE
+};
+
+// Bổ sung STAFF_ENDPOINTS (const gốc chỉ có cơ bản)
+export const STAFF_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/staff',                                                             // GET
+    DETAIL: (staffId: string) => `/api/staff/${staffId}`,                           // GET
+    CREATE: '/api/staff',                                                           // POST
+    UPDATE: (staffId: string) => `/api/staff/${staffId}`,                           // PUT
+    STATUS: (staffId: string) => `/api/staff/${staffId}/status`,                    // PUT
+    SIGNATURE: (staffId: string) => `/api/staff/${staffId}/signature`,              // PATCH (multipart)
+    DOCTOR_INFO: (staffId: string) => `/api/staff/${staffId}/doctor-info`,          // PUT
+    LICENSES: (staffId: string) => `/api/staff/${staffId}/licenses`,                // GET
+    CREATE_LICENSE: (staffId: string) => `/api/staff/${staffId}/licenses`,          // POST
+    UPDATE_LICENSE: (staffId: string, licenseId: string) => `/api/staff/${staffId}/licenses/${licenseId}`, // PUT
+    DELETE_LICENSE: (staffId: string, licenseId: string) => `/api/staff/${staffId}/licenses/${licenseId}`, // DELETE
+    ROLES: (staffId: string) => `/api/staff/${staffId}/roles`,                      // POST
+    REMOVE_ROLE: (staffId: string, roleId: string) => `/api/staff/${staffId}/roles/${roleId}`, // DELETE
+    BRANCHES: (staffId: string) => `/api/staff/${staffId}/branches`,                // POST
+    REMOVE_BRANCH: (staffId: string, branchId: string) => `/api/staff/${staffId}/branches/${branchId}`, // DELETE
+};
+
+// Bổ sung MEDICAL_ROOM_ENDPOINTS (const gốc có cơ bản)
+export const MEDICAL_ROOM_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/medical-rooms',                                                      // GET
+    DROPDOWN: '/api/medical-rooms/dropdown',                                         // GET
+    DETAIL: (id: string) => `/api/medical-rooms/${id}`,                              // GET
+    CREATE: '/api/medical-rooms',                                                    // POST
+    UPDATE: (id: string) => `/api/medical-rooms/${id}`,                              // PUT
+    STATUS: (id: string) => `/api/medical-rooms/${id}/status`,                       // PATCH
+    DELETE: (id: string) => `/api/medical-rooms/${id}`,                              // DELETE
+    ASSIGN_SERVICES: (roomId: string) => `/api/medical-rooms/${roomId}/services`,    // POST
+    SERVICES: (roomId: string) => `/api/medical-rooms/${roomId}/services`,           // GET
+    REMOVE_SERVICE: (roomId: string, serviceId: string) => `/api/medical-rooms/${roomId}/services/${serviceId}`, // DELETE
+};
+
+// Bổ sung MEDICAL_SERVICE_ENDPOINTS (const gốc thiếu import/export)
+export const MEDICAL_SERVICE_MANAGEMENT_ENDPOINTS = {
+    MASTER_LIST: '/api/medical-services/master',                                    // GET
+    MASTER_EXPORT: '/api/medical-services/master/export',                           // GET
+    MASTER_IMPORT: '/api/medical-services/master/import',                           // POST
+    MASTER_DETAIL: (id: string) => `/api/medical-services/master/${id}`,            // GET
+    MASTER_CREATE: '/api/medical-services/master',                                  // POST
+    MASTER_UPDATE: (id: string) => `/api/medical-services/master/${id}`,            // PUT
+    MASTER_STATUS: (id: string) => `/api/medical-services/master/${id}/status`,     // PATCH
+    MASTER_DELETE: (id: string) => `/api/medical-services/master/${id}`,            // DELETE
+    FACILITY_SERVICES: (facilityId: string) => `/api/medical-services/facilities/${facilityId}/services`, // GET
+    FACILITY_SERVICES_EXPORT: (facilityId: string) => `/api/medical-services/facilities/${facilityId}/services/export`, // GET
+    FACILITY_SERVICES_IMPORT: (facilityId: string) => `/api/medical-services/facilities/${facilityId}/services/import`, // POST
+    FACILITY_ACTIVE_SERVICES: (facilityId: string) => `/api/medical-services/facilities/${facilityId}/active-services`, // GET
+    FACILITY_SERVICE_DETAIL: (id: string) => `/api/medical-services/facilities/services/${id}`, // GET
+    FACILITY_SERVICE_CREATE: (facilityId: string) => `/api/medical-services/facilities/${facilityId}/services`, // POST
+    FACILITY_SERVICE_UPDATE: (id: string) => `/api/medical-services/facilities/services/${id}`, // PUT
+    FACILITY_SERVICE_STATUS: (id: string) => `/api/medical-services/facilities/services/${id}/status`, // PATCH
+};
+
+// ============================================
+// BILLING — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 9.2 Billing Invoice (Hóa đơn)
+// ✅ Swagger: /api/billing/invoices/*
+// ============================================
+export const BILLING_INVOICE_ENDPOINTS = {
+    CREATE: '/api/billing/invoices',                                                             // POST
+    GENERATE: (encounterId: string) => `/api/billing/invoices/generate/${encounterId}`,          // POST
+    REVENUE_SUMMARY: (facilityId: string) => `/api/billing/invoices/summary/${facilityId}`,      // GET
+    BY_ENCOUNTER: (encounterId: string) => `/api/billing/invoices/by-encounter/${encounterId}`,  // GET
+    BY_PATIENT: (patientId: string) => `/api/billing/invoices/by-patient/${patientId}`,         // GET
+    LIST: '/api/billing/invoices',                                                               // GET
+    INSURANCE_CLAIM: (invoiceId: string) => `/api/billing/invoices/${invoiceId}/insurance-claim`, // GET
+    DETAIL: (invoiceId: string) => `/api/billing/invoices/${invoiceId}`,                         // GET
+    UPDATE: (invoiceId: string) => `/api/billing/invoices/${invoiceId}`,                         // PUT
+    CANCEL: (invoiceId: string) => `/api/billing/invoices/${invoiceId}/cancel`,                  // PATCH
+    ADD_ITEM: (invoiceId: string) => `/api/billing/invoices/${invoiceId}/items`,                 // POST
+    UPDATE_ITEM: (invoiceId: string, itemId: string) => `/api/billing/invoices/${invoiceId}/items/${itemId}`, // PUT
+    DELETE_ITEM: (invoiceId: string, itemId: string) => `/api/billing/invoices/${invoiceId}/items/${itemId}`, // DELETE
+    RECALCULATE: (invoiceId: string) => `/api/billing/invoices/${invoiceId}/recalculate`,        // POST
+};
+
+// ============================================
+// 9.2 Billing Payment (Thanh toán hóa đơn)
+// ✅ Swagger: /api/billing/payments/*
+// ============================================
+export const BILLING_PAYMENT_ENDPOINTS = {
+    CREATE: '/api/billing/payments',                                                             // POST
+    BY_INVOICE: (invoiceId: string) => `/api/billing/payments/by-invoice/${invoiceId}`,         // GET
+    REFUND: (paymentId: string) => `/api/billing/payments/${paymentId}/refund`,                  // POST
+    DETAIL: (paymentId: string) => `/api/billing/payments/${paymentId}`,                         // GET
+};
+
+// ============================================
+// 9.2 Billing Cashier Shift (Ca làm việc thu ngân — trong invoice routes)
+// ✅ Swagger: /api/billing/cashier-shifts/*
+// ============================================
+export const BILLING_CASHIER_SHIFT_ENDPOINTS = {
+    OPEN: '/api/billing/cashier-shifts',                                            // POST: mở ca
+    LIST: '/api/billing/cashier-shifts',                                            // GET
+    CLOSE: (shiftId: string) => `/api/billing/cashier-shifts/${shiftId}/close`,     // PATCH
+    DETAIL: (shiftId: string) => `/api/billing/cashier-shifts/${shiftId}`,          // GET
+};
+
+// ============================================
+// 9.4 Billing Offline Payment (Thanh toán tại quầy)
+// ✅ Swagger: /api/billing/offline/*
+// ============================================
+export const BILLING_OFFLINE_PAYMENT_ENDPOINTS = {
+    PAY: '/api/billing/offline/pay',                                                            // POST
+    VOID_TRANSACTION: (transactionId: string) => `/api/billing/offline/transactions/${transactionId}/void`, // POST
+    TRANSACTIONS: '/api/billing/offline/transactions',                                          // GET
+    CREATE_TERMINAL: '/api/billing/offline/terminals',                                          // POST
+    UPDATE_TERMINAL: (terminalId: string) => `/api/billing/offline/terminals/${terminalId}`,    // PUT
+    TERMINALS: '/api/billing/offline/terminals',                                                // GET
+    TERMINAL_DETAIL: (terminalId: string) => `/api/billing/offline/terminals/${terminalId}`,    // GET
+    TOGGLE_TERMINAL: (terminalId: string) => `/api/billing/offline/terminals/${terminalId}/toggle`, // PATCH
+    RECEIPT_BY_TRANSACTION: (transactionId: string) => `/api/billing/offline/receipts/by-transaction/${transactionId}`, // GET
+    RECEIPT_DETAIL: (receiptId: string) => `/api/billing/offline/receipts/${receiptId}`,        // GET
+    REPRINT_RECEIPT: (receiptId: string) => `/api/billing/offline/receipts/${receiptId}/reprint`, // POST
+    SHIFT_CASH_DENOMINATION: (shiftId: string) => `/api/billing/offline/shifts/${shiftId}/cash-denomination`, // POST
+    SHIFT_TRANSACTIONS: (shiftId: string) => `/api/billing/offline/shifts/${shiftId}/transactions`, // GET
+    SHIFT_SUMMARY: (shiftId: string) => `/api/billing/offline/shifts/${shiftId}/summary`,       // GET
+    DAILY_REPORT: '/api/billing/offline/reports/daily',                                         // GET
+    CASHIER_PERFORMANCE: '/api/billing/offline/reports/cashier-performance',                    // GET
+};
+
+// ============================================
+// 9.5 Billing Document (Chứng từ & Hóa đơn điện tử)
+// ✅ Swagger: /api/billing/documents/*
+// ============================================
+export const BILLING_DOCUMENT_ENDPOINTS = {
+    CREATE_E_INVOICE: '/api/billing/documents/e-invoices',                                      // POST
+    CREATE_VAT_INVOICE: '/api/billing/documents/e-invoices/vat',                                // POST
+    ISSUE_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/issue`,           // PATCH
+    SIGN_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/sign`,             // PATCH
+    SEND_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/send`,             // PATCH
+    CANCEL_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/cancel`,         // POST
+    REPLACE_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/replace`,       // POST
+    ADJUST_E_INVOICE: (id: string) => `/api/billing/documents/e-invoices/${id}/adjust`,         // POST
+    E_INVOICE_DETAIL: (id: string) => `/api/billing/documents/e-invoices/${id}`,                // GET
+    E_INVOICES: '/api/billing/documents/e-invoices',                                            // GET
+    LOOKUP_E_INVOICE: (code: string) => `/api/billing/documents/e-invoices/lookup/${code}`,     // GET
+    PRINT_DATA: (id: string) => `/api/billing/documents/e-invoices/${id}/print-data`,           // GET
+    PRINT_HISTORY: (id: string) => `/api/billing/documents/e-invoices/${id}/print-history`,     // GET
+    SEARCH: '/api/billing/documents/search',                                                    // GET
+    TIMELINE: (invoiceId: string) => `/api/billing/documents/invoices/${invoiceId}/timeline`,   // GET
+    UPLOAD_ATTACHMENT: '/api/billing/documents/attachments',                                    // POST
+    ATTACHMENTS: '/api/billing/documents/attachments',                                          // GET
+    ATTACHMENT_DETAIL: (id: string) => `/api/billing/documents/attachments/${id}`,              // GET
+    DELETE_ATTACHMENT: (id: string) => `/api/billing/documents/attachments/${id}`,              // DELETE
+    ARCHIVE_ATTACHMENTS: '/api/billing/documents/attachments/archive',                          // PATCH
+    DOC_CONFIG: (facilityId: string) => `/api/billing/documents/config/${facilityId}`,          // GET/PUT
+};
+
+// ============================================
+// 9.1 Billing Pricing (Bảng giá dịch vụ)
+// ✅ Swagger: /api/billing/pricing/*
+// ============================================
+export const BILLING_PRICING_ENDPOINTS = {
+    CATALOG: '/api/billing/pricing/catalog',                                                    // GET
+    FACILITY_CATALOG: (facilityId: string) => `/api/billing/pricing/catalog/${facilityId}`,     // GET
+    POLICIES: (facilityServiceId: string) => `/api/billing/pricing/policies/${facilityServiceId}`, // GET
+    CREATE_POLICY: '/api/billing/pricing/policies',                                             // POST
+    BULK_CREATE: '/api/billing/pricing/policies/bulk',                                          // POST
+    UPDATE_POLICY: (policyId: string) => `/api/billing/pricing/policies/${policyId}`,           // PUT
+    DELETE_POLICY: (policyId: string) => `/api/billing/pricing/policies/${policyId}`,           // DELETE
+    RESOLVE: '/api/billing/pricing/resolve',                                                    // GET
+    SPECIALTY_PRICES: (facilityServiceId: string) => `/api/billing/pricing/specialty-prices/${facilityServiceId}`, // GET
+    CREATE_SPECIALTY_PRICE: '/api/billing/pricing/specialty-prices',                            // POST
+    UPDATE_SPECIALTY_PRICE: (specialtyPriceId: string) => `/api/billing/pricing/specialty-prices/${specialtyPriceId}`, // PUT
+    DELETE_SPECIALTY_PRICE: (specialtyPriceId: string) => `/api/billing/pricing/specialty-prices/${specialtyPriceId}`, // DELETE
+    HISTORY_BY_SERVICE: (facilityServiceId: string) => `/api/billing/pricing/history/${facilityServiceId}`, // GET
+    HISTORY_BY_FACILITY: (facilityId: string) => `/api/billing/pricing/history/facility/${facilityId}`, // GET
+    COMPARE: '/api/billing/pricing/compare',                                                    // GET
+    SUMMARY: (facilityId: string) => `/api/billing/pricing/summary/${facilityId}`,              // GET
+    EXPIRING_POLICIES: (facilityId: string) => `/api/billing/pricing/expiring-policies/${facilityId}`, // GET
+};
+
+// ============================================
+// 9.8 Billing Pricing Policy (Chính sách giá & ưu đãi)
+// ✅ Swagger: /api/billing/pricing-policies/*
+// ============================================
+export const BILLING_PRICING_POLICY_ENDPOINTS = {
+    // Discounts
+    CREATE_DISCOUNT: '/api/billing/pricing-policies/discounts',                     // POST
+    DISCOUNTS: '/api/billing/pricing-policies/discounts',                           // GET
+    CALCULATE_DISCOUNT: '/api/billing/pricing-policies/discounts/calculate',        // POST
+    DISCOUNT_DETAIL: (id: string) => `/api/billing/pricing-policies/discounts/${id}`, // GET
+    UPDATE_DISCOUNT: (id: string) => `/api/billing/pricing-policies/discounts/${id}`, // PUT
+    DELETE_DISCOUNT: (id: string) => `/api/billing/pricing-policies/discounts/${id}`, // DELETE
+    // Vouchers
+    CREATE_VOUCHER: '/api/billing/pricing-policies/vouchers',                       // POST
+    VOUCHERS: '/api/billing/pricing-policies/vouchers',                             // GET
+    VALIDATE_VOUCHER: '/api/billing/pricing-policies/vouchers/validate',            // POST
+    REDEEM_VOUCHER: '/api/billing/pricing-policies/vouchers/redeem',                // POST
+    VOUCHER_DETAIL: (id: string) => `/api/billing/pricing-policies/vouchers/${id}`, // GET
+    UPDATE_VOUCHER: (id: string) => `/api/billing/pricing-policies/vouchers/${id}`, // PUT
+    DELETE_VOUCHER: (id: string) => `/api/billing/pricing-policies/vouchers/${id}`, // DELETE
+    VOUCHER_USAGE: (id: string) => `/api/billing/pricing-policies/vouchers/${id}/usage`, // GET
+    // Bundles
+    CREATE_BUNDLE: '/api/billing/pricing-policies/bundles',                         // POST
+    BUNDLES: '/api/billing/pricing-policies/bundles',                               // GET
+    BUNDLE_DETAIL: (id: string) => `/api/billing/pricing-policies/bundles/${id}`,   // GET
+    UPDATE_BUNDLE: (id: string) => `/api/billing/pricing-policies/bundles/${id}`,   // PUT
+    DELETE_BUNDLE: (id: string) => `/api/billing/pricing-policies/bundles/${id}`,   // DELETE
+    CALCULATE_BUNDLE: (id: string) => `/api/billing/pricing-policies/bundles/${id}/calculate`, // POST
+    // Promotions & History
+    ACTIVE_PROMOTIONS: '/api/billing/pricing-policies/active-promotions',           // GET
+    HISTORY: '/api/billing/pricing-policies/history',                               // GET
+};
+
+// ============================================
+// 9.7 Billing Refund (Hoàn tiền)
+// ✅ Swagger: /api/billing/refunds/*
+// ============================================
+export const BILLING_REFUND_ENDPOINTS = {
+    CREATE_REQUEST: '/api/billing/refunds/requests',                                            // POST
+    REQUESTS: '/api/billing/refunds/requests',                                                  // GET
+    REQUEST_DETAIL: (id: string) => `/api/billing/refunds/requests/${id}`,                      // GET
+    APPROVE: (id: string) => `/api/billing/refunds/requests/${id}/approve`,                     // PATCH
+    REJECT: (id: string) => `/api/billing/refunds/requests/${id}/reject`,                       // PATCH
+    PROCESS: (id: string) => `/api/billing/refunds/requests/${id}/process`,                     // PATCH
+    CANCEL: (id: string) => `/api/billing/refunds/requests/${id}/cancel`,                       // PATCH
+    CREATE_ADJUSTMENT: '/api/billing/refunds/adjustments',                                      // POST
+    ADJUSTMENTS: '/api/billing/refunds/adjustments',                                            // GET
+    ADJUSTMENT_DETAIL: (id: string) => `/api/billing/refunds/adjustments/${id}`,                // GET
+    APPROVE_ADJUSTMENT: (id: string) => `/api/billing/refunds/adjustments/${id}/approve`,       // PATCH
+    APPLY_ADJUSTMENT: (id: string) => `/api/billing/refunds/adjustments/${id}/apply`,           // PATCH
+    REJECT_ADJUSTMENT: (id: string) => `/api/billing/refunds/adjustments/${id}/reject`,         // PATCH
+    DASHBOARD: '/api/billing/refunds/dashboard',                                                // GET
+    REQUEST_TIMELINE: (id: string) => `/api/billing/refunds/requests/${id}/timeline`,           // GET
+    TRANSACTION_HISTORY: (txnId: string) => `/api/billing/refunds/transaction/${txnId}/history`, // GET
+};
+
+// ============================================
+// 9.6 Billing Reconciliation (Đối soát thanh toán)
+// ✅ Swagger: /api/billing/reconciliation/*
+// ============================================
+export const BILLING_RECONCILIATION_ENDPOINTS = {
+    RUN_ONLINE: '/api/billing/reconciliation/online',                                           // POST
+    RUN_SHIFT: (shiftId: string) => `/api/billing/reconciliation/shift/${shiftId}`,             // POST
+    SESSIONS: '/api/billing/reconciliation/sessions',                                           // GET
+    SESSION_DETAIL: (id: string) => `/api/billing/reconciliation/sessions/${id}`,               // GET
+    SHIFT_DISCREPANCY: (shiftId: string) => `/api/billing/reconciliation/shifts/${shiftId}/discrepancy`, // GET
+    DISCREPANCY_REPORT: '/api/billing/reconciliation/discrepancy-report',                       // GET
+    RESOLVE_ITEM: (itemId: string) => `/api/billing/reconciliation/items/${itemId}/resolve`,    // PATCH
+    REVIEW_SESSION: (id: string) => `/api/billing/reconciliation/sessions/${id}/review`,        // PATCH
+    APPROVE_SESSION: (id: string) => `/api/billing/reconciliation/sessions/${id}/approve`,      // PATCH
+    REJECT_SESSION: (id: string) => `/api/billing/reconciliation/sessions/${id}/reject`,        // PATCH
+    CREATE_SETTLEMENT: '/api/billing/reconciliation/settlements',                               // POST
+    SUBMIT_SETTLEMENT: (id: string) => `/api/billing/reconciliation/settlements/${id}/submit`,  // PATCH
+    APPROVE_SETTLEMENT: (id: string) => `/api/billing/reconciliation/settlements/${id}/approve`, // PATCH
+    REJECT_SETTLEMENT: (id: string) => `/api/billing/reconciliation/settlements/${id}/reject`,  // PATCH
+    SETTLEMENTS: '/api/billing/reconciliation/settlements',                                     // GET
+    SETTLEMENT_DETAIL: (id: string) => `/api/billing/reconciliation/settlements/${id}`,         // GET
+    HISTORY: '/api/billing/reconciliation/history',                                             // GET
+    EXPORT_SETTLEMENT: (id: string) => `/api/billing/reconciliation/settlements/${id}/export`,  // GET
+};
+
+// ============================================
+// 9.9 Billing Cashier Auth (Phân quyền thu ngân)
+// ✅ Swagger: /api/billing/cashier-auth/*
+// ============================================
+export const BILLING_CASHIER_AUTH_ENDPOINTS = {
+    CREATE_PROFILE: '/api/billing/cashier-auth/profiles',                                       // POST
+    PROFILES: '/api/billing/cashier-auth/profiles',                                             // GET
+    PROFILE_BY_USER: (userId: string) => `/api/billing/cashier-auth/profiles/by-user/${userId}`, // GET
+    PROFILE_DETAIL: (id: string) => `/api/billing/cashier-auth/profiles/${id}`,                  // GET
+    UPDATE_PROFILE: (id: string) => `/api/billing/cashier-auth/profiles/${id}`,                  // PUT
+    DELETE_PROFILE: (id: string) => `/api/billing/cashier-auth/profiles/${id}`,                  // DELETE
+    SET_LIMIT: '/api/billing/cashier-auth/limits',                                              // POST
+    CHECK_LIMIT: '/api/billing/cashier-auth/limits/check',                                      // POST
+    LIMIT: (profileId: string) => `/api/billing/cashier-auth/limits/${profileId}`,               // GET/PUT
+    ACTIVE_SHIFTS: '/api/billing/cashier-auth/shifts/active',                                   // GET
+    LOCK_SHIFT: (shiftId: string) => `/api/billing/cashier-auth/shifts/${shiftId}/lock`,         // PATCH
+    UNLOCK_SHIFT: (shiftId: string) => `/api/billing/cashier-auth/shifts/${shiftId}/unlock`,     // PATCH
+    FORCE_CLOSE_SHIFT: (shiftId: string) => `/api/billing/cashier-auth/shifts/${shiftId}/force-close`, // PATCH
+    HANDOVER_SHIFT: (shiftId: string) => `/api/billing/cashier-auth/shifts/${shiftId}/handover`, // PATCH
+    ACTIVITY_LOGS: '/api/billing/cashier-auth/activity-logs',                                   // GET
+    LOGS_BY_SHIFT: (shiftId: string) => `/api/billing/cashier-auth/activity-logs/shift/${shiftId}`, // GET
+    LOGS_BY_PROFILE: (profileId: string) => `/api/billing/cashier-auth/activity-logs/${profileId}`, // GET
+    DASHBOARD: '/api/billing/cashier-auth/dashboard',                                           // GET
+    STATS: (profileId: string) => `/api/billing/cashier-auth/stats/${profileId}`,               // GET
+};
+
+// ============================================
+// 9.3 Billing Payment Gateway (SePay / Thanh toán online)
+// ✅ Swagger: /api/billing/payments/*
+// ============================================
+export const BILLING_PAYMENT_GATEWAY_ENDPOINTS = {
+    GENERATE_QR: '/api/billing/payments/qr-generate',                                          // POST
+    ORDER_DETAIL: (orderId: string) => `/api/billing/payments/orders/${orderId}`,               // GET
+    ORDER_STATUS: (orderId: string) => `/api/billing/payments/orders/${orderId}/status`,        // GET
+    CANCEL_ORDER: (orderId: string) => `/api/billing/payments/orders/${orderId}/cancel`,        // POST
+    ORDERS_BY_INVOICE: (invoiceId: string) => `/api/billing/payments/invoice/${invoiceId}/orders`, // GET
+    WEBHOOK_SEPAY: '/api/billing/payments/webhook/sepay',                                       // POST
+    MANUAL_VERIFY: (orderId: string) => `/api/billing/payments/webhook/verify/${orderId}`,      // GET
+    GATEWAY_CONFIG: '/api/billing/payments/gateway/config',                                     // GET/PUT
+    TEST_GATEWAY: '/api/billing/payments/gateway/test',                                         // POST
+    ONLINE_HISTORY: '/api/billing/payments/online/history',                                     // GET
+    ONLINE_STATS: '/api/billing/payments/online/stats',                                         // GET
+};
+
+// ============================================
+// REMOTE CONSULTATION — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 8.2 Tele Booking (Đặt lịch tư vấn từ xa)
+// ✅ Swagger: /api/teleconsultation/booking/*
+// ============================================
+export const TELE_BOOKING_ENDPOINTS = {
+    AVAILABLE_DOCTORS: '/api/teleconsultation/booking/doctors',                     // GET
+    AVAILABLE_SLOTS: '/api/teleconsultation/booking/slots',                         // GET
+    CHECK_DOCTOR: '/api/teleconsultation/booking/check-doctor',                     // GET
+    MY_BOOKINGS: '/api/teleconsultation/booking/my-bookings',                       // GET
+    CREATE: '/api/teleconsultation/booking',                                        // POST
+    UPDATE: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}`,    // PUT
+    CONFIRM: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}/confirm`, // POST
+    CANCEL: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}/cancel`,   // POST
+    INITIATE_PAYMENT: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}/payment`, // POST
+    PAYMENT_CALLBACK: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}/payment-callback`, // POST
+    LIST: '/api/teleconsultation/booking',                                          // GET (admin/doctor)
+    DETAIL: (sessionId: string) => `/api/teleconsultation/booking/${sessionId}`,    // GET
+};
+
+// ============================================
+// 8.3 Tele Room (Phòng khám trực tuyến)
+// ✅ Swagger: /api/teleconsultation/room/*
+// ============================================
+export const TELE_ROOM_ENDPOINTS = {
+    ACTIVE: '/api/teleconsultation/room/active',                                    // GET (admin)
+    OPEN: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/open`,      // POST
+    JOIN: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/join`,      // POST
+    LEAVE: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/leave`,    // POST
+    CLOSE: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/close`,    // POST
+    DETAIL: (consultationId: string) => `/api/teleconsultation/room/${consultationId}`,         // GET
+    SEND_MESSAGE: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/messages`, // POST
+    MESSAGES: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/messages`, // GET
+    MARK_READ: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/messages/read`, // PUT
+    UPLOAD_FILE: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/files`, // POST
+    FILES: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/files`,     // GET
+    DELETE_FILE: (consultationId: string, fileId: string) => `/api/teleconsultation/room/${consultationId}/files/${fileId}`, // DELETE
+    UPDATE_MEDIA: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/media`, // PUT
+    PARTICIPANTS: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/participants`, // GET
+    KICK_USER: (consultationId: string, userId: string) => `/api/teleconsultation/room/${consultationId}/kick/${userId}`, // POST
+    EVENTS: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/events`,   // GET
+    NETWORK_REPORT: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/network-report`, // POST
+    SUMMARY: (consultationId: string) => `/api/teleconsultation/room/${consultationId}/summary`, // GET
+};
+
+// ============================================
+// 8.4 Tele Medical Chat (Trao đổi thông tin y tế)
+// ✅ Swagger: /api/teleconsultation/medical-chat/*
+// ============================================
+export const TELE_MEDICAL_CHAT_ENDPOINTS = {
+    UNREAD_COUNT: '/api/teleconsultation/medical-chat/unread-count',                // GET
+    MY_PATIENTS: '/api/teleconsultation/medical-chat/my-patients',                  // GET (doctor)
+    CREATE_CONVERSATION: '/api/teleconsultation/medical-chat/conversations',        // POST
+    CONVERSATIONS: '/api/teleconsultation/medical-chat/conversations',              // GET
+    CONVERSATION_DETAIL: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}`, // GET
+    CLOSE_CONVERSATION: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/close`, // PUT
+    REOPEN_CONVERSATION: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/reopen`, // PUT
+    SEND_MESSAGE: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages`, // POST
+    MESSAGES: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages`, // GET
+    PINNED_MESSAGES: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages/pinned`, // GET
+    MARK_READ: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages/read`, // PUT
+    TOGGLE_PIN: (conversationId: string, messageId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages/${messageId}/pin`, // PUT
+    DELETE_MESSAGE: (conversationId: string, messageId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/messages/${messageId}`, // DELETE
+    ATTACHMENTS: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/attachments`, // GET
+    MEDICAL_ATTACHMENTS: (conversationId: string) => `/api/teleconsultation/medical-chat/conversations/${conversationId}/attachments/medical`, // GET
+};
+
+// ============================================
+// 8.5 Tele Result (Kết quả khám từ xa)
+// ✅ Swagger: /api/teleconsultation/results/*
+// ============================================
+export const TELE_RESULT_ENDPOINTS = {
+    LIST: '/api/teleconsultation/results',                                                  // GET
+    UNSIGNED: '/api/teleconsultation/results/unsigned',                                     // GET
+    FOLLOW_UPS: '/api/teleconsultation/results/follow-ups',                                 // GET
+    PATIENT_RESULTS: (patientId: string) => `/api/teleconsultation/results/patient/${patientId}`, // GET
+    CREATE: (consultationId: string) => `/api/teleconsultation/results/${consultationId}`,  // POST
+    UPDATE: (consultationId: string) => `/api/teleconsultation/results/${consultationId}`,  // PUT
+    DETAIL: (consultationId: string) => `/api/teleconsultation/results/${consultationId}`,  // GET
+    COMPLETE: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/complete`, // PUT
+    SIGN: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/sign`, // PUT
+    UPDATE_SYMPTOMS: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/symptoms`, // PUT
+    UPDATE_VITALS: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/vitals`, // PUT
+    UPDATE_REFERRAL: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/referral`, // PUT
+    UPDATE_FOLLOW_UP: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/follow-up`, // PUT
+    SUMMARY: (consultationId: string) => `/api/teleconsultation/results/${consultationId}/summary`, // GET
+};
+
+// ============================================
+// 8.6 Tele Prescription (Kê đơn & chỉ định từ xa)
+// ✅ Swagger: /api/teleconsultation/prescriptions/*
+// ============================================
+export const TELE_PRESCRIPTION_ENDPOINTS = {
+    LIST: '/api/teleconsultation/prescriptions',                                            // GET
+    DRUG_RESTRICTIONS: '/api/teleconsultation/prescriptions/drug-restrictions',             // GET
+    PATIENT_PRESCRIPTIONS: (patientId: string) => `/api/teleconsultation/prescriptions/patient/${patientId}`, // GET
+    CREATE: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}`, // POST
+    DETAIL: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}`, // GET
+    ADD_ITEM: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/items`, // POST
+    REMOVE_ITEM: (consultationId: string, detailId: string) => `/api/teleconsultation/prescriptions/${consultationId}/items/${detailId}`, // DELETE
+    PRESCRIBE: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/prescribe`, // PUT
+    SEND_TO_PATIENT: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/send`, // PUT
+    STOCK_CHECK: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/stock-check`, // GET
+    CREATE_LAB_ORDER: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/lab-orders`, // POST
+    LAB_ORDERS: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/lab-orders`, // GET
+    UPDATE_REFERRAL: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/referral`, // PUT
+    SUMMARY: (consultationId: string) => `/api/teleconsultation/prescriptions/${consultationId}/summary`, // GET
+};
+
+// ============================================
+// 8.7 Tele Follow-up (Theo dõi sau tư vấn)
+// ✅ Swagger: /api/teleconsultation/follow-ups/*
+// ============================================
+export const TELE_FOLLOWUP_ENDPOINTS = {
+    PLANS: '/api/teleconsultation/follow-ups/plans',                                        // GET
+    UPCOMING: '/api/teleconsultation/follow-ups/plans/upcoming',                            // GET
+    PATIENT_PLANS: (patientId: string) => `/api/teleconsultation/follow-ups/plans/patient/${patientId}`, // GET
+    STATS: '/api/teleconsultation/follow-ups/stats',                                        // GET
+    ATTENTION_UPDATES: '/api/teleconsultation/follow-ups/updates/attention',                // GET
+    CREATE_PLAN: (consultationId: string) => `/api/teleconsultation/follow-ups/plans/${consultationId}`, // POST
+    UPDATE_PLAN: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}`,    // PUT
+    PLAN_DETAIL: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}`,    // GET
+    COMPLETE_PLAN: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/complete`, // PUT
+    CONVERT_PLAN: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/convert`, // PUT
+    ADD_HEALTH_UPDATE: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/updates`, // POST
+    HEALTH_UPDATES: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/updates`, // GET
+    RESPOND_UPDATE: (updateId: string) => `/api/teleconsultation/follow-ups/updates/${updateId}/respond`, // PUT
+    SEND_REMINDER: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/send-reminder`, // POST
+    REPORT: (planId: string) => `/api/teleconsultation/follow-ups/plans/${planId}/report`,  // GET
+};
+
+// ============================================
+// 8.1 Tele Consultation Type (Hình thức khám từ xa)
+// ✅ Swagger: /api/teleconsultation/types|configs/*
+// ============================================
+export const TELE_CONSULTATION_TYPE_ENDPOINTS = {
+    CREATE_TYPE: '/api/teleconsultation/types',                                              // POST
+    ACTIVE_TYPES: '/api/teleconsultation/types/active',                                     // GET
+    TYPES: '/api/teleconsultation/types',                                                    // GET
+    TYPE_DETAIL: (typeId: string) => `/api/teleconsultation/types/${typeId}`,                // GET
+    UPDATE_TYPE: (typeId: string) => `/api/teleconsultation/types/${typeId}`,                // PUT
+    DELETE_TYPE: (typeId: string) => `/api/teleconsultation/types/${typeId}`,                // DELETE
+    CREATE_CONFIG: '/api/teleconsultation/configs',                                          // POST
+    BATCH_CONFIGS: '/api/teleconsultation/configs/batch',                                    // POST
+    CONFIGS: '/api/teleconsultation/configs',                                                // GET
+    CONFIG_DETAIL: (configId: string) => `/api/teleconsultation/configs/${configId}`,        // GET
+    UPDATE_CONFIG: (configId: string) => `/api/teleconsultation/configs/${configId}`,        // PUT
+    DELETE_CONFIG: (configId: string) => `/api/teleconsultation/configs/${configId}`,        // DELETE
+    TYPE_SPECIALTIES: (typeId: string) => `/api/teleconsultation/types/${typeId}/specialties`, // GET
+    SPECIALTIES_TYPES: (specialtyId: string) => `/api/teleconsultation/specialties/${specialtyId}/types`, // GET
+    AVAILABILITY: '/api/teleconsultation/availability',                                      // GET
+    STATS: '/api/teleconsultation/stats',                                                    // GET
+};
+
+// ============================================
+// 8.8 Tele Quality (Chất lượng & đánh giá)
+// ✅ Swagger: /api/teleconsultation/quality/*
+// ============================================
+export const TELE_QUALITY_ENDPOINTS = {
+    REVIEWS: '/api/teleconsultation/quality/reviews',                                        // GET
+    DOCTOR_REVIEWS: (doctorId: string) => `/api/teleconsultation/quality/reviews/doctor/${doctorId}`, // GET
+    OVERVIEW: '/api/teleconsultation/quality/metrics/overview',                              // GET
+    CONNECTION_STATS: '/api/teleconsultation/quality/metrics/connection',                    // GET
+    TRENDS: '/api/teleconsultation/quality/metrics/trends',                                  // GET
+    DOCTOR_METRICS: (doctorId: string) => `/api/teleconsultation/quality/metrics/doctor/${doctorId}`, // GET
+    ALERTS: '/api/teleconsultation/quality/alerts',                                          // GET/POST
+    ALERT_STATS: '/api/teleconsultation/quality/alerts/stats',                               // GET
+    RESOLVE_ALERT: (alertId: string) => `/api/teleconsultation/quality/alerts/${alertId}/resolve`, // PUT
+    CREATE_REVIEW: (consultationId: string) => `/api/teleconsultation/quality/reviews/${consultationId}`, // POST
+    GET_REVIEW: (consultationId: string) => `/api/teleconsultation/quality/reviews/${consultationId}`, // GET
+    DOCTOR_REPORT: (doctorId: string) => `/api/teleconsultation/quality/reports/doctor/${doctorId}`, // GET
+    SYSTEM_REPORT: '/api/teleconsultation/quality/reports/summary',                          // GET
+};
+
+// ============================================
+// 8.9 Tele Config (Cấu hình hệ thống tele)
+// ✅ Swagger: /api/teleconsultation/admin/*
+// ============================================
+export const TELE_CONFIG_ENDPOINTS = {
+    ALL_CONFIGS: '/api/teleconsultation/admin/configs',                                      // GET
+    BATCH_UPDATE: '/api/teleconsultation/admin/configs/batch',                               // PUT
+    RESET_DEFAULTS: '/api/teleconsultation/admin/configs/reset',                             // POST
+    AUDIT_LOG: '/api/teleconsultation/admin/configs/audit-log',                              // GET
+    CONFIG: (configKey: string) => `/api/teleconsultation/admin/configs/${configKey}`,       // GET/PUT
+    PRICING: '/api/teleconsultation/admin/pricing',                                          // GET/POST
+    PRICING_LOOKUP: '/api/teleconsultation/admin/pricing/lookup',                            // GET
+    UPDATE_PRICING: (pricingId: string) => `/api/teleconsultation/admin/pricing/${pricingId}`, // PUT
+    DELETE_PRICING: (pricingId: string) => `/api/teleconsultation/admin/pricing/${pricingId}`, // DELETE
+    SLA_DASHBOARD: '/api/teleconsultation/admin/sla/dashboard',                              // GET
+    SLA_BREACHES: '/api/teleconsultation/admin/sla/breaches',                                // GET
+};
+
+// ============================================
+// AI — BỔ SUNG CÁC ENDPOINT THIẾU
+// ============================================
+
+// ============================================
+// 7.1 AI Health Chat (Tư vấn sức khỏe AI)
+// ✅ Swagger: /api/ai/health-chat/*
+// ============================================
+export const AI_HEALTH_CHAT_ENDPOINTS = {
+    CREATE_SESSION: '/api/ai/health-chat/sessions',                                          // POST
+    SEND_MESSAGE: (sessionId: string) => `/api/ai/health-chat/sessions/${sessionId}/messages`, // POST
+    STREAM_MESSAGE: (sessionId: string) => `/api/ai/health-chat/sessions/${sessionId}/messages/stream`, // POST
+    COMPLETE_SESSION: (sessionId: string) => `/api/ai/health-chat/sessions/${sessionId}/complete`, // PATCH
+    SESSION_HISTORY: (sessionId: string) => `/api/ai/health-chat/sessions/${sessionId}`,     // GET
+    USER_SESSIONS: '/api/ai/health-chat/sessions',                                           // GET
+    FEEDBACK: (sessionId: string, messageId: string) => `/api/ai/health-chat/sessions/${sessionId}/messages/${messageId}/feedback`, // PATCH
+    TOKEN_ANALYTICS: '/api/ai/health-chat/analytics/tokens',                                 // GET (admin)
+    DELETE_SESSION: (sessionId: string) => `/api/ai/health-chat/sessions/${sessionId}`,      // DELETE
+};
+
+// ============================================
+// 7.2 AI RAG (Knowledge Base)
+// ✅ Swagger: /api/ai/rag/*
+// ============================================
+export const AI_RAG_ENDPOINTS = {
+    UPLOAD: '/api/ai/rag/upload',                                                            // POST (multipart)
+    DOCUMENTS: '/api/ai/rag/documents',                                                      // GET
+    DELETE_DOCUMENT: (id: string) => `/api/ai/rag/documents/${id}`,                          // DELETE
+};
+
+// ============================================
+// Staff Schedule — Bổ sung STAFF_SCHEDULE_ENDPOINTS
+// ✅ Swagger: /api/staff-schedules/*
+// ============================================
+export const STAFF_SCHEDULE_ENDPOINTS = {
+    LIST: '/api/staff-schedules',                                                             // GET
+    CREATE: '/api/staff-schedules',                                                           // POST
+    CALENDAR: '/api/staff-schedules/calendar',                                                // GET
+    BY_STAFF: (staffId: string) => `/api/staff-schedules/staff/${staffId}`,                   // GET
+    BY_DATE: (date: string) => `/api/staff-schedules/date/${date}`,                           // GET
+    DETAIL: (id: string) => `/api/staff-schedules/${id}`,                                     // GET
+    UPDATE: (id: string) => `/api/staff-schedules/${id}`,                                     // PUT
+    DELETE: (id: string) => `/api/staff-schedules/${id}`,                                     // DELETE
+    SUSPEND: (id: string) => `/api/staff-schedules/${id}/suspend`,                            // PATCH
+    RESUME: (id: string) => `/api/staff-schedules/${id}/resume`,                              // PATCH
+};
+
+// ============================================
+// Leave Management — Bổ sung LEAVE_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/leaves/*
+// ============================================
+export const LEAVE_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/leaves',                                                            // GET
+    CREATE: '/api/leaves',                                                          // POST
+    DETAIL: (id: string) => `/api/leaves/${id}`,                                    // GET
+    UPDATE: (id: string) => `/api/leaves/${id}`,                                    // PUT
+    DELETE: (id: string) => `/api/leaves/${id}`,                                    // DELETE
+    APPROVE: (id: string) => `/api/leaves/${id}/approve`,                           // PATCH
+    REJECT: (id: string) => `/api/leaves/${id}/reject`,                             // PATCH
+};
+
+// ============================================
+// Specialty — Bổ sung SPECIALTY_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/specialties/*
+// ============================================
+export const SPECIALTY_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/specialties',                                                       // GET
+    CREATE: '/api/specialties',                                                     // POST
+    DETAIL: (id: string) => `/api/specialties/${id}`,                               // GET
+    UPDATE: (id: string) => `/api/specialties/${id}`,                               // PUT/PATCH
+    DELETE: (id: string) => `/api/specialties/${id}`,                               // DELETE
+};
+
+// ============================================
+// Inventory — Bổ sung INVENTORY_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/inventory/*
+// ============================================
+export const INVENTORY_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/inventory',                                                         // GET
+    CREATE: '/api/inventory',                                                       // POST
+    DETAIL: (batchId: string) => `/api/inventory/${batchId}`,                       // GET
+    UPDATE: (batchId: string) => `/api/inventory/${batchId}`,                       // PUT
+    LOW_STOCK: '/api/inventory/alerts/low-stock',                                   // GET
+    EXPIRING: '/api/inventory/alerts/expiring',                                     // GET
+};
+
+// ============================================
+// Warehouse — Bổ sung WAREHOUSE_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/warehouses/*
+// ============================================
+export const WAREHOUSE_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/warehouses',                                                        // GET
+    CREATE: '/api/warehouses',                                                      // POST
+    DETAIL: (id: string) => `/api/warehouses/${id}`,                                // GET
+    UPDATE: (id: string) => `/api/warehouses/${id}`,                                // PUT
+    TOGGLE: (id: string) => `/api/warehouses/${id}/toggle`,                         // PATCH
+};
+
+// ============================================
+// Supplier — Bổ sung SUPPLIER_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/suppliers/*
+// ============================================
+export const SUPPLIER_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/suppliers',                                                         // GET
+    CREATE: '/api/suppliers',                                                       // POST
+    DETAIL: (id: string) => `/api/suppliers/${id}`,                                 // GET
+    UPDATE: (id: string) => `/api/suppliers/${id}`,                                 // PATCH
+};
+
+// ============================================
+// Stock In — Bổ sung STOCK_IN_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/stock-in/*
+// ============================================
+export const STOCK_IN_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/stock-in',                                                          // GET
+    CREATE: '/api/stock-in',                                                        // POST
+    ADD_ITEM: (orderId: string) => `/api/stock-in/${orderId}/items`,                // POST
+    CONFIRM: (orderId: string) => `/api/stock-in/${orderId}/confirm`,               // PATCH
+    RECEIVE: (orderId: string) => `/api/stock-in/${orderId}/receive`,               // PATCH
+    CANCEL: (orderId: string) => `/api/stock-in/${orderId}/cancel`,                 // PATCH
+    DETAIL: (orderId: string) => `/api/stock-in/${orderId}`,                        // GET
+};
+
+// ============================================
+// Stock Out — Bổ sung STOCK_OUT_MANAGEMENT_ENDPOINTS
+// ✅ Swagger: /api/stock-out/*
+// ============================================
+export const STOCK_OUT_MANAGEMENT_ENDPOINTS = {
+    LIST: '/api/stock-out',                                                         // GET
+    CREATE: '/api/stock-out',                                                       // POST
+    ADD_ITEM: (orderId: string) => `/api/stock-out/${orderId}/items`,               // POST
+    DELETE_ITEM: (orderId: string, detailId: string) => `/api/stock-out/${orderId}/items/${detailId}`, // DELETE
+    CONFIRM: (orderId: string) => `/api/stock-out/${orderId}/confirm`,              // PATCH
+    CANCEL: (orderId: string) => `/api/stock-out/${orderId}/cancel`,                // PATCH
+    DETAIL: (orderId: string) => `/api/stock-out/${orderId}`,                       // GET
 };

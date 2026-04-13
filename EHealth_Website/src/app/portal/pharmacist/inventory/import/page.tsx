@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { inventoryService } from "@/services/inventoryService";
@@ -12,6 +12,10 @@ const UNITS = ["viên", "ống", "gói", "chai", "tuýp", "hộp"];
 export default function ImportMedicinePage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
+    const [todayDisplay, setTodayDisplay] = useState("");
+    useEffect(() => {
+        setTodayDisplay(new Date().toLocaleDateString("vi-VN"));
+    }, []);
     const [items, setItems] = useState([
         { name: "", group: "Kháng sinh", unit: "viên", quantity: "", price: "", expiry: "", supplier: "DHG Pharma", batch: "" },
     ]);
@@ -76,7 +80,7 @@ export default function ImportMedicinePage() {
                         <h1 className="text-xl font-bold text-[#121417] dark:text-white flex items-center gap-2">
                             <span className="material-symbols-outlined text-[#3C81C6]">inventory_2</span> Phiếu nhập thuốc
                         </h1>
-                        <p className="text-sm text-[#687582] mt-1">Ngày nhập: {new Date().toLocaleDateString("vi-VN")}</p>
+                        <p className="text-sm text-[#687582] mt-1">Ngày nhập: {todayDisplay}</p>
                     </div>
                     <div className="text-right">
                         <p className="text-sm text-[#687582]">Tổng giá trị</p>

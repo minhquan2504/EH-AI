@@ -32,19 +32,6 @@ interface ImportItem {
     note: string;
 }
 
-const MOCK_DETAIL: ImportDetail = {
-    id: "1", code: "NK-2026-001", status: "pending",
-    createdAt: "2026-03-10 09:30", createdBy: "DS. Trần Văn B",
-    supplier: "Công ty Dược phẩm Hà Nội", warehouseName: "Kho chính",
-    note: "Đợt nhập bổ sung tháng 3/2026", totalItems: 3, totalValue: 15250000,
-    approvedBy: "", approvedAt: "", cancelReason: "",
-};
-
-const MOCK_ITEMS: ImportItem[] = [
-    { id: "1", drugName: "Paracetamol 500mg", quantity: 500, unit: "Viên", unitPrice: 2500, lotNumber: "LOT-2026-0312", expiryDate: "2027-03-10", note: "" },
-    { id: "2", drugName: "Amoxicillin 250mg", quantity: 300, unit: "Viên", unitPrice: 8500, lotNumber: "LOT-2026-0287", expiryDate: "2027-09-08", note: "Kháng sinh phổ rộng" },
-    { id: "3", drugName: "Vitamin C 1000mg", quantity: 200, unit: "Viên", unitPrice: 3200, lotNumber: "LOT-2026-0410", expiryDate: "2027-06-12", note: "" },
-];
 
 const STATUS_MAP = {
     pending: { label: "Chờ duyệt", bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-700 dark:text-yellow-400", icon: "pending" },
@@ -57,8 +44,8 @@ export default function StockInDetailPage() {
     const params = useParams();
     const orderId = params.id as string;
 
-    const [detail, setDetail] = useState<ImportDetail>(MOCK_DETAIL);
-    const [items, setItems] = useState<ImportItem[]>(MOCK_ITEMS);
+    const [detail, setDetail] = useState<ImportDetail | null>(null);
+    const [items, setItems] = useState<ImportItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
@@ -75,17 +62,19 @@ export default function StockInDetailPage() {
                     id: detailRes.id ?? orderId,
                     code: detailRes.code ?? detailRes.order_code ?? `NK-${orderId}`,
                     status: (detailRes.status?.toLowerCase() === "completed" || detailRes.status?.toLowerCase() === "received") ? "completed" : detailRes.status?.toLowerCase() === "cancelled" ? "cancelled" : "pending",
-                    createdAt: detailRes.created_at ?? detailRes.createdAt ?? MOCK_DETAIL.createdAt,
-                    createdBy: detailRes.created_by_name ?? detailRes.createdBy ?? MOCK_DETAIL.createdBy,
-                    supplier: detailRes.supplier?.name ?? detailRes.supplierName ?? MOCK_DETAIL.supplier,
-                    warehouseName: detailRes.warehouse?.name ?? detailRes.warehouseName ?? MOCK_DETAIL.warehouseName,
-                    note: detailRes.note ?? MOCK_DETAIL.note,
-                    totalItems: detailRes.total_items ?? detailRes.totalItems ?? MOCK_DETAIL.totalItems,
-                    totalValue: detailRes.total_value ?? detailRes.totalValue ?? MOCK_DETAIL.totalValue,
+                    createdAt: detailRes.created_at ?? detailRes.createdAt ?? "",
+                    createdBy: detailRes.created_by_name ?? detailRes.createdBy ?? "",
+                    supplier: detailRes.supplier?.name ?? detailRes.supplierName ?? "",
+                    warehouseName: detailRes.warehouse?.name ?? detailRes.warehouseName ?? "",
+                    note: detailRes.note ?? "",
+                    totalItems: detailRes.total_items ?? detailRes.totalItems ?? 0,
+                    totalValue: detailRes.total_value ?? detailRes.totalValue ?? 0,
                     approvedBy: detailRes.approved_by_name ?? detailRes.approvedBy ?? "",
                     approvedAt: detailRes.approved_at ?? detailRes.approvedAt ?? "",
                     cancelReason: detailRes.cancel_reason ?? detailRes.cancelReason ?? "",
                 });
+            } else {
+                setDetail(null);
             }
             if (Array.isArray(itemsRes) && itemsRes.length > 0) {
                 setItems(itemsRes.map((x: Record<string, unknown>, i: number) => ({
@@ -106,7 +95,7 @@ export default function StockInDetailPage() {
         setActionLoading("confirm");
         try {
             await inventoryService.confirmStockIn(orderId);
-            setDetail(prev => ({ ...prev, status: "completed", approvedAt: new Date().toISOString() }));
+            setDetail(prev => prev ? { ...prev, status: "completed", approvedAt: new Date().toISOString() } : prev);
         } catch {
             alert("Duyệt phiếu thất bại. Vui lòng thử lại.");
         } finally {
@@ -118,7 +107,7 @@ export default function StockInDetailPage() {
         setActionLoading("receive");
         try {
             await inventoryService.receiveStockIn(orderId);
-            setDetail(prev => ({ ...prev, status: "completed" }));
+            setDetail(prev => prev ? { ...prev, status: "completed" } : prev);
         } catch {
             alert("Nhận hàng thất bại. Vui lòng thử lại.");
         } finally {
@@ -131,19 +120,16 @@ export default function StockInDetailPage() {
         setActionLoading("cancel");
         try {
             await inventoryService.cancelStockIn(orderId, cancelReason);
-            setDetail(prev => ({ ...prev, status: "cancelled", cancelReason }));
+            setDetail(prev => prev ? { ...prev, status: "cancelled", cancelReason } : prev);
         } catch {
             alert("Đã hủy phiếu nhập.");
-            setDetail(prev => ({ ...prev, status: "cancelled", cancelReason }));
+            setDetail(prev => prev ? { ...prev, status: "cancelled", cancelReason } : prev);
         } finally {
             setActionLoading("");
             setShowCancelModal(false);
             setCancelReason("");
         }
     };
-
-    const status = STATUS_MAP[detail.status];
-    const totalValue = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
 
     if (loading) {
         return (
@@ -152,6 +138,19 @@ export default function StockInDetailPage() {
             </div>
         );
     }
+
+    if (!detail) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">inbox</span>
+                <p className="text-lg text-gray-500 mb-4">Không tìm thấy phiếu nhập</p>
+                <button onClick={() => router.back()} className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors">Quay lại</button>
+            </div>
+        );
+    }
+
+    const status = STATUS_MAP[detail.status];
+    const totalValue = items.reduce((sum, it) => sum + it.quantity * it.unitPrice, 0);
 
     return (
         <div className="space-y-6">
@@ -218,7 +217,7 @@ export default function StockInDetailPage() {
                 </div>
                 <div className="bg-white dark:bg-[#1e242b] p-4 rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
                     <p className="text-xs text-[#687582] dark:text-gray-400 font-medium uppercase tracking-wider mb-1">Tổng giá trị</p>
-                    <p className="text-sm font-bold text-[#3C81C6]">{totalValue.toLocaleString()}₫</p>
+                    <p className="text-sm font-bold text-[#3C81C6]">{totalValue.toLocaleString("vi-VN")}₫</p>
                 </div>
             </div>
 
@@ -271,10 +270,10 @@ export default function StockInDetailPage() {
                                 <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                     <td className="py-3 px-5 text-sm text-[#687582]">{idx + 1}</td>
                                     <td className="py-3 px-5 text-sm font-medium text-[#121417] dark:text-white">{item.drugName}</td>
-                                    <td className="py-3 px-5 text-sm font-bold text-[#121417] dark:text-white text-right">{item.quantity.toLocaleString()}</td>
+                                    <td className="py-3 px-5 text-sm font-bold text-[#121417] dark:text-white text-right">{item.quantity.toLocaleString("vi-VN")}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.unit}</td>
-                                    <td className="py-3 px-5 text-sm text-[#121417] dark:text-white text-right">{item.unitPrice.toLocaleString()}₫</td>
-                                    <td className="py-3 px-5 text-sm font-bold text-[#3C81C6] text-right">{(item.quantity * item.unitPrice).toLocaleString()}₫</td>
+                                    <td className="py-3 px-5 text-sm text-[#121417] dark:text-white text-right">{item.unitPrice.toLocaleString("vi-VN")}₫</td>
+                                    <td className="py-3 px-5 text-sm font-bold text-[#3C81C6] text-right">{(item.quantity * item.unitPrice).toLocaleString("vi-VN")}₫</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.lotNumber || "—"}</td>
                                     <td className="py-3 px-5 text-sm text-[#687582]">{item.expiryDate || "—"}</td>
                                 </tr>
@@ -283,7 +282,7 @@ export default function StockInDetailPage() {
                         <tfoot className="bg-gray-50 dark:bg-gray-800/50 border-t-2 border-[#dde0e4] dark:border-[#2d353e]">
                             <tr>
                                 <td colSpan={5} className="py-3 px-5 text-sm font-bold text-[#121417] dark:text-white text-right">Tổng cộng</td>
-                                <td className="py-3 px-5 text-base font-black text-[#3C81C6] text-right">{totalValue.toLocaleString()}₫</td>
+                                <td className="py-3 px-5 text-base font-black text-[#3C81C6] text-right">{totalValue.toLocaleString("vi-VN")}₫</td>
                                 <td colSpan={2} />
                             </tr>
                         </tfoot>

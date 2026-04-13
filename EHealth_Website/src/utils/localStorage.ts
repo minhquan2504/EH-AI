@@ -14,7 +14,9 @@ export function loadFromStorage<T>(key: string, fallback: T): T {
         const stored = localStorage.getItem(key);
         if (stored) return JSON.parse(stored) as T;
     } catch (err) {
-        console.warn(`[Storage] Error loading key "${key}":`, err);
+        if (process.env.NODE_ENV === 'development') {
+            console.warn(`[Storage] Error loading key "${key}":`, err);
+        }
     }
     return fallback;
 }
@@ -27,7 +29,9 @@ export function saveToStorage<T>(key: string, data: T): void {
     try {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (err) {
-        console.warn(`[Storage] Error saving key "${key}":`, err);
+        if (process.env.NODE_ENV === 'development') {
+            console.warn(`[Storage] Error saving key "${key}":`, err);
+        }
     }
 }
 

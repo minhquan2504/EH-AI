@@ -14,28 +14,9 @@ interface TimeSlot {
 
 const SHIFTS = ["Sáng", "Chiều", "Tối"];
 
-const MOCK_SLOTS: TimeSlot[] = [
-    { id: "1", shift: "Sáng", startTime: "07:00", endTime: "07:30", maxPatients: 5, status: "active" },
-    { id: "2", shift: "Sáng", startTime: "07:30", endTime: "08:00", maxPatients: 5, status: "active" },
-    { id: "3", shift: "Sáng", startTime: "08:00", endTime: "08:30", maxPatients: 5, status: "active" },
-    { id: "4", shift: "Sáng", startTime: "08:30", endTime: "09:00", maxPatients: 5, status: "active" },
-    { id: "5", shift: "Sáng", startTime: "09:00", endTime: "09:30", maxPatients: 4, status: "active" },
-    { id: "6", shift: "Sáng", startTime: "09:30", endTime: "10:00", maxPatients: 4, status: "active" },
-    { id: "7", shift: "Sáng", startTime: "10:00", endTime: "10:30", maxPatients: 3, status: "active" },
-    { id: "8", shift: "Sáng", startTime: "10:30", endTime: "11:00", maxPatients: 3, status: "active" },
-    { id: "9", shift: "Chiều", startTime: "13:00", endTime: "13:30", maxPatients: 5, status: "active" },
-    { id: "10", shift: "Chiều", startTime: "13:30", endTime: "14:00", maxPatients: 5, status: "active" },
-    { id: "11", shift: "Chiều", startTime: "14:00", endTime: "14:30", maxPatients: 4, status: "active" },
-    { id: "12", shift: "Chiều", startTime: "14:30", endTime: "15:00", maxPatients: 4, status: "active" },
-    { id: "13", shift: "Chiều", startTime: "15:00", endTime: "15:30", maxPatients: 3, status: "active" },
-    { id: "14", shift: "Chiều", startTime: "15:30", endTime: "16:00", maxPatients: 3, status: "inactive" },
-    { id: "15", shift: "Tối", startTime: "18:00", endTime: "18:30", maxPatients: 3, status: "active" },
-    { id: "16", shift: "Tối", startTime: "18:30", endTime: "19:00", maxPatients: 3, status: "active" },
-    { id: "17", shift: "Tối", startTime: "19:00", endTime: "19:30", maxPatients: 2, status: "inactive" },
-];
 
 export default function TimeSlotsPage() {
-    const [slots, setSlots] = useState<TimeSlot[]>(MOCK_SLOTS);
+    const [slots, setSlots] = useState<TimeSlot[]>([]);
     const [activeShift, setActiveShift] = useState("Sáng");
 
     useEffect(() => {
@@ -44,17 +25,16 @@ export default function TimeSlotsPage() {
                 const items: any[] = res?.data?.slots ?? res?.data ?? res ?? [];
                 if (Array.isArray(items) && items.length > 0) {
                     setSlots(items.map((s: any, i: number) => ({
-                        ...MOCK_SLOTS[i % MOCK_SLOTS.length],
                         id: s.id ?? String(i + 1),
                         shift: s.shift === "MORNING" ? "Sáng" : s.shift === "AFTERNOON" ? "Chiều" : s.shift === "NIGHT" ? "Tối" : s.shift ?? "Sáng",
-                        startTime: s.startTime ?? s.start_time ?? MOCK_SLOTS[i % MOCK_SLOTS.length].startTime,
-                        endTime: s.endTime ?? s.end_time ?? MOCK_SLOTS[i % MOCK_SLOTS.length].endTime,
-                        maxPatients: s.maxPatients ?? s.max_patients ?? MOCK_SLOTS[i % MOCK_SLOTS.length].maxPatients,
+                        startTime: s.startTime ?? s.start_time ?? "",
+                        endTime: s.endTime ?? s.end_time ?? "",
+                        maxPatients: s.maxPatients ?? s.max_patients ?? 0,
                         status: s.isActive === false ? "inactive" : "active",
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filteredSlots = slots.filter((s) => s.shift === activeShift);

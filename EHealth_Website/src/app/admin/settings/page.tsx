@@ -17,21 +17,21 @@ interface UserProfile {
     createdAt: string;
 }
 
-const MOCK_USER: UserProfile = {
-    fullName: "Nguyễn Văn Admin",
-    email: "admin@ehealth.vn",
-    phone: "0912345678",
-    role: "Quản trị viên",
-    department: "Phòng CNTT",
-    createdAt: "2023-01-15",
+const EMPTY_USER: UserProfile = {
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "",
+    department: "",
+    createdAt: "",
 };
 
 export default function SettingsPage() {
     const { user: authUser, updateUser } = useAuth();
     const toast = useToast();
-    const [user, setUser] = useState<UserProfile>(MOCK_USER);
+    const [user, setUser] = useState<UserProfile>(EMPTY_USER);
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState(MOCK_USER);
+    const [editForm, setEditForm] = useState(EMPTY_USER);
     const [activeTab, setActiveTab] = useState<"profile" | "security" | "preferences">("profile");
     const [saving, setSaving] = useState(false);
 
@@ -41,19 +41,19 @@ export default function SettingsPage() {
                 const d = res?.data?.data ?? res?.data;
                 if (d) {
                     const profile: UserProfile = {
-                        fullName: d.fullName ?? d.full_name ?? MOCK_USER.fullName,
-                        email: d.email ?? MOCK_USER.email,
-                        phone: d.phone ?? MOCK_USER.phone,
+                        fullName: d.fullName ?? d.full_name ?? "",
+                        email: d.email ?? "",
+                        phone: d.phone ?? "",
                         avatar: d.avatar,
-                        role: d.roleName ?? d.role ?? MOCK_USER.role,
-                        department: d.departmentName ?? d.department ?? MOCK_USER.department,
-                        createdAt: d.createdAt?.split("T")[0] ?? MOCK_USER.createdAt,
+                        role: d.roleName ?? d.role ?? "",
+                        department: d.departmentName ?? d.department ?? "",
+                        createdAt: d.createdAt?.split("T")[0] ?? "",
                     };
                     setUser(profile);
                     setEditForm(profile);
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const handleSave = async () => {
@@ -230,6 +230,7 @@ export default function SettingsPage() {
                                     </label>
                                     <input
                                         type="password"
+                                        aria-label="Mật khẩu hiện tại"
                                         className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white"
                                         placeholder="••••••••"
                                     />
@@ -240,6 +241,7 @@ export default function SettingsPage() {
                                     </label>
                                     <input
                                         type="password"
+                                        aria-label="Mật khẩu mới"
                                         className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white"
                                         placeholder="••••••••"
                                     />
@@ -250,6 +252,7 @@ export default function SettingsPage() {
                                     </label>
                                     <input
                                         type="password"
+                                        aria-label="Xác nhận mật khẩu mới"
                                         className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white"
                                         placeholder="••••••••"
                                     />

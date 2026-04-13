@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { MOCK_DOCTORS } from "@/lib/mock-data/admin";
 import { DOCTOR_STATUS } from "@/constants/status";
 import type { Doctor } from "@/types";
 import { staffService } from "@/services/staffService";
@@ -14,36 +13,48 @@ export default function DoctorDetailPage() {
     const doctorId = params.id as string;
 
     const [doctor, setDoctor] = useState<Doctor | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!doctorId) return;
+        setLoading(true);
         staffService.getById(doctorId)
             .then((res: any) => {
                 const d = res?.data ?? res;
-                if (d) {
+                if (d && (d.id || d.staff_id)) {
                     setDoctor({
-                        ...MOCK_DOCTORS[0],
-                        id: d.id ?? doctorId,
+                        id: d.id ?? d.staff_id ?? doctorId,
                         fullName: d.full_name ?? d.fullName ?? "",
                         email: d.email ?? "",
                         phone: d.phone_number ?? d.phone ?? "",
                         code: d.staff_code ?? d.employee_code ?? d.code ?? doctorId,
-                        departmentName: d.department?.name ?? d.departmentName ?? "",
+                        departmentName: d.department?.name ?? d.departmentName ?? d.department_name ?? "",
+                        departmentId: d.department?.id ?? d.departmentId ?? d.department_id ?? "",
                         specialization: d.specialization ?? "",
                         status: d.status?.toLowerCase() === "active" ? DOCTOR_STATUS.ACTIVE : d.status ?? DOCTOR_STATUS.ACTIVE,
-                        rating: d.rating ?? 5,
-                        reviewCount: d.reviewCount ?? 0,
+                        rating: d.rating ?? 0,
+                        reviewCount: d.reviewCount ?? d.review_count ?? 0,
                         experience: d.experience ?? 0,
+                        avatar: d.avatar ?? d.avatar_url ?? "",
                         createdAt: d.created_at?.split("T")[0] ?? d.createdAt ?? "",
                         workingSchedule: d.workingSchedule ?? [],
                     } as Doctor);
                 }
             })
             .catch(() => {
-                const found = MOCK_DOCTORS.find((d) => d.id === doctorId);
-                setDoctor(found || null);
-            });
+                setDoctor(null);
+            })
+            .finally(() => setLoading(false));
     }, [doctorId]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-[#3C81C6]/20 border-t-[#3C81C6] rounded-full animate-spin mb-4" />
+                <p className="text-sm text-[#687582]">Đang tải...</p>
+            </div>
+        );
+    }
 
     if (!doctor) {
         return (

@@ -3,20 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { emrService } from "@/services/emrService";
+import { encounterService } from "@/services/encounterService";
 import { useAuth } from "@/contexts/AuthContext";
 import { AIRecordSummary, AITrendDetector } from "@/components/portal/ai";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
-
-const MOCK_TIMELINE = [
-    { id: 1, date: "20/02/2025", type: "visit", title: "Khám Tim mạch", doctor: "BS. Trần Văn Minh", department: "Tim mạch", details: "Tăng huyết áp - I10. Điều chỉnh liều thuốc.", vitalSigns: { bp: "140/90", hr: "78" } },
-    { id: 2, date: "20/02/2025", type: "lab", title: "Xét nghiệm máu", details: "Glucose: 7.2 mmol/L (cao), HbA1c: 6.8%, Cholesterol: 5.5 mmol/L" },
-    { id: 3, date: "15/01/2025", type: "visit", title: "Khám Nội tiết", doctor: "BS. Lê Thị Hoa", department: "Nội tiết", details: "Tiểu đường type 2, kiểm soát tốt", vitalSigns: { bp: "130/85", hr: "72" } },
-    { id: 4, date: "15/01/2025", type: "prescription", title: "Đơn thuốc #DT002", details: "Metformin 500mg (2 viên/ngày), Glimepiride 2mg (1 viên/ngày)" },
-    { id: 5, date: "10/12/2024", type: "visit", title: "Kiểm tra định kỳ", doctor: "BS. Trần Văn Minh", department: "Tim mạch", details: "Huyết áp ổn định. Duy trì phác đồ hiện tại.", vitalSigns: { bp: "125/80", hr: "70" } },
-    { id: 6, date: "10/12/2024", type: "imaging", title: "X-quang ngực", details: "Bóng tim bình thường, phổi sạch, không thấy bất thường." },
-    { id: 7, date: "05/11/2024", type: "visit", title: "Khám Nội tổng quát", doctor: "BS. Phạm Chí Thanh", department: "Nội tổng quát", details: "Viêm dạ dày - K29. Kê thuốc điều trị 14 ngày." },
-    { id: 8, date: "05/11/2024", type: "prescription", title: "Đơn thuốc #DT003", details: "Omeprazole 20mg (1 viên/sáng trước ăn), Sucralfate 1g (3 viên/ngày)" },
-];
 
 const typeConfig: Record<string, { icon: string; color: string; label: string }> = {
     visit: { icon: "stethoscope", color: "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400", label: "Lượt khám" },
@@ -29,39 +19,61 @@ export default function MedicalRecordsPage() {
     const router = useRouter();
     const { user } = useAuth();
     const [filterType, setFilterType] = useState("all");
-    usePageAIContext({ pageKey: "medical-records", patientId: "BN001", patientName: "Nguyễn Văn An" });
-    const [timeline, setTimeline] = useState(MOCK_TIMELINE);
+    const [patientFilter, setPatientFilter] = useState("");
+    const [loading, setLoading] = useState(false);
+    usePageAIContext({ pageKey: "medical-records" });
+    const [timeline, setTimeline] = useState<any[]>([]);
 
     useEffect(() => {
         if (!user?.id) return;
-        emrService.getList({ doctorId: user.id, limit: 50 })
+        setLoading(true);
+        // Thử load từ encounters API (medical records theo doctor)
+        encounterService.getList({ doctorId: user.id, limit: 50 })
             .then(res => {
-                const items: any[] = res?.data?.data ?? res?.data ?? [];
+                const items: any[] = res?.data?.items ?? res?.data ?? res ?? [];
                 if (items.length > 0) {
                     const mapped = items.map((e: any) => ({
                         id: e.id,
-                        date: e.visitDate ?? e.createdAt?.split("T")[0] ?? "",
+                        date: e.visitDate
+                            ? new Date(e.visitDate).toLocaleDateString("vi-VN")
+                            : e.createdAt
+                                ? new Date(e.createdAt).toLocaleDateString("vi-VN")
+                                : "",
                         type: "visit",
-                        title: `Khám ${e.departmentName ?? ""}`,
-                        doctor: e.doctorName ?? "",
-                        department: e.departmentName ?? "",
-                        details: e.diagnosis ?? e.chiefComplaint ?? "",
-                        vitalSigns: e.vitalSigns,
+                        title: `Khám ${e.departmentName ?? e.specialty ?? ""}`.trim(),
+                        doctor: e.doctorName ?? e.doctor?.fullName ?? "",
+                        department: e.departmentName ?? e.specialty ?? "",
+                        details: e.diagnosis ?? e.chiefComplaint ?? e.reason ?? "",
+                        vitalSigns: e.vitalSigns
+                            ? { bp: e.vitalSigns.bloodPressure ?? "", hr: String(e.vitalSigns.heartRate ?? "") }
+                            : undefined,
+                        patientId: e.patientId,
+                        patientName: e.patientName ?? e.patient?.fullName ?? "",
                     }));
-                    setTimeline(mapped);
+                    setTimeline(mapped as any);
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { setTimeline([]); })
+            .finally(() => setLoading(false));
     }, [user?.id]);
 
-    const filtered = timeline.filter((item) => filterType === "all" || item.type === filterType);
+    const filtered = timeline.filter((item) => {
+        if (filterType !== "all" && item.type !== filterType) return false;
+        if (patientFilter.trim()) {
+            const q = patientFilter.toLowerCase();
+            const name = (item as any).patientName?.toLowerCase() ?? "";
+            const pId = (item as any).patientId?.toLowerCase() ?? "";
+            if (!name.includes(q) && !pId.includes(q)) return false;
+        }
+        return true;
+    });
 
     // Group by date
-    const grouped = filtered.reduce((acc, item) => {
+    const grouped: Record<string, any[]> = filtered.reduce((acc: Record<string, any[]>, item) => {
         if (!acc[item.date]) acc[item.date] = [];
         acc[item.date].push(item);
         return acc;
-    }, {} as Record<string, typeof timeline>);
+    }, {});
 
     return (
         <div className="p-6 md:p-8"><div className="max-w-5xl mx-auto space-y-6">
@@ -123,17 +135,38 @@ export default function MedicalRecordsPage() {
             </div>
 
             {/* Filter */}
-            <div className="flex gap-2 flex-wrap">
-                {[{ k: "all", l: "Tất cả" }, ...Object.entries(typeConfig).map(([k, v]) => ({ k, l: v.label }))].map((f) => (
-                    <button key={f.k} onClick={() => setFilterType(f.k)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterType === f.k ? "bg-[#3C81C6] text-white" : "bg-white dark:bg-[#1e242b] text-[#687582] border border-[#dde0e4] dark:border-[#2d353e]"}`}>
-                        {f.l}
-                    </button>
-                ))}
+            <div className="space-y-3">
+                {/* Search patient */}
+                <div className="relative max-w-sm">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#b0b8c1] text-[18px]">search</span>
+                    <input
+                        type="text"
+                        value={patientFilter}
+                        onChange={(e) => setPatientFilter(e.target.value)}
+                        placeholder="Tìm theo tên hoặc mã bệnh nhân..."
+                        className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#1e242b] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white"
+                    />
+                </div>
+                {/* Type filter */}
+                <div className="flex gap-2 flex-wrap items-center">
+                    {[{ k: "all", l: "Tất cả" }, ...Object.entries(typeConfig).map(([k, v]) => ({ k, l: v.label }))].map((f) => (
+                        <button key={f.k} onClick={() => setFilterType(f.k)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterType === f.k ? "bg-[#3C81C6] text-white" : "bg-white dark:bg-[#1e242b] text-[#687582] border border-[#dde0e4] dark:border-[#2d353e]"}`}>
+                            {f.l}
+                        </button>
+                    ))}
+                    {loading && <div className="w-4 h-4 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin ml-2" />}
+                </div>
             </div>
 
             {/* Timeline */}
             <div className="space-y-6">
+                {Object.keys(grouped).length === 0 && !loading && (
+                    <div className="text-center py-16">
+                        <span className="material-symbols-outlined text-4xl text-[#b0b8c1] block mb-3">folder_open</span>
+                        <p className="text-sm text-[#687582]">Không tìm thấy hồ sơ phù hợp</p>
+                    </div>
+                )}
                 {Object.entries(grouped).map(([date, items]) => (
                     <div key={date}>
                         <div className="flex items-center gap-3 mb-3">

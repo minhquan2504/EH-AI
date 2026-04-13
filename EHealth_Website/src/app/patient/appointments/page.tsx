@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_PATIENT_PROFILES, getProfilesByUserId, type PatientProfile } from "@/data/patient-profiles-mock";
 import { AppointmentStatusBadge } from "@/components/patient/AppointmentStatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAppointments, type Appointment } from "@/services/appointmentService";
-import { filterMockAppointments } from "@/data/patient-mock";
+import { getAppointments, cancelAppointment, appointmentChangesService, type Appointment } from "@/services/appointmentService";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
 import { AIAppointmentSuggester } from "@/components/portal/ai";
 
@@ -22,12 +20,32 @@ export default function AppointmentsPage() {
     const [activeTab, setActiveTab] = useState("upcoming");
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedProfileId, setSelectedProfileId] = useState("pp-001");
-    const profiles = getProfilesByUserId("patient-001");
+
+    // Cancel modal
+    const [cancelModal, setCancelModal] = useState<{ id: string } | null>(null);
+    const [cancelReason, setCancelReason] = useState("");
+    const [cancelling, setCancelling] = useState(false);
+
+    // Reschedule modal
+    const [rescheduleModal, setRescheduleModal] = useState<{ id: string; doctorName: string } | null>(null);
+    const [newDate, setNewDate] = useState("");
+    const [newTime, setNewTime] = useState("");
+    const [rescheduling, setRescheduling] = useState(false);
+    const [minDate, setMinDate] = useState("");
+    useEffect(() => {
+        setMinDate(new Date().toISOString().split("T")[0]);
+    }, []);
+
+    const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+
+    const showToast = (msg: string, type: "success" | "error" = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         loadAppointments();
-    }, [activeTab]);
+    }, [activeTab, user?.id]);
 
     const loadAppointments = async () => {
         const statusMap: Record<string, string> = {
@@ -42,32 +60,66 @@ export default function AppointmentsPage() {
                 status: statusMap[activeTab],
                 limit: 20,
             });
-            if (res.data && res.data.length > 0) {
-                setAppointments(res.data);
-            } else {
-                setAppointments(filterMockAppointments(statusMap[activeTab]));
-            }
+            setAppointments(res.data && res.data.length > 0 ? res.data : []);
         } catch {
-            setAppointments(filterMockAppointments(statusMap[activeTab]));
+            setAppointments([]);
         } finally {
             setLoading(false);
         }
     };
 
+    const handleCancel = async () => {
+        if (!cancelModal) return;
+        setCancelling(true);
+        try {
+            await cancelAppointment(cancelModal.id, cancelReason);
+            setCancelModal(null);
+            setCancelReason("");
+            showToast("Đã hủy lịch hẹn thành công");
+            await loadAppointments();
+        } catch {
+            showToast("Hủy lịch thất bại. Vui lòng thử lại.", "error");
+        } finally {
+            setCancelling(false);
+        }
+    };
+
+    const handleReschedule = async () => {
+        if (!rescheduleModal || !newDate || !newTime) {
+            showToast("Vui lòng chọn ngày và giờ mới", "error"); return;
+        }
+        setRescheduling(true);
+        try {
+            await appointmentChangesService.request({
+                appointmentId: rescheduleModal.id,
+                newDate,
+                newTime,
+                reason: "Bệnh nhân yêu cầu dời lịch",
+            });
+            setRescheduleModal(null);
+            setNewDate(""); setNewTime("");
+            showToast("Đã gửi yêu cầu dời lịch. Chờ xác nhận.");
+        } catch {
+            showToast("Gửi yêu cầu dời lịch thất bại.", "error");
+        } finally {
+            setRescheduling(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
+            {/* Toast */}
+            {toast && (
+                <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}`}>
+                    {toast.msg}
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Lịch hẹn của tôi</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Quản lý tất cả lịch hẹn khám bệnh</p>
-                    <div className="flex items-center gap-2 mt-3">
-                        <span className="material-symbols-outlined text-[#3C81C6]" style={{ fontSize: "18px" }}>person</span>
-                        <select value={selectedProfileId} onChange={e => setSelectedProfileId(e.target.value)}
-                            className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-white dark:bg-[#1e242b] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/30 font-medium">
-                            {profiles.map(p => <option key={p.id} value={p.id}>{p.fullName} — {p.relationshipLabel}</option>)}
-                        </select>
-                    </div>
                 </div>
                 <Link href="/booking"
                     className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#3C81C6] to-[#2563eb] text-white text-sm font-semibold rounded-xl shadow-md shadow-[#3C81C6]/20 hover:shadow-lg transition-all active:scale-[0.97]">
@@ -175,22 +227,97 @@ export default function AppointmentsPage() {
                                 </Link>
                                 {(apt.status === "pending" || apt.status === "confirmed") && (
                                     <>
-                                        <button className="px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors">
+                                        <button
+                                            onClick={() => { setRescheduleModal({ id: apt.id, doctorName: apt.doctorName }); setNewDate(""); setNewTime(""); }}
+                                            className="px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors">
                                             Dời lịch
                                         </button>
-                                        <button className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
+                                        <button
+                                            onClick={() => { setCancelModal({ id: apt.id }); setCancelReason(""); }}
+                                            className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
                                             Hủy lịch
                                         </button>
                                     </>
                                 )}
                                 {apt.status === "completed" && (
-                                    <button className="px-3 py-1.5 text-xs font-medium text-[#3C81C6] bg-[#3C81C6]/[0.06] border border-[#3C81C6]/20 rounded-lg hover:bg-[#3C81C6]/[0.12] transition-colors">
+                                    <button
+                                        onClick={() => alert("Tính năng đánh giá sẽ sớm có")}
+                                        className="px-3 py-1.5 text-xs font-medium text-[#3C81C6] bg-[#3C81C6]/[0.06] border border-[#3C81C6]/20 rounded-lg hover:bg-[#3C81C6]/[0.12] transition-colors">
                                         Đánh giá
                                     </button>
                                 )}
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Cancel Modal */}
+            {cancelModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setCancelModal(null)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-red-600" style={{ fontSize: "22px" }}>warning</span>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Xác nhận hủy lịch</h3>
+                                <p className="text-xs text-gray-500">Hành động này không thể hoàn tác</p>
+                            </div>
+                        </div>
+                        <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                            placeholder="Lý do hủy lịch (không bắt buộc)..."
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm mb-4 bg-gray-50 min-h-[80px] resize-none focus:outline-none focus:ring-2 focus:ring-red-200" />
+                        <div className="flex gap-3">
+                            <button onClick={() => setCancelModal(null)}
+                                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                                Quay lại
+                            </button>
+                            <button onClick={handleCancel} disabled={cancelling}
+                                className="flex-1 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 disabled:opacity-50 transition-colors">
+                                {cancelling ? "Đang xử lý..." : "Xác nhận hủy"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reschedule Modal */}
+            {rescheduleModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setRescheduleModal(null)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-amber-600" style={{ fontSize: "22px" }}>event_repeat</span>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Dời lịch hẹn</h3>
+                                <p className="text-xs text-gray-500">{rescheduleModal.doctorName}</p>
+                            </div>
+                        </div>
+                        <div className="space-y-3 mb-4">
+                            <div>
+                                <label className="text-xs text-gray-500 font-medium mb-1 block">Ngày mới *</label>
+                                <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} min={minDate}
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-200 bg-gray-50" />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500 font-medium mb-1 block">Giờ mới *</label>
+                                <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)}
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-200 bg-gray-50" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button onClick={() => setRescheduleModal(null)}
+                                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                                Quay lại
+                            </button>
+                            <button onClick={handleReschedule} disabled={rescheduling}
+                                className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-500 rounded-xl hover:bg-amber-600 disabled:opacity-50 transition-colors">
+                                {rescheduling ? "Đang gửi..." : "Gửi yêu cầu"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

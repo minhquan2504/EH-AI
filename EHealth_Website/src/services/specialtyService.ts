@@ -27,15 +27,36 @@ export interface Specialty {
 // Service Functions
 // ============================================
 
+/** Unwrap specialties từ các kiểu response khác nhau */
+export function unwrapSpecialties(res: any): Specialty[] {
+    const raw = res?.data?.data ?? res?.data?.items ?? res?.data ?? res?.items ?? res ?? [];
+    if (!Array.isArray(raw)) return [];
+    return raw.map((s: any): Specialty => ({
+        id: s.id ?? '',
+        code: s.code ?? '',
+        name: s.name ?? '',
+        description: s.description ?? '',
+        isActive: s.isActive ?? s.is_active ?? true,
+        createdAt: s.createdAt ?? s.created_at ?? '',
+        updatedAt: s.updatedAt ?? s.updated_at ?? '',
+    }));
+}
+
 /** GET /api/specialties — Lấy danh sách chuyên khoa */
 export const getSpecialties = async (params?: {
     page?: number;
     limit?: number;
     searchKeyword?: string;
+    search?: string;
+    isActive?: boolean;
 }): Promise<{ data: Specialty[]; pagination?: any }> => {
     try {
         const response = await axiosClient.get(SPECIALTY_ENDPOINTS.LIST, { params });
-        return response.data;
+        // Unwrap nhiều kiểu response
+        const raw = response.data;
+        const items = unwrapSpecialties(raw);
+        const pagination = raw?.data?.pagination ?? raw?.pagination ?? undefined;
+        return { data: items, pagination };
     } catch (error: any) {
         throw new Error(error.response?.data?.message || 'Lấy danh sách chuyên khoa thất bại');
     }

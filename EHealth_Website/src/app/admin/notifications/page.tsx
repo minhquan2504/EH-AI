@@ -4,45 +4,42 @@ import { useState, useEffect } from "react";
 import {
     getNotificationCategories,
     createNotificationCategory,
+    updateNotificationCategory,
+    deleteNotificationCategory,
     getNotificationTemplates,
     createNotificationTemplate,
+    updateNotificationTemplate,
+    deleteNotificationTemplate,
+    getNotificationRoleConfigs,
+    updateNotificationRoleConfig,
     sendAdminBroadcast,
     NotificationCategory,
     NotificationTemplate,
 } from "@/services/notificationService";
 import { useToast } from "@/contexts/ToastContext";
 
-const MOCK_CATEGORIES: NotificationCategory[] = [
-    { id: "cat1", name: "Lịch hẹn", code: "APPOINTMENT", description: "Thông báo liên quan đến lịch hẹn", isActive: true },
-    { id: "cat2", name: "Kết quả xét nghiệm", code: "LAB_RESULT", description: "Thông báo kết quả xét nghiệm", isActive: true },
-    { id: "cat3", name: "Thanh toán", code: "BILLING", description: "Thông báo thanh toán và hóa đơn", isActive: true },
-    { id: "cat4", name: "Hệ thống", code: "SYSTEM", description: "Thông báo hệ thống và bảo trì", isActive: false },
-];
 
-const MOCK_TEMPLATES: NotificationTemplate[] = [
-    { id: "t1", categoryId: "cat1", name: "Xác nhận lịch hẹn", subject: "Xác nhận lịch khám ngày {{date}}", content: "Kính gửi {{patientName}}, lịch khám của bạn vào {{time}} ngày {{date}} với {{doctorName}} đã được xác nhận.", variables: ["patientName", "date", "time", "doctorName"], isActive: true },
-    { id: "t2", categoryId: "cat1", name: "Nhắc nhở lịch hẹn", subject: "Nhắc nhở: Lịch khám ngày mai", content: "Kính gửi {{patientName}}, nhắc bạn có lịch khám vào {{time}} ngày {{date}}. Vui lòng đến trước 15 phút.", variables: ["patientName", "date", "time"], isActive: true },
-    { id: "t3", categoryId: "cat2", name: "Kết quả xét nghiệm sẵn sàng", subject: "Kết quả xét nghiệm của bạn đã có", content: "Kính gửi {{patientName}}, kết quả xét nghiệm ngày {{date}} đã được cập nhật. Vui lòng đăng nhập để xem.", variables: ["patientName", "date"], isActive: true },
-    { id: "t4", categoryId: "cat3", name: "Xác nhận thanh toán", subject: "Xác nhận thanh toán hóa đơn {{invoiceId}}", content: "Hóa đơn {{invoiceId}} trị giá {{amount}} đã được thanh toán thành công.", variables: ["invoiceId", "amount"], isActive: true },
-];
-
-type ActiveTab = "categories" | "templates" | "broadcast";
+type ActiveTab = "categories" | "templates" | "roleconfigs" | "broadcast";
 
 export default function AdminNotifications() {
     const toast = useToast();
     const [activeTab, setActiveTab] = useState<ActiveTab>("categories");
-    const [categories, setCategories] = useState<NotificationCategory[]>(MOCK_CATEGORIES);
-    const [templates, setTemplates] = useState<NotificationTemplate[]>(MOCK_TEMPLATES);
+    const [categories, setCategories] = useState<NotificationCategory[]>([]);
+    const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
+    const [roleConfigs, setRoleConfigs] = useState<any[]>([]);
     const [loadingCat, setLoadingCat] = useState(true);
     const [loadingTpl, setLoadingTpl] = useState(true);
+    const [loadingRc, setLoadingRc] = useState(false);
 
-    // Modal tạo category
+    // Modal tạo/sửa category
     const [showCatModal, setShowCatModal] = useState(false);
+    const [editingCat, setEditingCat] = useState<NotificationCategory | null>(null);
     const [catForm, setCatForm] = useState({ name: "", code: "", description: "" });
     const [savingCat, setSavingCat] = useState(false);
 
-    // Modal tạo template
+    // Modal tạo/sửa template
     const [showTplModal, setShowTplModal] = useState(false);
+    const [editingTpl, setEditingTpl] = useState<NotificationTemplate | null>(null);
     const [tplForm, setTplForm] = useState({ categoryId: "", name: "", subject: "", content: "", variables: "" });
     const [savingTpl, setSavingTpl] = useState(false);
 
@@ -57,47 +54,148 @@ export default function AdminNotifications() {
 
     useEffect(() => {
         getNotificationCategories()
-            .then(data => { if (data.length > 0) setCategories(data); })
-            .catch(() => {})
+            .then(data => { if (data.length > 0) setCategories(data); else setCategories([]); })
+            .catch(() => { setCategories([]); })
             .finally(() => setLoadingCat(false));
     }, []);
 
     useEffect(() => {
         getNotificationTemplates()
-            .then(data => { if (data.length > 0) setTemplates(data); })
-            .catch(() => {})
+            .then(data => { if (data.length > 0) setTemplates(data); else setTemplates([]); })
+            .catch(() => { setTemplates([]); })
             .finally(() => setLoadingTpl(false));
     }, []);
 
-    const handleCreateCategory = async () => {
+    useEffect(() => {
+        if (activeTab === "roleconfigs") {
+            setLoadingRc(true);
+            getNotificationRoleConfigs()
+                .then(data => {
+                    const raw = data?.data ?? data ?? [];
+                    setRoleConfigs(Array.isArray(raw) ? raw : []);
+                })
+                .catch(() => setRoleConfigs([]))
+                .finally(() => setLoadingRc(false));
+        }
+    }, [activeTab]);
+
+    // --- Category handlers ---
+    const openCreateCat = () => {
+        setEditingCat(null);
+        setCatForm({ name: "", code: "", description: "" });
+        setShowCatModal(true);
+    };
+
+    const openEditCat = (cat: NotificationCategory) => {
+        setEditingCat(cat);
+        setCatForm({ name: cat.name, code: cat.code, description: cat.description ?? "" });
+        setShowCatModal(true);
+    };
+
+    const handleSaveCategory = async () => {
         if (!catForm.name || !catForm.code) { toast.error("Vui lòng điền tên và mã loại!"); return; }
         setSavingCat(true);
         try {
-            await createNotificationCategory(catForm);
-            setCategories(prev => [...prev, { id: Date.now().toString(), ...catForm, isActive: true }]);
-            toast.success("Đã tạo loại thông báo!");
+            if (editingCat) {
+                await updateNotificationCategory(editingCat.id, catForm);
+                setCategories(prev => prev.map(c => c.id === editingCat.id ? { ...c, ...catForm } : c));
+                toast.success("Đã cập nhật loại thông báo!");
+            } else {
+                await createNotificationCategory(catForm);
+                setCategories(prev => [...prev, { id: Date.now().toString(), ...catForm, isActive: true }]);
+                toast.success("Đã tạo loại thông báo!");
+            }
             setShowCatModal(false);
             setCatForm({ name: "", code: "", description: "" });
         } catch {
-            toast.error("Tạo loại thông báo thất bại!");
+            toast.error(editingCat ? "Cập nhật thất bại!" : "Tạo loại thông báo thất bại!");
         } finally { setSavingCat(false); }
     };
 
-    const handleCreateTemplate = async () => {
+    const handleDeleteCat = async (id: string) => {
+        if (!confirm("Xóa loại thông báo này?")) return;
+        try {
+            await deleteNotificationCategory(id);
+            setCategories(prev => prev.filter(c => c.id !== id));
+            toast.success("Đã xóa loại thông báo!");
+        } catch {
+            toast.error("Xóa thất bại!");
+        }
+    };
+
+    // --- Template handlers ---
+    const openCreateTpl = () => {
+        setEditingTpl(null);
+        setTplForm({ categoryId: "", name: "", subject: "", content: "", variables: "" });
+        setShowTplModal(true);
+    };
+
+    const openEditTpl = (tpl: NotificationTemplate) => {
+        setEditingTpl(tpl);
+        setTplForm({
+            categoryId: tpl.categoryId,
+            name: tpl.name,
+            subject: tpl.subject ?? "",
+            content: tpl.content,
+            variables: (tpl.variables ?? []).join(", "),
+        });
+        setShowTplModal(true);
+    };
+
+    const handleSaveTemplate = async () => {
         if (!tplForm.name || !tplForm.content) { toast.error("Vui lòng điền tên và nội dung mẫu!"); return; }
         setSavingTpl(true);
         try {
             const vars = tplForm.variables ? tplForm.variables.split(",").map(v => v.trim()).filter(Boolean) : [];
-            await createNotificationTemplate({ ...tplForm, variables: vars });
-            setTemplates(prev => [...prev, { id: Date.now().toString(), ...tplForm, variables: vars, isActive: true }]);
-            toast.success("Đã tạo mẫu thông báo!");
+            if (editingTpl) {
+                await updateNotificationTemplate(editingTpl.id, { ...tplForm, variables: vars });
+                setTemplates(prev => prev.map(t => t.id === editingTpl.id ? { ...t, ...tplForm, variables: vars } : t));
+                toast.success("Đã cập nhật mẫu thông báo!");
+            } else {
+                await createNotificationTemplate({ ...tplForm, variables: vars });
+                setTemplates(prev => [...prev, { id: Date.now().toString(), ...tplForm, variables: vars, isActive: true }]);
+                toast.success("Đã tạo mẫu thông báo!");
+            }
             setShowTplModal(false);
             setTplForm({ categoryId: "", name: "", subject: "", content: "", variables: "" });
         } catch {
-            toast.error("Tạo mẫu thất bại!");
+            toast.error(editingTpl ? "Cập nhật mẫu thất bại!" : "Tạo mẫu thất bại!");
         } finally { setSavingTpl(false); }
     };
 
+    const handleDeleteTpl = async (id: string) => {
+        if (!confirm("Xóa mẫu thông báo này?")) return;
+        try {
+            await deleteNotificationTemplate(id);
+            setTemplates(prev => prev.filter(t => t.id !== id));
+            toast.success("Đã xóa mẫu thông báo!");
+        } catch {
+            toast.error("Xóa mẫu thất bại!");
+        }
+    };
+
+    // --- Role config handler ---
+    const handleToggleRoleConfig = async (roleId: string, categoryId: string, current: boolean) => {
+        try {
+            await updateNotificationRoleConfig(roleId, categoryId, { enabled: !current });
+            setRoleConfigs(prev => prev.map((rc: any) => {
+                if (rc.roleId === roleId) {
+                    return {
+                        ...rc,
+                        categories: (rc.categories ?? []).map((c: any) =>
+                            c.categoryId === categoryId ? { ...c, enabled: !current } : c
+                        ),
+                    };
+                }
+                return rc;
+            }));
+            toast.success("Đã cập nhật cấu hình!");
+        } catch {
+            toast.error("Cập nhật cấu hình thất bại!");
+        }
+    };
+
+    // --- Broadcast ---
     const handleBroadcast = async () => {
         if (!bcForm.title || !bcForm.content) { toast.error("Vui lòng điền tiêu đề và nội dung!"); return; }
         if (bcForm.roles.length === 0) { toast.error("Chọn ít nhất một nhóm nhận!"); return; }
@@ -113,7 +211,6 @@ export default function AdminNotifications() {
 
     const toggleRole = (r: string) => setBcForm(prev => ({ ...prev, roles: prev.roles.includes(r) ? prev.roles.filter(x => x !== r) : [...prev.roles, r] }));
     const toggleChannel = (c: string) => setBcForm(prev => ({ ...prev, channels: prev.channels.includes(c) ? prev.channels.filter(x => x !== c) : [...prev.channels, c] }));
-
     const catOfTemplate = (categoryId: string) => categories.find(c => c.id === categoryId)?.name ?? "—";
 
     return (
@@ -143,10 +240,15 @@ export default function AdminNotifications() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-                    {([["categories", "Loại thông báo", "category"], ["templates", "Mẫu thông báo", "description"], ["broadcast", "Gửi hàng loạt", "send"]] as const).map(([key, label, icon]) => (
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 overflow-x-auto">
+                    {([
+                        ["categories", "Loại thông báo", "category"],
+                        ["templates", "Mẫu thông báo", "description"],
+                        ["roleconfigs", "Cấu hình Role", "manage_accounts"],
+                        ["broadcast", "Gửi hàng loạt", "send"],
+                    ] as const).map(([key, label, icon]) => (
                         <button key={key} onClick={() => setActiveTab(key)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === key ? "bg-white dark:bg-[#1e242b] text-[#121417] dark:text-white shadow-sm" : "text-[#687582] hover:text-[#121417]"}`}>
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-w-fit px-3 ${activeTab === key ? "bg-white dark:bg-[#1e242b] text-[#121417] dark:text-white shadow-sm" : "text-[#687582] hover:text-[#121417]"}`}>
                             <span className="material-symbols-outlined text-[18px]">{icon}</span>{label}
                         </button>
                     ))}
@@ -157,7 +259,7 @@ export default function AdminNotifications() {
                     <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
                         <div className="p-4 border-b border-[#dde0e4] dark:border-[#2d353e] flex items-center justify-between">
                             <p className="text-sm font-semibold text-[#121417] dark:text-white">Danh sách loại thông báo ({categories.length})</p>
-                            <button onClick={() => setShowCatModal(true)}
+                            <button onClick={openCreateCat}
                                 className="flex items-center gap-1.5 px-3 py-2 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-medium transition-colors">
                                 <span className="material-symbols-outlined text-[18px]">add</span>Thêm loại
                             </button>
@@ -165,13 +267,13 @@ export default function AdminNotifications() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead><tr className="border-b border-[#dde0e4] dark:border-[#2d353e]">
-                                    {["Tên loại", "Mã", "Mô tả", "Trạng thái"].map(h => (
+                                    {["Tên loại", "Mã", "Mô tả", "Trạng thái", "Thao tác"].map(h => (
                                         <th key={h} className="px-4 py-3 text-xs font-semibold text-[#687582] uppercase">{h}</th>
                                     ))}
                                 </tr></thead>
                                 <tbody>
                                     {loadingCat ? (
-                                        <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-[#687582]">Đang tải...</td></tr>
+                                        <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-[#687582]">Đang tải...</td></tr>
                                     ) : categories.map(cat => (
                                         <tr key={cat.id} className="border-b border-[#dde0e4] dark:border-[#2d353e] hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                                             <td className="px-4 py-3 text-sm font-semibold text-[#121417] dark:text-white">{cat.name}</td>
@@ -181,6 +283,20 @@ export default function AdminNotifications() {
                                                 <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${cat.isActive ? "bg-green-50 text-green-600 dark:bg-green-900/20" : "bg-gray-100 text-gray-500 dark:bg-gray-700"}`}>
                                                     {cat.isActive ? "Đang bật" : "Tắt"}
                                                 </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-1">
+                                                    <button onClick={() => openEditCat(cat)}
+                                                        aria-label="Sửa loại thông báo"
+                                                        className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-[#687582] hover:text-[#3C81C6] transition-colors" title="Sửa">
+                                                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                                                    </button>
+                                                    <button onClick={() => handleDeleteCat(cat.id)}
+                                                        aria-label="Xóa loại thông báo"
+                                                        className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-[#687582] hover:text-red-500 transition-colors" title="Xóa">
+                                                        <span className="material-symbols-outlined text-[16px]">delete</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -195,7 +311,7 @@ export default function AdminNotifications() {
                     <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
                         <div className="p-4 border-b border-[#dde0e4] dark:border-[#2d353e] flex items-center justify-between">
                             <p className="text-sm font-semibold text-[#121417] dark:text-white">Mẫu thông báo ({templates.length})</p>
-                            <button onClick={() => setShowTplModal(true)}
+                            <button onClick={openCreateTpl}
                                 className="flex items-center gap-1.5 px-3 py-2 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-medium transition-colors">
                                 <span className="material-symbols-outlined text-[18px]">add</span>Thêm mẫu
                             </button>
@@ -222,10 +338,104 @@ export default function AdminNotifications() {
                                                 </div>
                                             )}
                                         </div>
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            <button onClick={() => openEditTpl(tpl)}
+                                                aria-label="Sửa mẫu thông báo"
+                                                className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-[#687582] hover:text-[#3C81C6] transition-colors" title="Sửa">
+                                                <span className="material-symbols-outlined text-[16px]">edit</span>
+                                            </button>
+                                            <button onClick={() => handleDeleteTpl(tpl.id)}
+                                                aria-label="Xóa mẫu thông báo"
+                                                className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-[#687582] hover:text-red-500 transition-colors" title="Xóa">
+                                                <span className="material-symbols-outlined text-[16px]">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {/* ===== Tab: Role Configs ===== */}
+                {activeTab === "roleconfigs" && (
+                    <div className="bg-white dark:bg-[#1e242b] rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
+                        <div className="p-4 border-b border-[#dde0e4] dark:border-[#2d353e]">
+                            <p className="text-sm font-semibold text-[#121417] dark:text-white">Cấu hình thông báo theo vai trò</p>
+                            <p className="text-xs text-[#687582] mt-0.5">Bật/tắt từng loại thông báo cho từng nhóm người dùng</p>
+                        </div>
+                        {loadingRc ? (
+                            <div className="p-8 text-center text-sm text-[#687582]">Đang tải...</div>
+                        ) : roleConfigs.length === 0 ? (
+                            <div className="p-8 text-center">
+                                <span className="material-symbols-outlined text-4xl text-[#b0b8c1] block mb-3">manage_accounts</span>
+                                <p className="text-sm text-[#687582]">Chưa có cấu hình role. Backend sẽ trả về dữ liệu sau khi kết nối.</p>
+                                <div className="mt-4 overflow-x-auto">
+                                    <table className="mx-auto border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-xs">
+                                        <thead>
+                                            <tr className="bg-gray-50 dark:bg-gray-800">
+                                                <th className="px-4 py-2 text-left text-[#687582]">Vai trò</th>
+                                                {categories.slice(0, 4).map(c => (
+                                                    <th key={c.id} className="px-4 py-2 text-center text-[#687582]">{c.name}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {ALL_ROLES.map(role => (
+                                                <tr key={role} className="border-t border-[#dde0e4] dark:border-[#2d353e]">
+                                                    <td className="px-4 py-2 font-medium text-[#121417] dark:text-white">{ROLE_LABELS[role]}</td>
+                                                    {categories.slice(0, 4).map(c => (
+                                                        <td key={c.id} className="px-4 py-2 text-center">
+                                                            <button
+                                                                onClick={() => handleToggleRoleConfig(role, c.id, false)}
+                                                                className="w-8 h-5 rounded-full bg-gray-200 dark:bg-gray-700 relative transition-colors hover:bg-[#3C81C6]/50"
+                                                                title="Click để bật">
+                                                                <span className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" />
+                                                            </button>
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto p-4">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-50 dark:bg-gray-800">
+                                            <th className="px-4 py-2 text-left text-[#687582] text-xs font-semibold">Vai trò</th>
+                                            {categories.map(c => (
+                                                <th key={c.id} className="px-4 py-2 text-center text-[#687582] text-xs font-semibold">{c.name}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {roleConfigs.map((rc: any) => (
+                                            <tr key={rc.roleId ?? rc.role} className="border-t border-[#dde0e4] dark:border-[#2d353e]">
+                                                <td className="px-4 py-3 font-medium text-[#121417] dark:text-white">
+                                                    {ROLE_LABELS[rc.roleId ?? rc.role] ?? rc.roleId ?? rc.role}
+                                                </td>
+                                                {categories.map(c => {
+                                                    const config = (rc.categories ?? []).find((x: any) => x.categoryId === c.id || x.categoryCode === c.code);
+                                                    const enabled = config?.enabled ?? false;
+                                                    return (
+                                                        <td key={c.id} className="px-4 py-3 text-center">
+                                                            <button
+                                                                onClick={() => handleToggleRoleConfig(rc.roleId ?? rc.role, c.id, enabled)}
+                                                                className={`w-10 h-6 rounded-full relative transition-colors ${enabled ? 'bg-[#3C81C6]' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                                                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${enabled ? 'left-5' : 'left-1'}`} />
+                                                            </button>
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -237,7 +447,7 @@ export default function AdminNotifications() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Tiêu đề *</label>
-                                    <input type="text" value={bcForm.title} onChange={e => setBcForm(p => ({ ...p, title: e.target.value }))} placeholder="VD: Thông báo bảo trì hệ thống"
+                                    <input type="text" value={bcForm.title} onChange={e => setBcForm(p => ({ ...p, title: e.target.value }))} aria-label="Tiêu đề thông báo" placeholder="VD: Thông báo bảo trì hệ thống"
                                         className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                 </div>
                                 <div>
@@ -284,22 +494,24 @@ export default function AdminNotifications() {
                 )}
             </div>
 
-            {/* Modal tạo Category */}
+            {/* Modal Category */}
             {showCatModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCatModal(false)}>
                     <div className="bg-white dark:bg-[#1e242b] rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-[#dde0e4] dark:border-[#2d353e]">
-                            <h2 className="text-base font-bold text-[#121417] dark:text-white">Tạo loại thông báo mới</h2>
+                            <h2 className="text-base font-bold text-[#121417] dark:text-white">
+                                {editingCat ? "Sửa loại thông báo" : "Tạo loại thông báo mới"}
+                            </h2>
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Tên loại *</label>
-                                <input type="text" value={catForm.name} onChange={e => setCatForm(p => ({ ...p, name: e.target.value }))} placeholder="VD: Lịch hẹn"
+                                <input type="text" value={catForm.name} onChange={e => setCatForm(p => ({ ...p, name: e.target.value }))} aria-label="Tên loại thông báo" placeholder="VD: Lịch hẹn"
                                     className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white focus:ring-2 focus:ring-[#3C81C6]/20" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Mã (code) *</label>
-                                <input type="text" value={catForm.code} onChange={e => setCatForm(p => ({ ...p, code: e.target.value.toUpperCase().replace(/\s/g, "_") }))} placeholder="VD: APPOINTMENT"
+                                <input type="text" value={catForm.code} onChange={e => setCatForm(p => ({ ...p, code: e.target.value.toUpperCase().replace(/\s/g, "_") }))} aria-label="Mã loại thông báo" placeholder="VD: APPOINTMENT"
                                     className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm font-mono outline-none dark:text-white focus:ring-2 focus:ring-[#3C81C6]/20" />
                             </div>
                             <div>
@@ -310,26 +522,29 @@ export default function AdminNotifications() {
                         </div>
                         <div className="p-6 border-t border-[#dde0e4] dark:border-[#2d353e] flex justify-end gap-3">
                             <button onClick={() => setShowCatModal(false)} className="px-4 py-2 text-sm text-[#687582] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl">Hủy</button>
-                            <button onClick={handleCreateCategory} disabled={savingCat}
+                            <button onClick={handleSaveCategory} disabled={savingCat}
                                 className="px-5 py-2 bg-[#3C81C6] hover:bg-[#2a6da8] text-white text-sm font-bold rounded-xl disabled:opacity-40">
-                                {savingCat ? "Đang lưu..." : "Tạo loại"}
+                                {savingCat ? "Đang lưu..." : editingCat ? "Cập nhật" : "Tạo loại"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Modal tạo Template */}
+            {/* Modal Template */}
             {showTplModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowTplModal(false)}>
                     <div className="bg-white dark:bg-[#1e242b] rounded-2xl shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-[#dde0e4] dark:border-[#2d353e]">
-                            <h2 className="text-base font-bold text-[#121417] dark:text-white">Tạo mẫu thông báo mới</h2>
+                            <h2 className="text-base font-bold text-[#121417] dark:text-white">
+                                {editingTpl ? "Sửa mẫu thông báo" : "Tạo mẫu thông báo mới"}
+                            </h2>
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Loại thông báo</label>
                                 <select value={tplForm.categoryId} onChange={e => setTplForm(p => ({ ...p, categoryId: e.target.value }))}
+                                    aria-label="Loại thông báo"
                                     className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white">
                                     <option value="">-- Chọn loại --</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -337,7 +552,7 @@ export default function AdminNotifications() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Tên mẫu *</label>
-                                <input type="text" value={tplForm.name} onChange={e => setTplForm(p => ({ ...p, name: e.target.value }))} placeholder="VD: Xác nhận lịch hẹn"
+                                <input type="text" value={tplForm.name} onChange={e => setTplForm(p => ({ ...p, name: e.target.value }))} aria-label="Tên mẫu thông báo" placeholder="VD: Xác nhận lịch hẹn"
                                     className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white focus:ring-2 focus:ring-[#3C81C6]/20" />
                             </div>
                             <div>
@@ -352,15 +567,15 @@ export default function AdminNotifications() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1">Biến động (ngăn bởi dấu phẩy)</label>
-                                <input type="text" value={tplForm.variables} onChange={e => setTplForm(p => ({ ...p, variables: e.target.value }))} placeholder="VD: patientName, date, time"
+                                <input type="text" value={tplForm.variables} onChange={e => setTplForm(p => ({ ...p, variables: e.target.value }))} aria-label="Biến động" placeholder="VD: patientName, date, time"
                                     className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm font-mono outline-none dark:text-white" />
                             </div>
                         </div>
                         <div className="p-6 border-t border-[#dde0e4] dark:border-[#2d353e] flex justify-end gap-3">
                             <button onClick={() => setShowTplModal(false)} className="px-4 py-2 text-sm text-[#687582] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl">Hủy</button>
-                            <button onClick={handleCreateTemplate} disabled={savingTpl}
+                            <button onClick={handleSaveTemplate} disabled={savingTpl}
                                 className="px-5 py-2 bg-[#3C81C6] hover:bg-[#2a6da8] text-white text-sm font-bold rounded-xl disabled:opacity-40">
-                                {savingTpl ? "Đang lưu..." : "Tạo mẫu"}
+                                {savingTpl ? "Đang lưu..." : editingTpl ? "Cập nhật" : "Tạo mẫu"}
                             </button>
                         </div>
                     </div>

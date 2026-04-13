@@ -17,29 +17,9 @@ interface Hospital {
     departmentCount: number;
 }
 
-const MOCK_HOSPITALS: Hospital[] = [
-    {
-        id: "1", name: "E-Health Quận 1", code: "CS-001",
-        address: "123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM",
-        phone: "028 3822 1234", email: "q1@ehealth.vn", type: "Phòng khám đa khoa",
-        status: "active", doctorCount: 25, departmentCount: 8,
-    },
-    {
-        id: "2", name: "E-Health Quận 7", code: "CS-002",
-        address: "456 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM",
-        phone: "028 3773 5678", email: "q7@ehealth.vn", type: "Phòng khám đa khoa",
-        status: "active", doctorCount: 18, departmentCount: 6,
-    },
-    {
-        id: "3", name: "E-Health Thủ Đức", code: "CS-003",
-        address: "789 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức",
-        phone: "028 3896 9012", email: "td@ehealth.vn", type: "Phòng khám chuyên khoa",
-        status: "inactive", doctorCount: 10, departmentCount: 4,
-    },
-];
 
 export default function HospitalsPage() {
-    const [hospitals, setHospitals] = useState<Hospital[]>(MOCK_HOSPITALS);
+    const [hospitals, setHospitals] = useState<Hospital[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -61,7 +41,7 @@ export default function HospitalsPage() {
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filtered = hospitals.filter(
@@ -75,7 +55,9 @@ export default function HospitalsPage() {
                     <h1 className="text-3xl font-black tracking-tight text-[#121417] dark:text-white">Cơ sở y tế</h1>
                     <p className="text-[#687582] dark:text-gray-400">Quản lý các chi nhánh và cơ sở y tế</p>
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200 dark:shadow-none transition-all">
+                <button
+                    onClick={() => alert("Liên hệ Admin hệ thống để thêm cơ sở mới")}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3C81C6] hover:bg-[#2a6da8] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-200 dark:shadow-none transition-all">
                     <span className="material-symbols-outlined text-[20px]">add_business</span>
                     Thêm cơ sở mới
                 </button>

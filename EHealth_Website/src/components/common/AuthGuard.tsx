@@ -1,6 +1,6 @@
 /**
  * Auth Guard Component
- * Chặn truy cập trái phép bằng cách kiểm tra role từ localStorage
+ * Chặn truy cập trái phép bằng cách kiểm tra roles[] từ localStorage
  * Nếu user chưa đăng nhập → redirect về /login
  * Nếu user không đúng role → redirect về /403
  */
@@ -35,10 +35,20 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
                 }
 
                 const user = JSON.parse(userStr);
-                const userRole = (user.role || "").toLowerCase();
 
-                // Không đúng role → về 403
-                if (!allowedRoles.includes(userRole)) {
+                // Lấy tất cả roles của user (hỗ trợ cả roles[] lẫn role đơn cũ)
+                let userRoles: string[] = [];
+                if (Array.isArray(user.roles) && user.roles.length > 0) {
+                    userRoles = user.roles.map((r: string) => r.toLowerCase());
+                } else if (user.role) {
+                    userRoles = [user.role.toLowerCase()];
+                }
+
+                // Kiểm tra xem user có ít nhất 1 role trong allowedRoles
+                const allowedLower = allowedRoles.map(r => r.toLowerCase());
+                const hasAccess = userRoles.some(r => allowedLower.includes(r));
+
+                if (!hasAccess) {
                     router.replace("/403");
                     return;
                 }

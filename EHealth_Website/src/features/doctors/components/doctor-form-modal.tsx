@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Modal } from "@/components/ui/modal";
 import { ROLES, ROLE_LABELS, type Role } from "@/constants/roles";
 import { UI_TEXT } from "@/constants/ui-text";
-import { MOCK_DEPARTMENTS } from "@/lib/mock-data/admin";
+import { getDepartments } from "@/services/departmentService";
 import type { Doctor } from "@/types";
 
 interface DoctorFormModalProps {
@@ -22,7 +22,20 @@ export function DoctorFormModal({
     initialData,
     mode,
 }: DoctorFormModalProps) {
-    const departments = MOCK_DEPARTMENTS;
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+
+    useEffect(() => {
+        getDepartments()
+            .then((res: any) => {
+                const items = res?.data?.data ?? res?.data ?? [];
+                const mapped = (Array.isArray(items) ? items : []).map((d: any) => ({
+                    id: d.id ?? d.department_id ?? "",
+                    name: d.name ?? d.department_name ?? "",
+                }));
+                setDepartments(mapped);
+            })
+            .catch(() => setDepartments([]));
+    }, []);
 
     const [formData, setFormData] = useState({
         fullName: initialData?.fullName || "",

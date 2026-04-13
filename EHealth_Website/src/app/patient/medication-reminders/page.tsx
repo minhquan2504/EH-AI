@@ -4,11 +4,8 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { usePageAIContext } from "@/hooks/usePageAIContext";
-import { MOCK_PATIENT_PROFILES, type PatientProfile } from "@/data/patient-profiles-mock";
-import {
-    MOCK_MEDICATION_REMINDERS, MOCK_MEDICATION_LOGS,
-    type MedicationReminder, type MedicationLog,
-} from "@/data/medication-reminders-mock";
+import type { PatientProfile } from "@/types/patient-profile";
+import type { MedicationReminder, MedicationLog } from "@/types/medication-reminder";
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from "@/utils/localStorage";
 import { validateRequired, validateDateRange } from "@/utils/validation";
 
@@ -52,26 +49,17 @@ export default function MedicationRemindersPage() {
     useEffect(() => {
         // Load profiles
         const storedProfiles = loadFromStorage<PatientProfile[]>(STORAGE_KEYS.PATIENT_PROFILES, []);
-        const activeProfiles = storedProfiles.length > 0
-            ? storedProfiles.filter(p => p.isActive)
-            : MOCK_PATIENT_PROFILES.filter(p => p.isActive);
+        const activeProfiles = storedProfiles.filter(p => p.isActive);
         setProfiles(activeProfiles);
         if (activeProfiles.length > 0) {
             setSelectedProfileId(activeProfiles[0].id);
         }
 
-        // Load reminders
+        // Load reminders từ localStorage
         const storedReminders = loadFromStorage<MedicationReminder[]>(STORAGE_KEYS.MEDICATION_REMINDERS, []);
         const storedLogs = loadFromStorage<MedicationLog[]>(STORAGE_KEYS.MEDICATION_LOGS, []);
-        if (storedReminders.length > 0) {
-            setReminders(storedReminders);
-            setLogs(storedLogs);
-        } else {
-            setReminders(MOCK_MEDICATION_REMINDERS);
-            setLogs(MOCK_MEDICATION_LOGS);
-            saveToStorage(STORAGE_KEYS.MEDICATION_REMINDERS, MOCK_MEDICATION_REMINDERS);
-            saveToStorage(STORAGE_KEYS.MEDICATION_LOGS, MOCK_MEDICATION_LOGS);
-        }
+        setReminders(storedReminders);
+        setLogs(storedLogs);
         setLoaded(true);
     }, []);
 

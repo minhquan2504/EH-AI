@@ -10,6 +10,7 @@ import { UserFormModal } from "@/features/users/components/user-form-modal";
 import { PermissionsModal } from "@/features/users/components/permissions-modal";
 import * as userService from "@/services/userService";
 import type { User } from "@/types";
+import { validateFile } from "@/utils/fileValidation";
 
 type SortField = "fullName" | "role" | "createdAt" | "lastAccess" | "status";
 type SortOrder = "asc" | "desc";
@@ -102,23 +103,37 @@ export default function UsersPage() {
         }
     };
 
-    // Export to CSV
-    const handleExport = () => {
-        const headers = ["Họ tên", "Email", "Vai trò", "Ngày tạo", "Trạng thái"];
-        const rows = filteredUsers.map((u) => [
-            u.fullName,
-            u.email,
-            ROLE_LABELS[u.role as Role],
-            u.createdAt,
-            u.status,
-        ]);
-        const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `users_${new Date().toISOString().split("T")[0]}.csv`;
-        link.click();
+    // Export Excel từ API
+    const handleExport = async () => {
+        try {
+            const blob = await userService.exportUsers({
+                role: roleFilter !== "all" ? roleFilter : undefined,
+                search: searchQuery || undefined,
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `users_${new Date().toISOString().split("T")[0]}.xlsx`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            // Fallback: export CSV từ dữ liệu hiện có
+            const headers = ["Họ tên", "Email", "Vai trò", "Ngày tạo", "Trạng thái"];
+            const rows = filteredUsers.map((u) => [
+                u.fullName,
+                u.email,
+                ROLE_LABELS[u.role as Role],
+                u.createdAt,
+                u.status,
+            ]);
+            const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `users_${new Date().toISOString().split("T")[0]}.csv`;
+            link.click();
+        }
     };
 
     // Handlers
@@ -146,15 +161,20 @@ export default function UsersPage() {
     const handleLockUser = async (userId: string) => {
         const user = users.find(u => u.id === userId);
         if (!user) return;
-        const newStatus = user.status === USER_STATUS.LOCKED ? USER_STATUS.ACTIVE : USER_STATUS.LOCKED;
+        const isLocked = user.status === USER_STATUS.LOCKED;
         try {
-            await userService.updateUserStatus(userId, { status: newStatus });
+            if (isLocked) {
+                await userService.unlockUser(userId);
+            } else {
+                await userService.lockUser(userId);
+            }
+            const newStatus = isLocked ? USER_STATUS.ACTIVE : USER_STATUS.LOCKED;
             setUsers((prev) =>
                 prev.map((u) => u.id === userId ? { ...u, status: newStatus } : u)
             );
-        } catch (err) {
+        } catch (err: any) {
             console.error('Cập nhật trạng thái thất bại:', err);
-            alert('Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+            alert(err?.message || 'Cập nhật trạng thái thất bại. Vui lòng thử lại.');
         }
     };
 
@@ -232,10 +252,37 @@ export default function UsersPage() {
                     <label className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-[#1e242b] border border-[#dde0e4] dark:border-[#2d353e] text-[#121417] dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
                         <span className="material-symbols-outlined text-[20px]">upload</span>
                         Import
-                        <input type="file" accept=".csv,.xlsx" className="hidden" onChange={(e) => {
+                        <input type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={async (e) => {
                             const file = e.target.files?.[0];
-                            if (file) alert(`Đã chọn file: ${file.name}. Chức năng import sẽ được xử lý.`);
+                            if (!file) return;
                             e.target.value = "";
+                            const validation = validateFile(file, { maxSize: 5 * 1024 * 1024, allowedTypes: ["csv", "xlsx", "xls"] });
+                            if (!validation.valid) { alert(validation.message); return; }
+                            try {
+                                const res = await userService.importUsers(file);
+                                const count = res?.data?.count ?? res?.count ?? "nhiều";
+                                alert(`Import thành công ${count} người dùng.`);
+                                // Reload danh sách
+                                setIsDataLoading(true);
+                                const reloadRes: any = await userService.getUsers({ limit: 100 });
+                                const items = reloadRes?.data?.items ?? reloadRes?.items ?? reloadRes?.data?.data ?? reloadRes?.data ?? reloadRes ?? [];
+                                if (Array.isArray(items)) {
+                                    setUsers(items.map((u: Record<string, unknown>) => ({
+                                        id: u.users_id ?? u.id ?? "",
+                                        fullName: (u as any).profile?.full_name ?? u.full_name ?? u.fullName ?? u.email ?? "",
+                                        email: u.email ?? "",
+                                        phone: u.phone ?? u.phone_number ?? "",
+                                        role: Array.isArray(u.roles) && (u.roles as string[]).length > 0 ? (u.roles as string[])[0].toLowerCase() : "staff",
+                                        status: u.status ?? "ACTIVE",
+                                        avatar: (u as any).profile?.avatar_url ?? u.avatar ?? "",
+                                        createdAt: u.created_at ?? u.createdAt ?? "",
+                                    })) as unknown as User[]);
+                                }
+                            } catch (err: any) {
+                                alert(err?.message || "Import thất bại. Vui lòng kiểm tra định dạng file và thử lại.");
+                            } finally {
+                                setIsDataLoading(false);
+                            }
                         }} />
                     </label>
                     <button

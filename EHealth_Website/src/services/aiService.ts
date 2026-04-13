@@ -1,5 +1,66 @@
 import axiosClient from '@/api/axiosClient';
 import { AI_ENDPOINTS } from '@/api/endpoints';
+
+// ============================================
+// Health Chat endpoints (local constants — không có trong endpoints.ts)
+// ============================================
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+const HC = {
+    SESSIONS: '/api/ai/health-chat/sessions',
+    SESSION: (id: string) => `/api/ai/health-chat/sessions/${id}`,
+    MESSAGES: (id: string) => `/api/ai/health-chat/sessions/${id}/messages`,
+    MESSAGES_STREAM: (id: string) => `/api/ai/health-chat/sessions/${id}/messages/stream`,
+    COMPLETE: (id: string) => `/api/ai/health-chat/sessions/${id}/complete`,
+    ANALYTICS_TOKENS: '/api/ai/health-chat/analytics/tokens',
+};
+
+const RAG = {
+    UPLOAD: '/api/ai/rag/documents/upload',
+    DOCUMENTS: '/api/ai/rag/documents',
+    SEARCH: '/api/ai/rag/search',
+};
+
+// ============================================
+// Types cho Health Chat
+// ============================================
+
+export interface HealthChatSession {
+    id: string;
+    title?: string;
+    status?: 'active' | 'completed';
+    createdAt?: string;
+    updatedAt?: string;
+    messageCount?: number;
+}
+
+export interface HealthChatMessage {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    createdAt?: string;
+    tokens?: number;
+}
+
+export interface HealthChatSendResponse {
+    message: HealthChatMessage;
+    sessionId: string;
+}
+
+export interface RAGDocument {
+    id: string;
+    name: string;
+    size?: number;
+    createdAt?: string;
+    status?: string;
+}
+
+export interface RAGSearchResult {
+    content: string;
+    score: number;
+    documentId?: string;
+    documentName?: string;
+}
 import type {
     AISuggestion,
     AIDiagnosisSuggestion,
@@ -265,4 +326,112 @@ export const aiService = {
     /** Role bridge summary (handoff between roles) */
     getRoleBridgeSummary: (data: { fromRole: string; toRole: string; patientId: string }) =>
         axiosClient.post(AI_ENDPOINTS.ANALYZE, { type: 'role_bridge', ...data }),
+
+    // ============================================
+    // AI Health Chat Session API
+    // ============================================
+
+    /** Tạo session mới — POST /api/ai/health-chat/sessions */
+    createHealthChatSession: (data?: { title?: string; patientId?: string; context?: Record<string, unknown> }) =>
+        axiosClient.post<{ data: HealthChatSession }>(HC.SESSIONS, data ?? {}),
+
+    /** Lấy danh sách sessions của user — GET /api/ai/health-chat/sessions */
+    getHealthChatSessions: (params?: { page?: number; limit?: number }) =>
+        axiosClient.get<{ data: HealthChatSession[]; pagination?: any }>(HC.SESSIONS, { params }),
+
+    /** Lấy chi tiết session — GET /api/ai/health-chat/sessions/:id */
+    getHealthChatSession: (sessionId: string) =>
+        axiosClient.get<{ data: HealthChatSession & { messages: HealthChatMessage[] } }>(HC.SESSION(sessionId)),
+
+    /** Cập nhật session — PUT /api/ai/health-chat/sessions/:id */
+    updateHealthChatSession: (sessionId: string, data: { title?: string }) =>
+        axiosClient.put(HC.SESSION(sessionId), data),
+
+    /** Gửi tin nhắn (JSON) — POST /api/ai/health-chat/sessions/:id/messages */
+    sendHealthChatMessage: (sessionId: string, data: { content: string; context?: Record<string, unknown> }) =>
+        axiosClient.post<{ data: HealthChatSendResponse }>(HC.MESSAGES(sessionId), data),
+
+    /** Kết thúc session — POST /api/ai/health-chat/sessions/:id/complete */
+    completeHealthChatSession: (sessionId: string) =>
+        axiosClient.post(HC.COMPLETE(sessionId)),
+
+    /** Xóa session — DELETE /api/ai/health-chat/sessions/:id */
+    deleteHealthChatSession: (sessionId: string) =>
+        axiosClient.delete(HC.SESSION(sessionId)),
+
+    /** Thống kê token (admin) — GET /api/ai/health-chat/analytics/tokens */
+    getTokenAnalytics: (params?: { from?: string; to?: string }) =>
+        axiosClient.get(HC.ANALYTICS_TOKENS, { params }),
+
+    /**
+     * Gửi tin nhắn với SSE streaming — POST .../messages/stream
+     * Trả về async generator từng chunk text
+     */
+    sendHealthChatMessageStream: async function* (
+        sessionId: string,
+        data: { content: string; context?: Record<string, unknown> },
+        token?: string,
+    ): AsyncGenerator<string> {
+        const authToken = token ?? (typeof window !== 'undefined' ? localStorage.getItem('accessToken') ?? localStorage.getItem('token') : null);
+        const response = await fetch(`${BASE_URL}${HC.MESSAGES_STREAM(sessionId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream',
+                ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok || !response.body) {
+            throw new Error(`Stream error: ${response.status}`);
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const raw = line.slice(6).trim();
+                    if (raw === '[DONE]') return;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        const chunk: string = parsed?.delta ?? parsed?.content ?? parsed?.text ?? parsed?.message ?? '';
+                        if (chunk) yield chunk;
+                    } catch {
+                        // chunk không phải JSON — yield thẳng
+                        if (raw) yield raw;
+                    }
+                }
+            }
+        }
+    },
+
+    // ============================================
+    // AI RAG
+    // ============================================
+
+    /** Upload tài liệu RAG — POST /api/ai/rag/documents/upload */
+    uploadRAGDocument: (file: File, metadata?: Record<string, string>) => {
+        const form = new FormData();
+        form.append('file', file);
+        if (metadata) {
+            Object.entries(metadata).forEach(([k, v]) => form.append(k, v));
+        }
+        return axiosClient.post<{ data: RAGDocument }>(RAG.UPLOAD, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    },
+
+    /** Lấy danh sách tài liệu RAG — GET /api/ai/rag/documents */
+    getRAGDocuments: (params?: { page?: number; limit?: number }) =>
+        axiosClient.get<{ data: RAGDocument[] }>(RAG.DOCUMENTS, { params }),
+
+    /** Tìm kiếm knowledge base — POST /api/ai/rag/search */
+    searchRAG: (data: { query: string; topK?: number; threshold?: number }) =>
+        axiosClient.post<{ data: RAGSearchResult[] }>(RAG.SEARCH, data),
 };

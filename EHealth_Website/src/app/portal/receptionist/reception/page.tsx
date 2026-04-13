@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getPatients, createPatient } from "@/services/patientService";
-import { createAppointment } from "@/services/appointmentService";
+import { createAppointment, doctorAvailabilityService } from "@/services/appointmentService";
 import { getDepartments } from "@/services/departmentService";
 import { AITriageAssistant } from "@/components/portal/ai";
 import { AISchedulingOptimizer } from "@/components/portal/ai";
@@ -16,27 +16,7 @@ const WIZARD_STEPS = [
     { key: "confirm", label: "Xác nhận", icon: "verified" },
 ];
 
-const MOCK_DEPARTMENTS = [
-    { id: "1", name: "Nội khoa", doctors: ["BS. Trần Minh", "BS. Lê Hoa"] },
-    { id: "2", name: "Da liễu", doctors: ["BS. Phạm Hoa"] },
-    { id: "3", name: "Tim mạch", doctors: ["BS. Ngô Đức", "BS. Hoàng Anh"] },
-    { id: "4", name: "Nhi khoa", doctors: ["BS. Lý Thanh"] },
-    { id: "5", name: "Tai mũi họng", doctors: ["BS. Vũ Nam"] },
-];
 type DeptItem = { id: string; name: string; doctors: string[] };
-
-const TIME_SLOTS = [
-    { time: "08:00", available: false }, { time: "08:30", available: true }, { time: "09:00", available: true },
-    { time: "09:30", available: true }, { time: "10:00", available: false }, { time: "10:30", available: true },
-    { time: "11:00", available: true }, { time: "13:30", available: true }, { time: "14:00", available: true },
-    { time: "14:30", available: false }, { time: "15:00", available: true }, { time: "15:30", available: true },
-];
-
-const MOCK_FOUND_PATIENT = {
-    id: "BN-24902", name: "Trần Văn Bình", age: 56, gender: "Nam",
-    phone: "0912 345 678", address: "123 Lê Lợi, Q.1, TP.HCM",
-    insurance: "HS401012345", lastVisit: "20/01/2025",
-};
 
 export default function ReceptionPage() {
     usePageAIContext({ pageKey: 'reception' });
@@ -44,7 +24,7 @@ export default function ReceptionPage() {
     const [step, setStep] = useState(0);
     const [searchType, setSearchType] = useState<"phone" | "cccd" | "bhyt">("phone");
     const [searchQuery, setSearchQuery] = useState("");
-    const [foundPatient, setFoundPatient] = useState<typeof MOCK_FOUND_PATIENT | null>(null);
+    const [foundPatient, setFoundPatient] = useState<{ id: string; name: string; age: number; gender: string; phone: string; address: string; insurance: string; lastVisit: string } | null>(null);
     const [isNewPatient, setIsNewPatient] = useState(false);
     const [searching, setSearching] = useState(false);
     const [newPatient, setNewPatient] = useState({ name: "", phone: "", gender: "male", age: "", address: "", insurance: "" });
@@ -52,27 +32,46 @@ export default function ReceptionPage() {
     const [serviceType, setServiceType] = useState("regular");
     const [selectedDoctor, setSelectedDoctor] = useState("");
     const [selectedSlot, setSelectedSlot] = useState("");
+    const [apiSlots, setApiSlots] = useState<{ time: string; available: boolean }[]>([]);
     const [reason, setReason] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
-    const [departments, setDepartments] = useState<DeptItem[]>(MOCK_DEPARTMENTS);
+    const [departments, setDepartments] = useState<DeptItem[]>([]);
 
     useEffect(() => {
         getDepartments()
             .then(res => {
                 const items: any[] = (res as any)?.data?.data ?? (res as any)?.data ?? res ?? [];
-                if (Array.isArray(items) && items.length > 0) {
-                    setDepartments(items.map((d: any) => ({
-                        id: d.id ?? d._id ?? String(d.departmentId ?? ""),
-                        name: d.name ?? d.departmentName ?? "",
-                        doctors: d.doctors?.map((doc: any) => doc.fullName ?? doc.name ?? doc) ?? [],
-                    })));
-                }
+                setDepartments(items.map((d: any) => ({
+                    id: d.id ?? d._id ?? String(d.departmentId ?? ""),
+                    name: d.name ?? d.departmentName ?? "",
+                    doctors: d.doctors?.map((doc: any) => doc.fullName ?? doc.name ?? doc) ?? [],
+                })));
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => setDepartments([]));
     }, []);
 
     const dept = departments.find(d => d.id === selectedDept);
+
+    // Load available slots when doctor selected
+    useEffect(() => {
+        if (!selectedDoctor) { setApiSlots([]); return; }
+        const today = new Date().toISOString().split("T")[0];
+        // Find doctorId from department staff list (bestcaffort)
+        const deptObj = departments.find(d => d.id === selectedDept);
+        const doctorId = (deptObj?.doctors as any[])?.find((doc: any) => (doc.fullName ?? doc.name ?? doc) === selectedDoctor)?.id ?? "";
+        if (!doctorId) return;
+        doctorAvailabilityService.getSlots({ doctorId, date: today })
+            .then((slots: any[]) => {
+                if (slots.length > 0) {
+                    setApiSlots(slots.map((s: any) => ({
+                        time: s.startTime ?? s.time ?? "",
+                        available: s.available !== false && (s.bookedCount ?? 0) < (s.maxPatients ?? 999),
+                    })).filter(s => s.time));
+                }
+            })
+            .catch(() => { setApiSlots([]); });
+    }, [selectedDoctor, selectedDept]);
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) return;
@@ -98,14 +97,8 @@ export default function ReceptionPage() {
                 setIsNewPatient(true);
             }
         } catch {
-            // Fallback to mock search behavior
-            if (searchQuery.includes("123") || searchQuery.includes("0912")) {
-                setFoundPatient(MOCK_FOUND_PATIENT);
-                setIsNewPatient(false);
-            } else {
-                setFoundPatient(null);
-                setIsNewPatient(true);
-            }
+            setFoundPatient(null);
+            setIsNewPatient(true);
         } finally {
             setSearching(false);
         }
@@ -226,6 +219,7 @@ export default function ReceptionPage() {
                             <div className="relative flex-1">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#687582] text-[20px]">search</span>
                                 <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSearch()}
+                                    aria-label="Tìm kiếm bệnh nhân"
                                     placeholder={`Nhập ${searchType === "phone" ? "số điện thoại" : searchType === "cccd" ? "số CCCD" : "số BHYT"}...`}
                                     className="w-full pl-10 pr-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                             </div>
@@ -255,19 +249,20 @@ export default function ReceptionPage() {
                                     <p className="text-xs text-blue-700 dark:text-blue-400">Không tìm thấy hồ sơ. Vui lòng nhập thông tin bệnh nhân mới.</p>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <input type="text" value={newPatient.name} onChange={e => setNewPatient(p => ({ ...p, name: e.target.value }))} placeholder="Họ và tên *"
+                                    <input type="text" value={newPatient.name} onChange={e => setNewPatient(p => ({ ...p, name: e.target.value }))} aria-label="Họ và tên" placeholder="Họ và tên *"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
-                                    <input type="text" value={newPatient.phone} onChange={e => setNewPatient(p => ({ ...p, phone: e.target.value }))} placeholder="Số điện thoại *"
+                                    <input type="text" value={newPatient.phone} onChange={e => setNewPatient(p => ({ ...p, phone: e.target.value }))} aria-label="Số điện thoại" placeholder="Số điện thoại *"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                     <select value={newPatient.gender} onChange={e => setNewPatient(p => ({ ...p, gender: e.target.value }))}
+                                        aria-label="Giới tính"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white">
                                         <option value="male">Nam</option><option value="female">Nữ</option>
                                     </select>
-                                    <input type="text" value={newPatient.age} onChange={e => setNewPatient(p => ({ ...p, age: e.target.value }))} placeholder="Tuổi"
+                                    <input type="text" value={newPatient.age} onChange={e => setNewPatient(p => ({ ...p, age: e.target.value }))} aria-label="Tuổi" placeholder="Tuổi"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white" />
-                                    <input type="text" value={newPatient.insurance} onChange={e => setNewPatient(p => ({ ...p, insurance: e.target.value }))} placeholder="Số BHYT"
+                                    <input type="text" value={newPatient.insurance} onChange={e => setNewPatient(p => ({ ...p, insurance: e.target.value }))} aria-label="Số BHYT" placeholder="Số BHYT"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white col-span-2 sm:col-span-1" />
-                                    <input type="text" value={newPatient.address} onChange={e => setNewPatient(p => ({ ...p, address: e.target.value }))} placeholder="Địa chỉ"
+                                    <input type="text" value={newPatient.address} onChange={e => setNewPatient(p => ({ ...p, address: e.target.value }))} aria-label="Địa chỉ" placeholder="Địa chỉ"
                                         className="px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none dark:text-white sm:col-span-2" />
                                 </div>
                             </div>
@@ -301,7 +296,7 @@ export default function ReceptionPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Lý do khám</label>
-                            <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="VD: Đau bụng, sốt cao, tái khám..."
+                            <input type="text" value={reason} onChange={e => setReason(e.target.value)} aria-label="Lý do khám" placeholder="VD: Đau bụng, sốt cao, tái khám..."
                                 className="w-full px-4 py-2.5 bg-[#f8f9fa] dark:bg-[#13191f] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                         </div>
                         {/* AI Triage */}
@@ -335,8 +330,14 @@ export default function ReceptionPage() {
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-[#687582] mb-2">Khung giờ hôm nay</p>
+                                    {apiSlots.length === 0 && (
+                                        <p className="text-xs text-amber-600 mb-2 flex items-center gap-1">
+                                            <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>info</span>
+                                            Chưa có khung giờ — vui lòng chọn bác sĩ hoặc liên hệ phòng khám
+                                        </p>
+                                    )}
                                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                        {TIME_SLOTS.map(slot => (
+                                        {apiSlots.map(slot => (
                                             <button key={slot.time} onClick={() => slot.available && setSelectedSlot(slot.time)} disabled={!slot.available}
                                                 className={`py-2.5 rounded-xl text-sm font-medium transition-all ${selectedSlot === slot.time ? "bg-[#3C81C6] text-white shadow-md" : slot.available ? "bg-gray-50 dark:bg-gray-800 text-[#121417] dark:text-white hover:bg-gray-100" : "bg-gray-100 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed line-through"}`}>
                                                 {slot.time}

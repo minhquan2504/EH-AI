@@ -75,7 +75,9 @@ export const getRoles = async (): Promise<RoleData[]> => {
         const response = await axiosClient.get(ROLE_ENDPOINTS.LIST);
         return response.data.data || [];
     } catch (error) {
-        console.error('Lỗi lấy danh sách vai trò:', error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Lỗi lấy danh sách vai trò:', error);
+        }
         return [];
     }
 };
@@ -104,7 +106,9 @@ export const getRoleDetail = async (id: string): Promise<RoleData | null> => {
         const response = await axiosClient.get(ROLE_ENDPOINTS.DETAIL(id));
         return response.data.data || null;
     } catch (error) {
-        console.error('Lỗi lấy chi tiết vai trò:', error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Lỗi lấy chi tiết vai trò:', error);
+        }
         return null;
     }
 };
@@ -157,7 +161,9 @@ export const getPermissions = async (): Promise<PermissionGroup[]> => {
         const response = await axiosClient.get(PERMISSION_ENDPOINTS.LIST);
         return response.data.data || [];
     } catch (error) {
-        console.error('Lỗi lấy danh sách quyền:', error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Lỗi lấy danh sách quyền:', error);
+        }
         return [];
     }
 };

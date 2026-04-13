@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { UI_TEXT } from "@/constants/ui-text";
-import { MOCK_DOCTOR_PROFILE } from "@/lib/mock-data/doctor";
 import axiosClient from "@/api/axiosClient";
 import { PROFILE_ENDPOINTS } from "@/api/endpoints";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +14,10 @@ export default function SettingsPage() {
     const { user, updateUser } = useAuth();
     const toast = useToast();
     const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
-    const [profile, setProfile] = useState(MOCK_DOCTOR_PROFILE);
+    const [profile, setProfile] = useState<Record<string, any>>({
+        fullName: user?.fullName ?? "", email: user?.email ?? "",
+        phone: user?.phone ?? "", specialty: "", department: "",
+    });
     const [darkMode, setDarkMode] = useState(false);
     const [savingProfile, setSavingProfile] = useState(false);
     const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
@@ -29,7 +31,7 @@ export default function SettingsPage() {
                 const d = res?.data?.data ?? res?.data;
                 if (d) setProfile(prev => ({ ...prev, ...d, fullName: d.fullName ?? d.name ?? prev.fullName }));
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => {/* profile empty state */});
     }, []);
 
     const [notifications, setNotifications] = useState({
@@ -95,6 +97,7 @@ export default function SettingsPage() {
 
     return (
         <div className="p-6 md:p-8 h-full">
+            <h1 className="sr-only">Cài đặt tài khoản</h1>
             <div className="max-w-6xl mx-auto flex flex-col h-full gap-6">
                 {/* Page Header */}
                 <div>
@@ -257,6 +260,7 @@ export default function SettingsPage() {
                                         </label>
                                         <input
                                             type="password"
+                                            aria-label="Mật khẩu hiện tại"
                                             className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 focus:border-[#3C81C6] dark:text-white"
                                             placeholder="••••••••"
                                         />
@@ -267,6 +271,7 @@ export default function SettingsPage() {
                                         </label>
                                         <input
                                             type="password"
+                                            aria-label="Mật khẩu mới"
                                             className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 focus:border-[#3C81C6] dark:text-white"
                                             placeholder="••••••••"
                                         />
@@ -277,6 +282,7 @@ export default function SettingsPage() {
                                         </label>
                                         <input
                                             type="password"
+                                            aria-label="Xác nhận mật khẩu mới"
                                             className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 focus:border-[#3C81C6] dark:text-white"
                                             placeholder="••••••••"
                                         />

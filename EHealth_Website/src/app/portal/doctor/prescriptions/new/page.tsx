@@ -1,25 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { prescriptionService } from "@/services/prescriptionService";
 
-const MOCK_PATIENTS = [
-    { id: "BN001", name: "Nguyễn Văn An" }, { id: "BN002", name: "Trần Thị Bình" },
-    { id: "BN003", name: "Lê Hoàng Cường" }, { id: "BN004", name: "Phạm Thị Dung" },
-];
+interface PatientOption {
+    id: string;
+    name: string;
+}
 
 export default function NewPrescriptionPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formData, setFormData] = useState({
-        patientId: "", diagnosis: "", icdCode: "", notes: "",
+        patientId: "", patientName: "", diagnosis: "", icdCode: "", notes: "",
     });
     const [medicines, setMedicines] = useState([
         { name: "", dosage: "", frequency: "", duration: "", quantity: "", note: "" },
     ]);
+
+    // Patient search
+    const [patientQuery, setPatientQuery] = useState("");
+    const [patientResults, setPatientResults] = useState<PatientOption[]>([]);
+    const [patientSearching, setPatientSearching] = useState(false);
+    const patientDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Debounce tìm kiếm bệnh nhân
+    useEffect(() => {
+        if (!patientQuery || patientQuery.length < 2) {
+            setPatientResults([]);
+            return;
+        }
+        const timer = setTimeout(() => {
+            setPatientSearching(true);
+            prescriptionService.searchPatients(patientQuery)
+                .then(data => setPatientResults(Array.isArray(data) ? data : []))
+                .catch(() => setPatientResults([]))
+                .finally(() => setPatientSearching(false));
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [patientQuery]);
+
+    // Đóng dropdown khi click ngoài
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (patientDropdownRef.current && !patientDropdownRef.current.contains(e.target as Node)) {
+                setPatientResults([]);
+            }
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -65,17 +98,25 @@ export default function NewPrescriptionPage() {
         if (!validate()) return;
         setSaving(true);
         try {
-            await prescriptionService.create({
+            const result = await prescriptionService.create({
                 patientId: formData.patientId,
                 diagnosis: formData.diagnosis,
                 icdCode: formData.icdCode || undefined,
                 notes: formData.notes || undefined,
                 medications: medicines.filter((m) => m.name).map((m) => ({
                     name: m.name, dosage: m.dosage, frequency: m.frequency,
-                    duration: m.duration, quantity: m.quantity, note: m.note || undefined,
+                    duration: m.duration,
+                    quantity: m.quantity ? Number(m.quantity) : undefined,
+                    note: m.note || undefined,
                 })),
             });
-            router.push("/portal/doctor/prescriptions");
+            // Redirect sang detail page nếu có id, fallback về list
+            const prescId = result?.id ?? result?.prescriptionId;
+            if (prescId) {
+                router.push(`/portal/doctor/prescriptions`);
+            } else {
+                router.push("/portal/doctor/prescriptions");
+            }
         } catch {
             alert("Tạo đơn thuốc thất bại. Vui lòng thử lại.");
         } finally {
@@ -105,17 +146,61 @@ export default function NewPrescriptionPage() {
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {/* Thông tin bệnh nhân & chẩn đoán */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                        {/* Patient Search */}
+                        <div className="relative" ref={patientDropdownRef}>
                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Bệnh nhân *</label>
-                            <select name="patientId" value={formData.patientId} onChange={handleChange} className={`w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border ${errors.patientId ? "border-red-400" : "border-gray-200 dark:border-gray-700"} rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`}>
-                                <option value="">-- Chọn bệnh nhân --</option>
-                                {MOCK_PATIENTS.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.id})</option>)}
-                            </select>
+                            {formData.patientId ? (
+                                <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                                    <span className="material-symbols-outlined text-blue-500 text-[18px]">person</span>
+                                    <span className="text-sm font-medium text-[#121417] dark:text-white flex-1">{formData.patientName} <span className="text-xs text-[#687582]">({formData.patientId})</span></span>
+                                    <button type="button" onClick={() => setFormData(p => ({ ...p, patientId: "", patientName: "" }))}
+                                        className="text-gray-400 hover:text-red-500 transition-colors">
+                                        <span className="material-symbols-outlined text-[16px]">close</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={patientQuery}
+                                            onChange={(e) => setPatientQuery(e.target.value)}
+                                            aria-label="Tìm bệnh nhân"
+                                            placeholder="Nhập tên hoặc mã bệnh nhân..."
+                                            className={`w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border ${errors.patientId ? "border-red-400" : "border-gray-200 dark:border-gray-700"} rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white pr-8`}
+                                        />
+                                        {patientSearching && (
+                                            <div className="absolute right-3 top-3 w-4 h-4 border-2 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
+                                        )}
+                                    </div>
+                                    {patientResults.length > 0 && (
+                                        <div className="absolute z-20 mt-1 w-full bg-white dark:bg-[#1e242b] border border-[#dde0e4] dark:border-[#2d353e] rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                            {patientResults.map((p) => (
+                                                <button key={p.id} type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({ ...prev, patientId: p.id, patientName: p.name }));
+                                                        setPatientQuery("");
+                                                        setPatientResults([]);
+                                                        if (errors.patientId) setErrors(prev => ({ ...prev, patientId: "" }));
+                                                    }}
+                                                    className="w-full text-left px-4 py-2.5 hover:bg-[#f8f9fa] dark:hover:bg-[#13191f] text-sm border-b border-[#f0f0f0] dark:border-[#2d353e] last:border-0">
+                                                    <span className="font-medium text-[#121417] dark:text-white">{p.name}</span>
+                                                    <span className="text-xs text-[#687582] ml-2">({p.id})</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {patientQuery.length >= 2 && !patientSearching && patientResults.length === 0 && (
+                                        <p className="text-xs text-[#687582] mt-1">Không tìm thấy bệnh nhân</p>
+                                    )}
+                                </>
+                            )}
                             {errors.patientId && <p className="text-xs text-red-500 mt-1">{errors.patientId}</p>}
                         </div>
+
                         <div>
                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Mã ICD-10</label>
-                            <input type="text" name="icdCode" value={formData.icdCode} onChange={handleChange} placeholder="VD: J06.9" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
+                            <input type="text" name="icdCode" value={formData.icdCode} onChange={handleChange} aria-label="Mã ICD-10" placeholder="VD: J06.9" className="w-full py-2.5 px-4 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Chẩn đoán *</label>
@@ -147,26 +232,26 @@ export default function NewPrescriptionPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
-                                            <input type="text" placeholder="Tên thuốc *" value={med.name} onChange={(e) => handleMedicineChange(idx, "name", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_name`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
+                                            <input type="text" aria-label="Tên thuốc" placeholder="Tên thuốc *" value={med.name} onChange={(e) => handleMedicineChange(idx, "name", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_name`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
                                             {errors[`med_${idx}_name`] && <p className="text-xs text-red-500 mt-0.5">{errors[`med_${idx}_name`]}</p>}
                                         </div>
                                         <div>
-                                            <input type="text" placeholder="Liều lượng (VD: 500mg) *" value={med.dosage} onChange={(e) => handleMedicineChange(idx, "dosage", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_dosage`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
+                                            <input type="text" aria-label="Liều lượng" placeholder="Liều lượng (VD: 500mg) *" value={med.dosage} onChange={(e) => handleMedicineChange(idx, "dosage", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_dosage`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
                                             {errors[`med_${idx}_dosage`] && <p className="text-xs text-red-500 mt-0.5">{errors[`med_${idx}_dosage`]}</p>}
                                         </div>
                                         <div>
-                                            <input type="text" placeholder="Tần suất (VD: 2 lần/ngày) *" value={med.frequency} onChange={(e) => handleMedicineChange(idx, "frequency", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_frequency`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
+                                            <input type="text" aria-label="Tần suất dùng thuốc" placeholder="Tần suất (VD: 2 lần/ngày) *" value={med.frequency} onChange={(e) => handleMedicineChange(idx, "frequency", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_frequency`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
                                             {errors[`med_${idx}_frequency`] && <p className="text-xs text-red-500 mt-0.5">{errors[`med_${idx}_frequency`]}</p>}
                                         </div>
                                         <div>
-                                            <input type="text" placeholder="Số ngày dùng *" value={med.duration} onChange={(e) => handleMedicineChange(idx, "duration", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_duration`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
+                                            <input type="text" aria-label="Số ngày dùng thuốc" placeholder="Số ngày dùng *" value={med.duration} onChange={(e) => handleMedicineChange(idx, "duration", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_duration`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
                                             {errors[`med_${idx}_duration`] && <p className="text-xs text-red-500 mt-0.5">{errors[`med_${idx}_duration`]}</p>}
                                         </div>
                                         <div>
-                                            <input type="text" placeholder="Số lượng" value={med.quantity} onChange={(e) => handleMedicineChange(idx, "quantity", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_quantity`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
+                                            <input type="text" aria-label="Số lượng thuốc" placeholder="Số lượng" value={med.quantity} onChange={(e) => handleMedicineChange(idx, "quantity", e.target.value)} className={`w-full py-2 px-3 text-sm bg-white dark:bg-gray-900 border ${errors[`med_${idx}_quantity`] ? "border-red-400" : "border-gray-200 dark:border-gray-600"} rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white`} />
                                             {errors[`med_${idx}_quantity`] && <p className="text-xs text-red-500 mt-0.5">{errors[`med_${idx}_quantity`]}</p>}
                                         </div>
-                                        <input type="text" placeholder="Ghi chú (uống sau ăn...)" value={med.note} onChange={(e) => handleMedicineChange(idx, "note", e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
+                                        <input type="text" aria-label="Ghi chú thuốc" placeholder="Ghi chú (uống sau ăn...)" value={med.note} onChange={(e) => handleMedicineChange(idx, "note", e.target.value)} className="py-2 px-3 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white" />
                                     </div>
                                 </div>
                             ))}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { scheduleService } from "@/services/scheduleService";
+import { doctorAvailabilityService } from "@/services/appointmentService";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DaySlot {
@@ -34,20 +35,48 @@ export default function ManageSlotsPage() {
     useEffect(() => {
         if (!user?.id) return;
         const today = new Date();
-        const from = new Date(today); from.setDate(today.getDate() - today.getDay() + 1);
-        const to = new Date(from); to.setDate(from.getDate() + 6);
-        scheduleService.getByDoctor(user.id, { from: from.toISOString().split("T")[0], to: to.toISOString().split("T")[0] })
+        const nextWeekDate = new Date(today);
+        nextWeekDate.setDate(today.getDate() + 7);
+
+        // Ưu tiên doctor-availability API
+        doctorAvailabilityService.getSlots({
+            doctorId: user.id,
+            date: today.toISOString().split("T")[0],
+        })
             .then((data) => {
                 if (Array.isArray(data) && data.length > 0) {
                     const DAY_MAP: Record<string, string> = { "1": "Thứ 2", "2": "Thứ 3", "3": "Thứ 4", "4": "Thứ 5", "5": "Thứ 6", "6": "Thứ 7", "0": "Chủ nhật" };
-                    const enabledDays = new Set(data.map((s) => new Date(s.date).getDay().toString()));
+                    const enabledDays = new Set(data.map((s: any) => new Date(s.date ?? s.workDate ?? "").getDay().toString()));
                     setSlots((prev) => prev.map((s) => {
                         const dayNum = Object.entries(DAY_MAP).find(([, v]) => v === s.day)?.[0];
-                        return dayNum ? { ...s, enabled: enabledDays.has(dayNum) } : s;
+                        const matched = data.find((d: any) => new Date(d.date ?? d.workDate ?? "").getDay().toString() === dayNum);
+                        return dayNum ? {
+                            ...s,
+                            enabled: enabledDays.has(dayNum),
+                            startTime: matched?.startTime ?? s.startTime,
+                            endTime: matched?.endTime ?? s.endTime,
+                            maxPatients: matched?.maxPatients ? String(matched.maxPatients) : s.maxPatients,
+                        } : s;
                     }));
                 }
             })
-            .catch(() => {/* keep default */});
+            .catch(() => {
+                // Fallback: scheduleService
+                const from = new Date(today); from.setDate(today.getDate() - today.getDay() + 1);
+                const to = new Date(from); to.setDate(from.getDate() + 6);
+                scheduleService.getByDoctor(user.id, { from: from.toISOString().split("T")[0], to: to.toISOString().split("T")[0] })
+                    .then((data) => {
+                        if (Array.isArray(data) && data.length > 0) {
+                            const DAY_MAP: Record<string, string> = { "1": "Thứ 2", "2": "Thứ 3", "3": "Thứ 4", "4": "Thứ 5", "5": "Thứ 6", "6": "Thứ 7", "0": "Chủ nhật" };
+                            const enabledDays = new Set(data.map((s) => new Date(s.date).getDay().toString()));
+                            setSlots((prev) => prev.map((s) => {
+                                const dayNum = Object.entries(DAY_MAP).find(([, v]) => v === s.day)?.[0];
+                                return dayNum ? { ...s, enabled: enabledDays.has(dayNum) } : s;
+                            }));
+                        }
+                    })
+                    .catch(() => {/* keep default */});
+            });
     }, [user?.id]);
 
     const updateSlot = (index: number, field: keyof DaySlot, value: string | boolean) => {
@@ -60,18 +89,29 @@ export default function ManageSlotsPage() {
             if (user?.id) {
                 const DAY_NUM: Record<string, number> = { "Thứ 2": 1, "Thứ 3": 2, "Thứ 4": 3, "Thứ 5": 4, "Thứ 6": 5, "Thứ 7": 6, "Chủ nhật": 0 };
                 const today = new Date();
-                const enabledSlots = slots.filter((s) => s.enabled);
+                const enabledSlots = slots.filter((s) => s.enabled && s.startTime && s.endTime);
                 for (const s of enabledSlots) {
                     const dayNum = DAY_NUM[s.day];
                     if (dayNum === undefined) continue;
                     const nextDate = new Date(today);
                     const diff = (dayNum - today.getDay() + 7) % 7 || 7;
                     nextDate.setDate(today.getDate() + diff);
-                    await scheduleService.create({
+                    const dateStr = nextDate.toISOString().split("T")[0];
+                    // Ưu tiên doctor-availability API
+                    await doctorAvailabilityService.create({
                         doctorId: user.id,
-                        date: nextDate.toISOString().split("T")[0],
-                        shift: s.startTime < "12:00" ? "MORNING" : s.startTime < "17:00" ? "AFTERNOON" : "NIGHT",
-                    } as any).catch(() => {});
+                        date: dateStr,
+                        startTime: s.startTime,
+                        endTime: s.endTime,
+                        maxPatients: parseInt(s.maxPatients) || 20,
+                    }).catch(() => {
+                        // Fallback: scheduleService
+                        scheduleService.create({
+                            doctorId: user.id,
+                            date: dateStr,
+                            shift: s.startTime < "12:00" ? "MORNING" : s.startTime < "17:00" ? "AFTERNOON" : "NIGHT",
+                        } as any).catch(() => {});
+                    });
                 }
             }
         } catch { /* ignore */ }

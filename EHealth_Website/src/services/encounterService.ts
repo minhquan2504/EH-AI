@@ -5,7 +5,15 @@
  */
 
 import axiosClient from '@/api/axiosClient';
-import { ENCOUNTER_ENDPOINTS, CLINICAL_EXAM_ENDPOINTS, DIAGNOSIS_ENDPOINTS, MEDICAL_RECORD_ENDPOINTS, SIGN_OFF_ENDPOINTS } from '@/api/endpoints';
+import {
+    ENCOUNTER_ENDPOINTS,
+    CLINICAL_EXAM_ENDPOINTS,
+    DIAGNOSIS_ENDPOINTS,
+    MEDICAL_RECORD_ENDPOINTS,
+    SIGN_OFF_ENDPOINTS,
+    MEDICAL_ORDER_ENDPOINTS,
+    PATIENT_ENDPOINTS,
+} from '@/api/endpoints';
 
 export const encounterService = {
     // Encounter CRUD
@@ -87,4 +95,21 @@ export const encounterService = {
 
     completeSignOff: (encounterId: string) =>
         axiosClient.post(SIGN_OFF_ENDPOINTS.COMPLETE(encounterId), {}).then(r => r.data),
+
+    // Medical Orders (chỉ định xét nghiệm / dịch vụ)
+    getMedicalOrders: (encounterId: string) =>
+        axiosClient.get(MEDICAL_ORDER_ENDPOINTS.BY_ENCOUNTER(encounterId)).then(r => r.data?.data ?? r.data ?? []),
+
+    createMedicalOrder: (encounterId: string, data: Record<string, any>) =>
+        axiosClient.post(MEDICAL_ORDER_ENDPOINTS.BY_ENCOUNTER(encounterId), data).then(r => r.data?.data ?? r.data),
+
+    cancelMedicalOrder: (orderId: string, reason?: string) =>
+        axiosClient.post(MEDICAL_ORDER_ENDPOINTS.CANCEL(orderId), { reason }).then(r => r.data),
+
+    // Patient info
+    getPatient: (patientId: string) =>
+        axiosClient.get(PATIENT_ENDPOINTS.DETAIL(patientId)).then(r => r.data?.data ?? r.data),
+
+    searchPatients: (q: string) =>
+        axiosClient.get(PATIENT_ENDPOINTS.LIST, { params: { search: q, limit: 20 } }).then(r => r.data?.data ?? r.data ?? []),
 };

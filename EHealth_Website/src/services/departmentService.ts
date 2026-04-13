@@ -4,7 +4,7 @@
  */
 
 import axiosClient from '@/api/axiosClient';
-import { DEPARTMENT_ENDPOINTS } from '@/api/endpoints';
+import { DEPARTMENT_ENDPOINTS, STAFF_ENDPOINTS } from '@/api/endpoints';
 
 // ============================================
 // Types
@@ -22,6 +22,25 @@ export interface Department {
     status: 'active' | 'inactive';
     createdAt: string;
     updatedAt: string;
+}
+
+/** Unwrap departments từ các kiểu response khác nhau */
+export function unwrapDepartments(res: any): Department[] {
+    const raw = res?.data?.data ?? res?.data?.items ?? res?.data ?? res?.items ?? res ?? [];
+    if (!Array.isArray(raw)) return [];
+    return raw.map((d: any): Department => ({
+        id: d.id ?? d.departments_id ?? '',
+        name: d.name ?? '',
+        code: d.code ?? '',
+        description: d.description ?? '',
+        headDoctorId: d.headDoctorId ?? d.head_doctor_id ?? '',
+        headDoctorName: d.headDoctorName ?? d.head_doctor_name ?? '',
+        totalDoctors: d.totalDoctors ?? d.doctor_count ?? d.doctorCount ?? 0,
+        totalPatients: d.totalPatients ?? d.patient_count ?? d.patientCount ?? 0,
+        status: (d.status ?? 'active') as 'active' | 'inactive',
+        createdAt: d.createdAt ?? d.created_at ?? '',
+        updatedAt: d.updatedAt ?? d.updated_at ?? '',
+    }));
 }
 
 export interface CreateDepartmentData {
@@ -50,10 +69,11 @@ export const getDepartments = async (params?: {
 // ============================================
 // Lấy chi tiết khoa
 // ============================================
-export const getDepartmentById = async (id: string): Promise<Department> => {
+export const getDepartmentById = async (id: string): Promise<any> => {
     try {
         const response = await axiosClient.get(DEPARTMENT_ENDPOINTS.DETAIL(id));
-        return response.data.data;
+        // Trả raw data để caller tự unwrap
+        return response.data?.data ?? response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || 'Lấy thông tin khoa thất bại');
     }
@@ -101,5 +121,21 @@ export const deleteDepartment = async (id: string): Promise<void> => {
         await axiosClient.delete(DEPARTMENT_ENDPOINTS.DELETE(id));
     } catch (error: any) {
         throw new Error(error.response?.data?.message || 'Xóa khoa thất bại');
+    }
+};
+
+// ============================================
+// Lấy danh sách nhân sự theo khoa
+// (dùng /api/staff?departmentId=xxx vì không có endpoint riêng)
+// ============================================
+export const getStaffByDepartment = async (departmentId: string): Promise<any[]> => {
+    try {
+        const response = await axiosClient.get(STAFF_ENDPOINTS.LIST, {
+            params: { departmentId, limit: 100 }
+        });
+        const raw = response.data?.data?.data ?? response.data?.data?.items ?? response.data?.data ?? response.data?.items ?? response.data ?? [];
+        return Array.isArray(raw) ? raw : [];
+    } catch (error: any) {
+        return [];
     }
 };

@@ -7,26 +7,6 @@ import { inventoryService } from "@/services/inventoryService";
 type RequestType = "import" | "export" | "transfer" | "cancel";
 type RequestStatus = "pending" | "approved" | "rejected";
 
-const MOCK_INVENTORY = [
-    { id: "T001", name: "Amoxicillin 500mg", group: "Kháng sinh", unit: "viên", stock: 45, min: 100, price: 3500, expiry: "06/2025", supplier: "DHG Pharma" },
-    { id: "T002", name: "Paracetamol 500mg", group: "Giảm đau", unit: "viên", stock: 30, min: 200, price: 1200, expiry: "12/2025", supplier: "Imexpharm" },
-    { id: "T003", name: "Omeprazole 20mg", group: "Tiêu hóa", unit: "viên", stock: 25, min: 80, price: 5500, expiry: "09/2025", supplier: "DHG Pharma" },
-    { id: "T004", name: "Amlodipine 5mg", group: "Tim mạch", unit: "viên", stock: 320, min: 100, price: 2800, expiry: "03/2026", supplier: "Hasan" },
-    { id: "T005", name: "Cetirizine 10mg", group: "Dị ứng", unit: "viên", stock: 180, min: 50, price: 2200, expiry: "11/2025", supplier: "Imexpharm" },
-    { id: "T006", name: "Vitamin C 1000mg", group: "Vitamin", unit: "viên", stock: 12, min: 50, price: 1500, expiry: "08/2025", supplier: "Pymepharco" },
-    { id: "T007", name: "Cefuroxime 500mg", group: "Kháng sinh", unit: "viên", stock: 18, min: 60, price: 12000, expiry: "04/2025", supplier: "DHG Pharma" },
-    { id: "T008", name: "Losartan 50mg", group: "Tim mạch", unit: "viên", stock: 250, min: 80, price: 4200, expiry: "01/2026", supplier: "Hasan" },
-    { id: "T009", name: "Metformin 500mg", group: "Đái tháo đường", unit: "viên", stock: 500, min: 200, price: 1800, expiry: "07/2025", supplier: "Pymepharco" },
-    { id: "T010", name: "Atorvastatin 10mg", group: "Tim mạch", unit: "viên", stock: 150, min: 60, price: 6500, expiry: "10/2025", supplier: "Imexpharm" },
-];
-
-const MOCK_REQUESTS: { id: string; type: RequestType; medicine: string; qty: number; reason: string; date: string; status: RequestStatus }[] = [
-    { id: "YC-001", type: "import", medicine: "Amoxicillin 500mg", qty: 500, reason: "Bổ sung tồn kho sắp hết", date: "25/02/2025", status: "pending" },
-    { id: "YC-002", type: "cancel", medicine: "Cefuroxime 500mg (LOT-2024-150)", qty: 18, reason: "Lô thuốc hết hạn 04/2025", date: "24/02/2025", status: "pending" },
-    { id: "YC-003", type: "export", medicine: "Paracetamol 500mg", qty: 200, reason: "Chuyển kho Chi nhánh 2", date: "23/02/2025", status: "approved" },
-    { id: "YC-004", type: "import", medicine: "Vitamin C 1000mg", qty: 300, reason: "Tồn kho thấp", date: "22/02/2025", status: "rejected" },
-];
-
 const TYPE_CONFIG: Record<RequestType, { label: string; icon: string; cls: string }> = {
     import: { label: "Nhập kho", icon: "archive", cls: "bg-blue-50 dark:bg-blue-900/20 text-blue-600" },
     export: { label: "Xuất kho", icon: "unarchive", cls: "bg-purple-50 dark:bg-purple-900/20 text-purple-600" },
@@ -40,9 +20,12 @@ const STATUS_CONFIG: Record<RequestStatus, { label: string; cls: string; icon: s
     rejected: { label: "Từ chối", cls: "bg-red-50 dark:bg-red-900/20 text-red-600 border-red-200 dark:border-red-800", icon: "cancel" },
 };
 
+type InventoryItem = { id: string; name: string; group: string; unit: string; stock: number; min: number; price: number; expiry: string; supplier: string };
+type RequestItem = { id: string; type: RequestType; medicine: string; qty: number; reason: string; date: string; status: RequestStatus };
+
 export default function PharmacistInventory() {
-    const [inventory, setInventory] = useState(MOCK_INVENTORY);
-    const [requests, setRequests] = useState(MOCK_REQUESTS);
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const [requests, setRequests] = useState<RequestItem[]>([]);
 
     useEffect(() => {
         // Thử lấy dữ liệu tồn kho thực từ /api/inventory trước
@@ -76,7 +59,7 @@ export default function PharmacistInventory() {
                             })));
                         }
                     })
-                    .catch(() => {/* keep mock */});
+                    .catch(() => { setInventory([]); });
             });
     }, []);
     const [search, setSearch] = useState("");
@@ -109,7 +92,7 @@ export default function PharmacistInventory() {
     }).length;
     const fmt = (n: number) => n.toLocaleString("vi-VN") + "đ";
 
-    const handleCreateRequest = () => {
+    const handleCreateRequest = async () => {
         if (!reqForm.medicine || !reqForm.qty) return;
         const newReq = {
             id: `YC-${String(requests.length + 1).padStart(3, "0")}`,
@@ -120,6 +103,18 @@ export default function PharmacistInventory() {
             date: new Date().toLocaleDateString("vi-VN"),
             status: "pending" as RequestStatus,
         };
+        try {
+            await inventoryService.createStockIn({
+                drugName: reqForm.medicine,
+                quantity: parseInt(reqForm.qty),
+                reason: reqForm.reason,
+                type: requestType,
+            });
+            alert("Gửi yêu cầu thành công");
+        } catch {
+            alert("Gửi yêu cầu thất bại. Vui lòng thử lại.");
+            return;
+        }
         setRequests(prev => [newReq, ...prev]);
         setShowRequestModal(false);
         setReqForm({ medicine: "", qty: "", reason: "" });
@@ -208,6 +203,12 @@ export default function PharmacistInventory() {
                                 ))}
                             </tr></thead>
                             <tbody>
+                                {filtered.length === 0 && (
+                                    <tr><td colSpan={8} className="py-12 text-center text-[#687582] dark:text-gray-400">
+                                        <span className="material-symbols-outlined text-4xl mb-2 block">inventory_2</span>
+                                        Kho thuốc trống hoặc không có dữ liệu
+                                    </td></tr>
+                                )}
                                 {filtered.map((item) => (
                                     <tr key={item.id} className="border-b border-[#dde0e4] dark:border-[#2d353e] hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
                                         <td className="px-4 py-3 text-sm font-mono text-[#3C81C6] font-medium">{item.id}</td>

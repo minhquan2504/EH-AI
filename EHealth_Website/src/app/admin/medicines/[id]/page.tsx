@@ -5,24 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { getDrugById, Drug } from "@/services/medicineService";
 
-const MOCK_DRUG: Drug = {
-    id: "1",
-    name: "Amoxicillin 500mg",
-    genericName: "Amoxicillin",
-    category: "Kháng sinh",
-    unit: "Viên",
-    price: 8500,
-    quantity: 45,
-    minQuantity: 100,
-    manufacturer: "Dược Hậu Giang",
-    expiryDate: "2027-03-10",
-    description: "Thuốc kháng sinh nhóm penicillin phổ rộng, dùng điều trị nhiễm khuẩn đường hô hấp, tiết niệu, da và mô mềm.",
-    sideEffects: "Buồn nôn, tiêu chảy, phát ban da, phản ứng dị ứng. Hiếm gặp: sốc phản vệ.",
-    activeIngredient: "Amoxicillin trihydrate",
-    status: "available",
-    createdAt: "2026-01-15T08:00:00Z",
-    updatedAt: "2026-03-20T10:30:00Z",
-};
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
     available: { label: "Còn hàng", color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
@@ -35,7 +17,7 @@ export default function MedicineDetailPage() {
     const params = useParams();
     const medicineId = params.id as string;
 
-    const [drug, setDrug] = useState<Drug>(MOCK_DRUG);
+    const [drug, setDrug] = useState<Drug | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -43,10 +25,29 @@ export default function MedicineDetailPage() {
         getDrugById(medicineId)
             .then((data) => {
                 if (data) setDrug(data);
+                else setDrug(null);
             })
-            .catch(() => {/* keep mock */})
+            .catch(() => { setDrug(null); })
             .finally(() => setLoading(false));
     }, [medicineId]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="w-8 h-8 border-4 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (!drug) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-4">medication_off</span>
+                <p className="text-lg text-gray-500 mb-4">Không tìm thấy thuốc</p>
+                <button onClick={() => router.back()} className="px-5 py-2.5 bg-[#3C81C6] text-white rounded-xl text-sm font-bold hover:bg-[#2a6da8] transition-colors">Quay lại</button>
+            </div>
+        );
+    }
 
     const statusInfo = STATUS_MAP[drug.status] ?? STATUS_MAP.available;
 
@@ -60,14 +61,6 @@ export default function MedicineDetailPage() {
 
     const stockBarColor = stockLevel === "OUT" ? "bg-red-500" : stockLevel === "LOW" ? "bg-amber-500" : "bg-emerald-500";
     const stockTextColor = stockLevel === "OUT" ? "text-red-600" : stockLevel === "LOW" ? "text-amber-600" : "text-emerald-600";
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-4 border-[#3C81C6] border-t-transparent rounded-full animate-spin" />
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-6">
@@ -128,7 +121,7 @@ export default function MedicineDetailPage() {
                 </div>
                 <div className="bg-white dark:bg-[#1e242b] p-4 rounded-xl border border-[#dde0e4] dark:border-[#2d353e]">
                     <p className="text-xs text-[#687582] dark:text-gray-400 font-medium uppercase tracking-wider mb-1">Giá bán</p>
-                    <p className="text-sm font-bold text-[#3C81C6]">{drug.price.toLocaleString()}₫/{drug.unit}</p>
+                    <p className="text-sm font-bold text-[#3C81C6]">{drug.price.toLocaleString("vi-VN")}₫/{drug.unit}</p>
                 </div>
             </div>
 

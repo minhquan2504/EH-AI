@@ -18,16 +18,10 @@ interface ImportRecord {
     createdBy: string;
 }
 
-const MOCK_IMPORTS: ImportRecord[] = [
-    { id: "1", code: "NK-2026-001", medicineName: "Paracetamol 500mg", quantity: 500, unitPrice: 2500, supplier: "Công ty Dược phẩm Hà Nội", date: "2026-03-10", batchNumber: "LOT-2026-0312", expiryDate: "2027-03-10", status: "completed", createdBy: "Admin Quản trị" },
-    { id: "2", code: "NK-2026-002", medicineName: "Amoxicillin 250mg", quantity: 300, unitPrice: 8500, supplier: "Công ty Traphaco", date: "2026-03-08", batchNumber: "LOT-2026-0287", expiryDate: "2027-09-08", status: "completed", createdBy: "Admin Quản trị" },
-    { id: "3", code: "NK-2026-003", medicineName: "Vitamin C 1000mg", quantity: 200, unitPrice: 3200, supplier: "Công ty DHG Pharma", date: "2026-03-12", batchNumber: "LOT-2026-0410", expiryDate: "2027-06-12", status: "pending", createdBy: "DS. Trần Văn B" },
-    { id: "4", code: "NK-2026-004", medicineName: "Omeprazol 20mg", quantity: 150, unitPrice: 12000, supplier: "Công ty Dược phẩm Hà Nội", date: "2026-03-05", batchNumber: "LOT-2026-0189", expiryDate: "2028-03-05", status: "completed", createdBy: "Admin Quản trị" },
-];
 
 export default function MedicineImportPage() {
     const router = useRouter();
-    const [records, setRecords] = useState<ImportRecord[]>(MOCK_IMPORTS);
+    const [records, setRecords] = useState<ImportRecord[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -36,7 +30,6 @@ export default function MedicineImportPage() {
                 const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
                 if (Array.isArray(items) && items.length > 0) {
                     setRecords(items.map((x: any, i: number) => ({
-                        ...MOCK_IMPORTS[i % MOCK_IMPORTS.length],
                         id: x.id ?? String(i + 1),
                         code: x.code ?? x.order_code ?? `NK-${x.id}`,
                         medicineName: x.drug?.name ?? x.drugName ?? x.medicineName ?? "",
@@ -51,7 +44,7 @@ export default function MedicineImportPage() {
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filtered = records.filter((r) =>
@@ -130,14 +123,16 @@ export default function MedicineImportPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#dde0e4] dark:divide-[#2d353e]">
-                            {filtered.map((record) => {
+                            {filtered.length === 0 ? (
+                                <tr><td colSpan={7} className="py-12 text-center text-[#687582] dark:text-gray-400"><span className="material-symbols-outlined text-4xl mb-2 block">inbox</span>Chưa có dữ liệu</td></tr>
+                            ) : filtered.map((record) => {
                                 const s = getStatusStyle(record.status);
                                 return (
                                     <tr key={record.id} onClick={() => router.push(`/admin/medicines/import/${record.id}`)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                                         <td className="py-3 px-6 text-sm font-bold text-[#3C81C6]">{record.code}</td>
                                         <td className="py-3 px-6 text-sm text-[#121417] dark:text-white">{record.medicineName}</td>
                                         <td className="py-3 px-6 text-sm text-[#121417] dark:text-white font-medium">{record.quantity}</td>
-                                        <td className="py-3 px-6 text-sm text-[#121417] dark:text-white">{record.unitPrice.toLocaleString()}₫</td>
+                                        <td className="py-3 px-6 text-sm text-[#121417] dark:text-white">{record.unitPrice.toLocaleString("vi-VN")}₫</td>
                                         <td className="py-3 px-6 text-sm text-[#687582] dark:text-gray-400">{record.supplier}</td>
                                         <td className="py-3 px-6 text-sm text-[#687582] dark:text-gray-400">{record.date}</td>
                                         <td className="py-3 px-6"><span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${s.bg} ${s.text}`}>{s.label}</span></td>

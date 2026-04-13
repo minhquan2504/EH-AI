@@ -16,16 +16,10 @@ interface ExportRecord {
     approvedBy: string;
 }
 
-const MOCK_EXPORTS: ExportRecord[] = [
-    { id: "1", code: "XK-2026-001", medicineName: "Paracetamol 500mg", quantity: 100, destination: "Khoa Nội", date: "2026-03-10", reason: "Cấp phát theo đơn", status: "completed", approvedBy: "Admin Quản trị" },
-    { id: "2", code: "XK-2026-002", medicineName: "Amoxicillin 250mg", quantity: 50, destination: "Khoa Nhi", date: "2026-03-09", reason: "Cấp phát theo đơn", status: "completed", approvedBy: "Admin Quản trị" },
-    { id: "3", code: "XK-2026-003", medicineName: "Vitamin C 1000mg", quantity: 30, destination: "Khoa Tim mạch", date: "2026-03-12", reason: "Bổ sung kho khoa", status: "pending", approvedBy: "—" },
-    { id: "4", code: "XK-2026-004", medicineName: "Omeprazol 20mg (hết hạn)", quantity: 20, destination: "Hủy bỏ", date: "2026-03-11", reason: "Thuốc hết hạn sử dụng", status: "cancelled", approvedBy: "Admin Quản trị" },
-];
 
 export default function MedicineExportPage() {
     const router = useRouter();
-    const [records, setRecords] = useState<ExportRecord[]>(MOCK_EXPORTS);
+    const [records, setRecords] = useState<ExportRecord[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
@@ -34,7 +28,6 @@ export default function MedicineExportPage() {
                 const items: any[] = res?.data?.data ?? res?.data ?? res ?? [];
                 if (Array.isArray(items) && items.length > 0) {
                     setRecords(items.map((x: any, i: number) => ({
-                        ...MOCK_EXPORTS[i % MOCK_EXPORTS.length],
                         id: x.id ?? String(i + 1),
                         code: x.code ?? x.order_code ?? `XK-${x.id}`,
                         medicineName: x.drug?.name ?? x.drugName ?? x.medicineName ?? "",
@@ -47,7 +40,7 @@ export default function MedicineExportPage() {
                     })));
                 }
             })
-            .catch(() => {/* keep mock */});
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filtered = records.filter((r) =>
@@ -125,7 +118,9 @@ export default function MedicineExportPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#dde0e4] dark:divide-[#2d353e]">
-                            {filtered.map((record) => {
+                            {filtered.length === 0 ? (
+                                <tr><td colSpan={7} className="py-12 text-center text-[#687582] dark:text-gray-400"><span className="material-symbols-outlined text-4xl mb-2 block">inbox</span>Chưa có dữ liệu</td></tr>
+                            ) : filtered.map((record) => {
                                 const s = getStatusStyle(record.status);
                                 return (
                                     <tr key={record.id} onClick={() => router.push(`/admin/medicines/export/${record.id}`)} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">

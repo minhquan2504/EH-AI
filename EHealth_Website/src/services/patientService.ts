@@ -6,7 +6,7 @@
  */
 
 import axiosClient from '@/api/axiosClient';
-import { PATIENT_ENDPOINTS } from '@/api/endpoints';
+import { PATIENT_ENDPOINTS, DOCUMENT_ENDPOINTS, EMR_ENDPOINTS, PRESCRIPTION_ENDPOINTS } from '@/api/endpoints';
 
 // ============================================
 // Types — theo đúng schema backend
@@ -25,9 +25,17 @@ export interface Patient {
     gender: PatientGender;
     identity_type?: IdentityType;
     identity_number?: string;
+    nationality?: string;
+    blood_type?: string;
+    allergies?: string;
+    chronic_diseases?: string;
     status: PatientStatus;
     created_at: string;
     updated_at: string;
+    // Joined fields (có thể có)
+    contact?: PatientContact;
+    contacts?: PatientContact[];
+    insurance?: PatientInsurance[];
 }
 
 export interface CreatePatientRequest {
@@ -53,6 +61,9 @@ export interface UpdatePatientRequest {
     identity_type?: IdentityType;
     identity_number?: string;
     nationality?: string;
+    blood_type?: string;
+    allergies?: string;
+    chronic_diseases?: string;
 }
 
 export interface PatientContact {
@@ -68,6 +79,30 @@ export interface PatientContact {
     updated_at: string;
 }
 
+export interface PatientInsurance {
+    insurance_id: string;
+    patient_id: string;
+    insurance_number: string;
+    provider?: string;
+    expiry_date?: string;
+    issued_date?: string;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface PatientDocument {
+    document_id: string;
+    patient_id: string;
+    file_name: string;
+    file_type?: string;
+    file_size?: number;
+    file_url?: string;
+    document_type?: string;
+    description?: string;
+    uploaded_by?: string;
+    created_at: string;
+}
+
 export interface PatientRelation {
     relation_id: string;
     patient_id: string;
@@ -78,6 +113,18 @@ export interface PatientRelation {
     has_legal_rights: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export interface MedicalRecord {
+    encounter_id?: string;
+    record_id?: string;
+    visit_date?: string;
+    created_at?: string;
+    doctor_name?: string;
+    department_name?: string;
+    diagnosis?: string;
+    chief_complaint?: string;
+    status?: string;
 }
 
 export interface PaginationInfo {
@@ -96,12 +143,17 @@ export interface PatientListResponse {
     };
 }
 
+// Helper unwrap pattern
+function unwrap<T>(res: any): T | undefined {
+    return res?.data?.data ?? res?.data ?? res;
+}
+
 // ============================================
-// API Functions
+// API Functions — Patients
 // ============================================
 
 /**
- * Lấy danh sách bệnh nhân (phân trang + tìm kiếm)
+ * Lấy danh sách bệnh nhân (phân trang + tìm kiếm nâng cao)
  */
 export const getPatients = async (params?: {
     page?: number;
@@ -109,6 +161,12 @@ export const getPatients = async (params?: {
     search?: string;
     status?: PatientStatus;
     gender?: PatientGender;
+    ageFrom?: number;
+    ageTo?: number;
+    tag?: string;
+    hasInsurance?: boolean;
+    createdFrom?: string;
+    createdTo?: string;
 }): Promise<PatientListResponse> => {
     try {
         const response = await axiosClient.get(PATIENT_ENDPOINTS.LIST, { params });
@@ -127,7 +185,9 @@ export const getPatients = async (params?: {
 export const getPatientDetail = async (patientId: string): Promise<{ success: boolean; data?: Patient; message?: string }> => {
     try {
         const response = await axiosClient.get(PATIENT_ENDPOINTS.DETAIL(patientId));
-        return response.data;
+        const raw = response.data;
+        const data = raw?.data ?? raw;
+        return { success: true, data };
     } catch (error: any) {
         return {
             success: false,
@@ -142,7 +202,9 @@ export const getPatientDetail = async (patientId: string): Promise<{ success: bo
 export const createPatient = async (data: CreatePatientRequest): Promise<{ success: boolean; data?: Patient; message?: string }> => {
     try {
         const response = await axiosClient.post(PATIENT_ENDPOINTS.CREATE, data);
-        return response.data;
+        const raw = response.data;
+        const patient = raw?.data ?? raw;
+        return { success: true, data: patient };
     } catch (error: any) {
         return {
             success: false,
@@ -154,10 +216,12 @@ export const createPatient = async (data: CreatePatientRequest): Promise<{ succe
 /**
  * Cập nhật thông tin hành chính bệnh nhân
  */
-export const updatePatient = async (patientId: string, data: UpdatePatientRequest): Promise<{ success: boolean; message?: string }> => {
+export const updatePatient = async (patientId: string, data: UpdatePatientRequest): Promise<{ success: boolean; data?: Patient; message?: string }> => {
     try {
         const response = await axiosClient.put(PATIENT_ENDPOINTS.UPDATE(patientId), data);
-        return response.data;
+        const raw = response.data;
+        const patient = raw?.data ?? raw;
+        return { success: true, data: patient };
     } catch (error: any) {
         return {
             success: false,
@@ -211,6 +275,20 @@ export const linkPatient = async (patientCode: string, identityNumber: string): 
 // ============================================
 
 /**
+ * Lấy danh sách liên hệ của bệnh nhân
+ */
+export const getContacts = async (patientId: string): Promise<{ success: boolean; data?: PatientContact[]; message?: string }> => {
+    try {
+        const response = await axiosClient.get(PATIENT_ENDPOINTS.ADD_CONTACT(patientId));
+        const raw = response.data;
+        const data: PatientContact[] = raw?.data?.items ?? raw?.data ?? raw ?? [];
+        return { success: true, data };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Lấy liên hệ thất bại' };
+    }
+};
+
+/**
  * Cập nhật thông tin liên hệ chính
  */
 export const updateContact = async (patientId: string, data: {
@@ -237,12 +315,31 @@ export const addContact = async (patientId: string, data: {
     street_address?: string;
     ward?: string;
     province?: string;
-}): Promise<{ success: boolean; message?: string }> => {
+}): Promise<{ success: boolean; data?: PatientContact; message?: string }> => {
     try {
         const response = await axiosClient.post(PATIENT_ENDPOINTS.ADD_CONTACT(patientId), data);
-        return response.data;
+        const raw = response.data;
+        return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
         return { success: false, message: error.response?.data?.message || 'Thêm liên hệ thất bại' };
+    }
+};
+
+/**
+ * Cập nhật liên hệ phụ
+ */
+export const editContact = async (patientId: string, contactId: string, data: {
+    phone_number?: string;
+    email?: string;
+    street_address?: string;
+    ward?: string;
+    province?: string;
+}): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const response = await axiosClient.put(PATIENT_ENDPOINTS.EDIT_CONTACT(patientId, contactId), data);
+        return response.data;
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Cập nhật liên hệ thất bại' };
     }
 };
 
@@ -263,6 +360,20 @@ export const deleteContact = async (patientId: string, contactId: string): Promi
 // ============================================
 
 /**
+ * Lấy danh sách người thân
+ */
+export const getRelations = async (patientId: string): Promise<{ success: boolean; data?: PatientRelation[]; message?: string }> => {
+    try {
+        const response = await axiosClient.get(PATIENT_ENDPOINTS.ADD_RELATION(patientId));
+        const raw = response.data;
+        const data: PatientRelation[] = raw?.data?.items ?? raw?.data ?? raw ?? [];
+        return { success: true, data };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Lấy người thân thất bại' };
+    }
+};
+
+/**
  * Thêm thông tin người thân
  */
 export const addRelation = async (patientId: string, data: {
@@ -271,10 +382,11 @@ export const addRelation = async (patientId: string, data: {
     phone_number: string;
     is_emergency?: boolean;
     has_legal_rights?: boolean;
-}): Promise<{ success: boolean; message?: string }> => {
+}): Promise<{ success: boolean; data?: PatientRelation; message?: string }> => {
     try {
         const response = await axiosClient.post(PATIENT_ENDPOINTS.ADD_RELATION(patientId), data);
-        return response.data;
+        const raw = response.data;
+        return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
         return { success: false, message: error.response?.data?.message || 'Thêm người thân thất bại' };
     }
@@ -307,5 +419,82 @@ export const deleteRelation = async (patientId: string, relationId: string): Pro
         return response.data;
     } catch (error: any) {
         return { success: false, message: error.response?.data?.message || 'Xóa người thân thất bại' };
+    }
+};
+
+// ============================================
+// Medical Records
+// ============================================
+
+/**
+ * Lấy lịch sử khám (encounters) theo bệnh nhân
+ */
+export const getMedicalHistory = async (patientId: string): Promise<{ success: boolean; data?: MedicalRecord[]; message?: string }> => {
+    try {
+        const response = await axiosClient.get(EMR_ENDPOINTS.BY_PATIENT(patientId));
+        const raw = response.data;
+        const data: MedicalRecord[] = raw?.data?.items ?? raw?.data ?? raw ?? [];
+        return { success: true, data };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Lấy lịch sử khám thất bại' };
+    }
+};
+
+/**
+ * Lấy đơn thuốc theo bệnh nhân
+ */
+export const getPrescriptions = async (patientId: string): Promise<{ success: boolean; data?: any[]; message?: string }> => {
+    try {
+        const response = await axiosClient.get(PRESCRIPTION_ENDPOINTS.BY_PATIENT(patientId));
+        const raw = response.data;
+        const data: any[] = raw?.data?.items ?? raw?.data ?? raw ?? [];
+        return { success: true, data };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Lấy đơn thuốc thất bại' };
+    }
+};
+
+// ============================================
+// Documents
+// ============================================
+
+/**
+ * Lấy danh sách tài liệu của bệnh nhân
+ */
+export const getDocuments = async (patientId: string): Promise<{ success: boolean; data?: PatientDocument[]; message?: string }> => {
+    try {
+        const response = await axiosClient.get(DOCUMENT_ENDPOINTS.LIST(patientId));
+        const raw = response.data;
+        const data: PatientDocument[] = raw?.data?.items ?? raw?.data ?? raw ?? [];
+        return { success: true, data };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Lấy tài liệu thất bại' };
+    }
+};
+
+/**
+ * Upload tài liệu bệnh nhân (FormData)
+ */
+export const uploadDocument = async (patientId: string, formData: FormData): Promise<{ success: boolean; data?: PatientDocument; message?: string }> => {
+    try {
+        const response = await axiosClient.post(DOCUMENT_ENDPOINTS.UPLOAD(patientId), formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const raw = response.data;
+        return { success: true, data: raw?.data ?? raw };
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Tải lên tài liệu thất bại' };
+    }
+};
+
+/**
+ * Xóa tài liệu bệnh nhân
+ */
+export const deleteDocument = async (patientId: string, docId: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+        const response = await axiosClient.delete(DOCUMENT_ENDPOINTS.DELETE(patientId, docId));
+        return response.data;
+    } catch (error: any) {
+        return { success: false, message: error.response?.data?.message || 'Xóa tài liệu thất bại' };
     }
 };

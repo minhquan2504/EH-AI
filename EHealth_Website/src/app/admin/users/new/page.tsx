@@ -38,6 +38,7 @@ export default function NewUserPage() {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
+    const [apiError, setApiError] = useState<string | null>(null);
 
     const currentRole = formData.role as string;
     const isCustomer = currentRole === ROLES.PATIENT;
@@ -81,18 +82,24 @@ export default function NewUserPage() {
         e.preventDefault();
         if (!validate()) return;
         setSaving(true);
+        setApiError(null);
         try {
             await createUser({
                 fullName: formData.fullName,
+                full_name: formData.fullName,
                 email: formData.email,
+                phone: formData.phone,
                 phoneNumber: formData.phone,
                 role: formData.role,
+                roles: [formData.role.toUpperCase()],
                 password: formData.password,
-                gender: (formData.gender as 'MALE' | 'FEMALE') || undefined,
+                gender: formData.gender === "male" ? "MALE" : formData.gender === "female" ? "FEMALE" : undefined,
+                dob: formData.dateOfBirth || undefined,
+                address: formData.address || undefined,
             } as any);
             router.push("/admin/users");
-        } catch {
-            alert("Tạo tài khoản thất bại. Vui lòng thử lại.");
+        } catch (err: any) {
+            setApiError(err?.message || "Tạo tài khoản thất bại. Vui lòng thử lại.");
         } finally {
             setSaving(false);
         }
@@ -124,6 +131,12 @@ export default function NewUserPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6">
+                    {apiError && (
+                        <div className="flex items-center gap-3 px-4 py-3 mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                            <span className="material-symbols-outlined text-[18px] text-red-600">error</span>
+                            <p className="text-sm text-red-700 dark:text-red-400">{apiError}</p>
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Vai trò — đặt đầu tiên để toggle fields */}
                         <div className="md:col-span-2">

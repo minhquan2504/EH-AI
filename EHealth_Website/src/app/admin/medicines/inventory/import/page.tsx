@@ -101,7 +101,7 @@ export default function InventoryImportPage() {
                                         Thuốc #{index + 1}
                                     </h3>
                                     {items.length > 1 && (
-                                        <button type="button" onClick={() => removeItem(index)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                        <button type="button" onClick={() => removeItem(index)} aria-label="Xóa thuốc" className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                             <span className="material-symbols-outlined text-[18px]">delete</span>
                                         </button>
                                     )}
@@ -111,7 +111,7 @@ export default function InventoryImportPage() {
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Tên thuốc *</label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#687582]"><span className="material-symbols-outlined text-[18px]">medication</span></span>
-                                            <input type="text" value={item.name} onChange={(e) => handleItemChange(index, "name", e.target.value)} placeholder="VD: Amoxicillin 500mg"
+                                            <input type="text" value={item.name} onChange={(e) => handleItemChange(index, "name", e.target.value)} aria-label="Tên thuốc" placeholder="VD: Amoxicillin 500mg"
                                                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                         </div>
                                     </div>
@@ -119,13 +119,14 @@ export default function InventoryImportPage() {
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Số lượng *</label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#687582]"><span className="material-symbols-outlined text-[18px]">inventory</span></span>
-                                            <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} placeholder="VD: 500"
+                                            <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} aria-label="Số lượng" placeholder="VD: 500"
                                                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Đơn vị</label>
                                         <select value={item.unit} onChange={(e) => handleItemChange(index, "unit", e.target.value)}
+                                            aria-label="Đơn vị"
                                             className="w-full py-2.5 px-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white">
                                             {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                                         </select>
@@ -134,7 +135,7 @@ export default function InventoryImportPage() {
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Nhà cung cấp</label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#687582]"><span className="material-symbols-outlined text-[18px]">factory</span></span>
-                                            <input type="text" value={item.supplier} onChange={(e) => handleItemChange(index, "supplier", e.target.value)} placeholder="VD: Dược Hậu Giang"
+                                            <input type="text" value={item.supplier} onChange={(e) => handleItemChange(index, "supplier", e.target.value)} aria-label="Nhà cung cấp" placeholder="VD: Dược Hậu Giang"
                                                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                         </div>
                                     </div>
@@ -142,7 +143,7 @@ export default function InventoryImportPage() {
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Số lô</label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#687582]"><span className="material-symbols-outlined text-[18px]">tag</span></span>
-                                            <input type="text" value={item.lotNumber} onChange={(e) => handleItemChange(index, "lotNumber", e.target.value)} placeholder="VD: LOT-2026-001"
+                                            <input type="text" value={item.lotNumber} onChange={(e) => handleItemChange(index, "lotNumber", e.target.value)} aria-label="Số lô" placeholder="VD: LOT-2026-001"
                                                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                         </div>
                                     </div>
@@ -155,13 +156,13 @@ export default function InventoryImportPage() {
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Giá nhập (VNĐ)</label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#687582]"><span className="material-symbols-outlined text-[18px]">payments</span></span>
-                                            <input type="number" value={item.price} onChange={(e) => handleItemChange(index, "price", e.target.value)} placeholder="VD: 5000"
+                                            <input type="number" value={item.price} onChange={(e) => handleItemChange(index, "price", e.target.value)} aria-label="Giá nhập" placeholder="VD: 5000"
                                                 className="w-full py-2.5 pl-10 pr-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                         </div>
                                     </div>
                                     <div className="lg:col-span-2">
                                         <label className="block text-sm font-medium text-[#121417] dark:text-gray-300 mb-1.5">Ghi chú</label>
-                                        <input type="text" value={item.note} onChange={(e) => handleItemChange(index, "note", e.target.value)} placeholder="VD: Đợt nhập tháng 3"
+                                        <input type="text" value={item.note} onChange={(e) => handleItemChange(index, "note", e.target.value)} aria-label="Ghi chú" placeholder="VD: Đợt nhập tháng 3"
                                             className="w-full py-2.5 px-4 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3C81C6]/20 dark:text-white placeholder:text-gray-400" />
                                     </div>
                                 </div>

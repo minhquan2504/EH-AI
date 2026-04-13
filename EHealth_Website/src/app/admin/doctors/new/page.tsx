@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MOCK_DEPARTMENTS } from "@/lib/mock-data/admin";
 import { staffService } from "@/services/staffService";
+import { getDepartments, unwrapDepartments } from "@/services/departmentService";
 
 const SPECIALTIES = [
     "Nội tổng quát", "Ngoại tổng quát", "Nhi khoa", "Sản phụ khoa", "Tim mạch",
@@ -33,6 +33,18 @@ export default function NewDoctorPage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+
+    useEffect(() => {
+        getDepartments({ limit: 100 })
+            .then((res: any) => {
+                const items = unwrapDepartments(res);
+                if (items.length > 0) {
+                    setDepartments(items.map(d => ({ id: d.id, name: d.name })));
+                }
+            })
+            .catch(() => { /* API không khả dụng */ });
+    }, []);
     const [formData, setFormData] = useState({
         fullName: "", email: "", phone: "", gender: "male",
         dateOfBirth: "", specialization: "Nội tổng quát",
@@ -157,7 +169,7 @@ export default function NewDoctorPage() {
                         <div className="md:col-span-2 pt-4 border-t border-gray-100 dark:border-gray-800"><SectionTitle icon="stethoscope" title="Thông tin chuyên môn" /></div>
                         <Field label="Số CCHN *" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} error={errors.licenseNumber} placeholder="VD: BS-2024-001" icon="verified" />
                         <Select label="Chuyên khoa" name="specialization" value={formData.specialization} onChange={handleChange} options={SPECIALTIES.map(s => ({ v: s, l: s }))} />
-                        <Select label="Khoa / Phòng ban" name="departmentId" value={formData.departmentId} onChange={handleChange} options={[{ v: "", l: "-- Chọn khoa --" }, ...MOCK_DEPARTMENTS.map(d => ({ v: d.id, l: d.name }))]} />
+                        <Select label="Khoa / Phòng ban" name="departmentId" value={formData.departmentId} onChange={handleChange} options={[{ v: "", l: "-- Chọn khoa --" }, ...departments.map(d => ({ v: d.id, l: d.name }))]} />
                         <Field label="Kinh nghiệm (năm)" name="experience" type="number" value={formData.experience} onChange={handleChange} placeholder="VD: 10" icon="work_history" />
 
                         {/* Cơ sở y tế */}

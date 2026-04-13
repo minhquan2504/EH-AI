@@ -18,18 +18,6 @@ interface ActivityLog {
     timestamp: string;
 }
 
-const MOCK_LOGS: ActivityLog[] = [
-    { id: "1", userId: "1", userName: "Admin Hệ thống", userRole: "Admin", action: "Đăng nhập hệ thống", ipAddress: "192.168.1.100", userAgent: "Chrome/Windows", status: "SUCCESS", timestamp: "2024-01-15T09:30:00" },
-    { id: "2", userId: "2", userName: "BS. Nguyễn Văn An", userRole: "Doctor", action: "Xem hồ sơ bệnh nhân", target: "Trần Văn B", ipAddress: "192.168.1.105", userAgent: "Safari/MacOS", status: "SUCCESS", timestamp: "2024-01-15T09:25:00" },
-    { id: "3", userId: "3", userName: "Đào Thị C", userRole: "Receptionist", action: "Tạo lịch hẹn mới", target: "Lê Văn D - Khoa Nội", ipAddress: "192.168.1.102", userAgent: "Firefox/Windows", status: "SUCCESS", timestamp: "2024-01-15T09:20:00" },
-    { id: "4", userId: "4", userName: "Phạm Văn E", userRole: "Pharmacist", action: "Xuất thuốc theo đơn", target: "ĐT-2024-0125", ipAddress: "192.168.1.108", userAgent: "Chrome/Windows", status: "SUCCESS", timestamp: "2024-01-15T09:15:00" },
-    { id: "5", userId: "1", userName: "Admin Hệ thống", userRole: "Admin", action: "Sửa đổi quyền người dùng", target: "Nhóm: Bác sĩ", ipAddress: "192.168.1.100", userAgent: "Chrome/Windows", status: "WARNING", timestamp: "2024-01-15T09:10:00" },
-    { id: "6", userId: "5", userName: "Hacker Test", userRole: "Unknown", action: "Cố gắng truy cập trái phép", target: "/admin/settings", ipAddress: "45.33.32.156", userAgent: "Unknown", status: "FAILED", timestamp: "2024-01-15T09:05:00" },
-    { id: "7", userId: "2", userName: "BS. Nguyễn Văn An", userRole: "Doctor", action: "Cập nhật chẩn đoán", target: "BN-2024-0458", ipAddress: "192.168.1.105", userAgent: "Safari/MacOS", status: "SUCCESS", timestamp: "2024-01-15T09:00:00" },
-    { id: "8", userId: "1", userName: "Admin Hệ thống", userRole: "Admin", action: "Thêm người dùng mới", target: "BS. Trần Thị F", ipAddress: "192.168.1.100", userAgent: "Chrome/Windows", status: "SUCCESS", timestamp: "2024-01-15T08:55:00" },
-    { id: "9", userId: "3", userName: "Đào Thị C", userRole: "Receptionist", action: "Hủy lịch hẹn", target: "LH-2024-0892", ipAddress: "192.168.1.102", userAgent: "Firefox/Windows", status: "SUCCESS", timestamp: "2024-01-15T08:50:00" },
-    { id: "10", userId: "4", userName: "Phạm Văn E", userRole: "Pharmacist", action: "Cập nhật tồn kho", target: "Paracetamol 500mg", ipAddress: "192.168.1.108", userAgent: "Chrome/Windows", status: "SUCCESS", timestamp: "2024-01-15T08:45:00" },
-];
 
 const STATUS_STYLES = {
     SUCCESS: { label: "Thành công", bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-400", icon: "check_circle" },
@@ -38,7 +26,7 @@ const STATUS_STYLES = {
 };
 
 export default function ActivityLogsPage() {
-    const [logs, setLogs] = useState<ActivityLog[]>(MOCK_LOGS);
+    const [logs, setLogs] = useState<ActivityLog[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [dateFrom, setDateFrom] = useState("");
@@ -47,7 +35,7 @@ export default function ActivityLogsPage() {
     useEffect(() => {
         auditService.getLogs({ limit: 100 })
             .then((res: any) => { const items = res?.data?.items ?? res?.items ?? res?.data?.data ?? res?.data ?? res ?? []; if (Array.isArray(items) && items.length > 0) setLogs(items); })
-            .catch(() => { /* giữ mock data nếu API lỗi */ });
+            .catch(() => { /* API không khả dụng, hiển thị trống */ });
     }, []);
 
     const filteredLogs = useMemo(() => {

@@ -33,10 +33,22 @@ export const appointmentStatusService = {
         axiosClient.get(APPOINTMENT_STATUS_ENDPOINTS.ROOM_STATUS).then(r => r.data),
 
     /**
+     * GET /api/appointment-status/settings — Cài đặt hàng đợi
+     */
+    getSettings: () =>
+        axiosClient.get(APPOINTMENT_STATUS_ENDPOINTS.SETTINGS).then(r => r?.data?.data ?? r?.data ?? r),
+
+    /**
      * POST /api/appointment-status/{id}/check-in — Check-in bệnh nhân
      */
     checkIn: (id: string, data?: { qrCode?: string }) =>
         axiosClient.post(APPOINTMENT_STATUS_ENDPOINTS.CHECK_IN(id), data ?? {}).then(r => r.data),
+
+    /**
+     * POST /api/appointment-status/check-in-qr — Check-in bằng QR
+     */
+    checkInByQR: (qrCode: string) =>
+        axiosClient.post(APPOINTMENT_STATUS_ENDPOINTS.CHECK_IN_QR, { qrCode }).then(r => r?.data?.data ?? r?.data ?? r),
 
     /**
      * POST /api/appointment-status/{id}/start-exam — Bắt đầu khám
